@@ -47,7 +47,7 @@ namespace JewelBlitzArena.Data
         public int RecoveryFrames { get; set; }
         public bool UtilityExempt { get; set; }
 
-        /// <summary>None, Heal, Magnet, or Utility (schema v5 Surge semantics).</summary>
+        /// <summary>None, Heal, Magnet, Utility, Stun, or Blind (schema v6 Surge semantics).</summary>
         public string Effect { get; set; } = "None";
     }
 

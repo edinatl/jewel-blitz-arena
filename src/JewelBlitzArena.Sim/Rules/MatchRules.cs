@@ -60,6 +60,14 @@ namespace JewelBlitzArena.Sim
         /// <summary>Magnet Surge pull / strip radius (cast.md Clank Spare Parts).</summary>
         public static readonly Fix MagnetSurgeRange = Fix.FromInt(6);
 
+        /// <summary>Teo Bateria area Stun (cast.md §5 / balance.md §4 max 60 f).</summary>
+        public static readonly Fix BateriaStunRange = Fix.FromInt(8);
+        public const int BateriaStunFrames = 60;
+
+        /// <summary>Clank Spare Chaff Blind duration (balance.md §4 max 120 f).</summary>
+        public static readonly Fix ChaffBlindRange = Fix.FromInt(6);
+        public const int BlindDurationFrames = 120;
+
         /// <summary>
         /// Clank Toolbox / Spare Parts direction index: 0 neutral, 1 forward, 2 up, 3 down
         /// (names.md / cast.md §2). Magnitude 0 → neutral; stick near +Z → up, −Z → down;

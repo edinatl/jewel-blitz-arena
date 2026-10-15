@@ -69,7 +69,11 @@ namespace JewelBlitzArena.Sim
                     FixVec2 dir = DirectionLut.GetUnit(input.Direction);
                     actor.VelX = dir.X * step;
                     actor.VelZ = dir.Y * step;
-                    actor.Facing = dir.X.Raw < 0 ? (byte)1 : (byte)0;
+                    // Blinded: auto-facing off (balance.md §4).
+                    if (actor.BlindFrames == 0)
+                    {
+                        actor.Facing = dir.X.Raw < 0 ? (byte)1 : (byte)0;
+                    }
                 }
             }
             else
@@ -220,6 +224,11 @@ namespace JewelBlitzArena.Sim
                 {
                     actor.ComboResetTimer = MatchRules.ComboResetFrames;
                 }
+            }
+
+            if (actor.BlindFrames > 0)
+            {
+                actor.BlindFrames--;
             }
 
             if (actor.ComboResetTimer > 0)
@@ -557,6 +566,23 @@ namespace JewelBlitzArena.Sim
                     break;
                 case MoveEffect.Utility:
                     actor.MoveDamage = 0;
+                    break;
+                case MoveEffect.Stun:
+                    actor.MoveDamage = move.Damage;
+                    StatusRuntime.ApplyAreaStun(
+                        ref state,
+                        actorIndex,
+                        MatchRules.BateriaStunRange,
+                        MatchRules.BateriaStunFrames,
+                        groundedOnly: true);
+                    break;
+                case MoveEffect.Blind:
+                    actor.MoveDamage = move.Damage;
+                    StatusRuntime.ApplyAreaBlind(
+                        ref state,
+                        actorIndex,
+                        MatchRules.ChaffBlindRange,
+                        MatchRules.BlindDurationFrames);
                     break;
                 default:
                     actor.MoveDamage = move.Damage;

@@ -7,8 +7,9 @@ namespace JewelBlitzArena.Data
         /// v3: optional authored <c>scripted_camera</c> path keys per phase enter-transition.
         /// v4: fighter <c>kitBehavior</c> named exception enum (architecture §2.5).
         /// v5: move <c>effect</c> (Heal / Magnet / Utility) for Surge semantics.
+        /// v6: move effects Stun / Blind (Bateria, Spare Chaff).
         /// </summary>
-        public const uint Version = 5;
+        public const uint Version = 6;
         public const string BlobExtension = ".jba";
         public static readonly byte[] Magic = { (byte)'J', (byte)'B', (byte)'A', (byte)'D' };
 
@@ -86,9 +87,13 @@ namespace JewelBlitzArena.Data
         None = 0,
         /// <summary>Restore Life equal to <see cref="MoveRecord.Damage"/>; no offensive hit.</summary>
         Heal = 1,
-        /// <summary>No offensive hit; strip held items and pull loose items in range.</summary>
+        /// <summary>No offensive hit; strip held items and pull/catch loose items in range.</summary>
         Magnet = 2,
         /// <summary>No offensive hit (control / blackout stubs).</summary>
         Utility = 3,
+        /// <summary>Area Stun (Bateria); keeps <see cref="MoveRecord.Damage"/> as hit damage.</summary>
+        Stun = 4,
+        /// <summary>Area Blind (Spare Chaff); keeps <see cref="MoveRecord.Damage"/> as hit damage.</summary>
+        Blind = 5,
     }
 }

@@ -32,12 +32,16 @@ namespace JewelBlitzArena.Sim
 
             if (input.Action)
             {
-                if (actor.HasEmptyHands)
+                // Blinded: can't pick up or catch (balance.md §4).
+                if (actor.BlindFrames == 0)
                 {
-                    TryPickupNearest(ref state, actorIndex, ref contacts);
-                }
+                    if (actor.HasEmptyHands)
+                    {
+                        TryPickupNearest(ref state, actorIndex, ref contacts);
+                    }
 
-                TryCatchThrown(ref state, actorIndex, ref contacts);
+                    TryCatchThrown(ref state, actorIndex, ref contacts);
+                }
             }
 
             if (input.Attack && !actor.HasEmptyHands)
@@ -216,8 +220,9 @@ namespace JewelBlitzArena.Sim
         }
 
         /// <summary>
-        /// Clank Spare Parts magnet: strip held items from others in range and pull loose
-        /// on-field items toward the caster (cast.md §2). Deterministic slot order.
+        /// Clank Spare Parts magnet: strip held items from others in range, catch the
+        /// nearest loose item into empty hands, and snap remaining field items to the
+        /// caster's pickup ring (cast.md §2). Deterministic slot order.
         /// </summary>
         public static void ApplyMagnetSurge(ref MatchState state, int casterIndex, Fix range)
         {
@@ -250,8 +255,58 @@ namespace JewelBlitzArena.Sim
                 DropHeldToField(ref state, a);
             }
 
+            // Prefer catching the nearest in-range field item into empty hands.
+            int catchSlot = -1;
+            long catchDistSq = long.MaxValue;
+            if (caster.HasEmptyHands && caster.BlindFrames == 0)
+            {
+                for (int i = 0; i < PoolCaps.LooseItems; i++)
+                {
+                    LooseItemSlot item = MatchStateAccess.GetLooseItem(ref state, i);
+                    if (!item.IsActive || item.HolderSlot != LooseItemSlot.NoHolder || item.InFlight)
+                    {
+                        continue;
+                    }
+
+                    long dSq = DistSqScaled(caster.PosX, caster.PosZ, item.PosX, item.PosZ);
+                    if (dSq > rangeSq)
+                    {
+                        continue;
+                    }
+
+                    if (dSq < catchDistSq || (dSq == catchDistSq && i < catchSlot))
+                    {
+                        catchDistSq = dSq;
+                        catchSlot = i;
+                    }
+                }
+            }
+
+            if (catchSlot >= 0)
+            {
+                LooseItemSlot caught = MatchStateAccess.GetLooseItem(ref state, catchSlot);
+                caught.HolderSlot = (byte)casterIndex;
+                caught.InFlight = false;
+                caught.FlightFrames = 0;
+                caught.VelX = Fix.Zero;
+                caught.VelY = Fix.Zero;
+                caught.VelZ = Fix.Zero;
+                caught.PosX = caster.PosX;
+                caught.PosY = caster.PosY + PhysicsConstants.ItemRadius;
+                caught.PosZ = caster.PosZ;
+                MatchStateAccess.SetLooseItem(ref state, catchSlot, caught);
+                caster.HeldItemSlot = (byte)catchSlot;
+            }
+
+            // Snap remaining field items in range to the pickup ring (not half-gap).
+            int pile = 0;
             for (int i = 0; i < PoolCaps.LooseItems; i++)
             {
+                if (i == catchSlot)
+                {
+                    continue;
+                }
+
                 LooseItemSlot item = MatchStateAccess.GetLooseItem(ref state, i);
                 if (!item.IsActive || item.HolderSlot != LooseItemSlot.NoHolder)
                 {
@@ -263,17 +318,18 @@ namespace JewelBlitzArena.Sim
                     continue;
                 }
 
-                // Pull to just outside the caster capsule — half the remaining gap.
-                Fix dx = caster.PosX - item.PosX;
-                Fix dz = caster.PosZ - item.PosZ;
-                item.PosX += dx / 2;
-                item.PosZ += dz / 2;
+                // Offset slightly along +X by pile index so items don't occupy one cell.
+                item.PosX = caster.PosX + (PhysicsConstants.PickupRange / 2)
+                    + (Fix.FromInt(pile) / 8);
+                item.PosY = caster.PosY + PhysicsConstants.ItemRadius;
+                item.PosZ = caster.PosZ;
                 item.VelX = Fix.Zero;
                 item.VelY = Fix.Zero;
                 item.VelZ = Fix.Zero;
                 item.InFlight = false;
                 item.FlightFrames = 0;
                 MatchStateAccess.SetLooseItem(ref state, i, item);
+                pile++;
             }
         }
 

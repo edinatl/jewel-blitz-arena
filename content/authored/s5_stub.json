@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 5,
+  "schemaVersion": 6,
   "fighters": [
     {
       "fighterId": 1,
@@ -422,7 +422,7 @@
           "activeFrames": 8,
           "recoveryFrames": 28,
           "utilityExempt": false,
-          "effect": "None"
+          "effect": "Stun"
         }
       ]
     },
@@ -727,7 +727,7 @@
           "activeFrames": 4,
           "recoveryFrames": 16,
           "utilityExempt": false,
-          "effect": "None"
+          "effect": "Blind"
         },
         {
           "name": "Spare Repair",

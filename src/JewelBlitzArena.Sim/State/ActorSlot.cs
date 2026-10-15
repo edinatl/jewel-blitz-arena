@@ -47,7 +47,9 @@ namespace JewelBlitzArena.Sim
         public byte HitApplied;
         public byte Facing; // 0 = +X, 1 = -X
         public byte HeldItemSlot; // 255 = empty (S2)
-        public ushort Reserved1;
+
+        /// <summary>Blinded timer (balance.md §4); was Reserved1 — same layout stride.</summary>
+        public ushort BlindFrames;
 
         public const byte FlagAlive = 1 << 0;
         public const byte FlagBlitzed = 1 << 1;

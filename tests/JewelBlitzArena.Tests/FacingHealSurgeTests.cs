@@ -125,9 +125,11 @@ public sealed class FacingHealSurgeTests
 
         MatchState after = sim.Snapshot();
         Assert.That(after.Actor1.HasEmptyHands, Is.True);
-        LooseItemSlot dropped = MatchStateAccess.GetLooseItem(ref after, itemSlot);
-        Assert.That(dropped.HolderSlot, Is.EqualTo(LooseItemSlot.NoHolder));
-        Assert.That(dropped.IsActive, Is.True);
+        // Clank had empty hands → magnet catches the stripped item.
+        Assert.That(after.Actor0.HeldItemSlot, Is.EqualTo((byte)itemSlot));
+        LooseItemSlot caught = MatchStateAccess.GetLooseItem(ref after, itemSlot);
+        Assert.That(caught.HolderSlot, Is.EqualTo(0));
+        Assert.That(caught.IsActive, Is.True);
         Assert.That(after.Actor0.MoveDamage, Is.EqualTo(0));
     }
 

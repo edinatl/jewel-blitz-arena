@@ -180,6 +180,8 @@ namespace JewelBlitzArena.Data
                 surgeA: ("Roda", 180),
                 surgeB: ("Bateria", 60),
                 flare: ("Somersault", 46));
+            // Surge B is last in StandardMoves — Stun 60 f area (cast.md §5).
+            f.Moves[f.Moves.Count - 1].Effect = "Stun";
             return f;
         }
 
@@ -253,7 +255,7 @@ namespace JewelBlitzArena.Data
                 Move("Toolbox Mine Field", "Surge", 70, 12, 8, 20),
                 Move("Spare Magnet", "Surge", 0, 10, 6, 18, effect: "Magnet"),
                 Move("Spare Flame", "Surge", 200, 12, 8, 24),
-                Move("Spare Chaff", "Surge", 40, 8, 4, 16),
+                Move("Spare Chaff", "Surge", 40, 8, 4, 16, effect: "Blind"),
                 Move("Spare Repair", "Surge", 280, 14, 2, 22, effect: "Heal"),
             };
             return f;
