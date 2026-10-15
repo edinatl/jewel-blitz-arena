@@ -3,7 +3,7 @@ namespace JewelBlitzArena.Sim
     /// <summary>
     /// Area status application for kit Surges (balance.md §4 / cast.md §5).
     /// Deterministic actor-index order; refreshes timers when the new duration is longer;
-    /// respects Dizzy/Pin immunities.
+    /// respects Dizzy/Pin/Freeze immunities.
     /// </summary>
     public static class StatusRuntime
     {
@@ -14,6 +14,7 @@ namespace JewelBlitzArena.Sim
             Dizzy = 2,
             Slow = 3,
             Pin = 4,
+            Freeze = 5,
         }
 
         public static void ApplyAreaStun(
@@ -44,6 +45,24 @@ namespace JewelBlitzArena.Sim
             ref MatchState state, int casterIndex, Fix range, int frames)
         {
             Apply(ref state, casterIndex, range, ClampUShort(CapHard(frames)), groundedOnly: true, Kind.Pin);
+        }
+
+        public static void ApplyAreaFreeze(
+            ref MatchState state, int casterIndex, Fix range, int frames)
+        {
+            Apply(ref state, casterIndex, range, ClampUShort(CapHard(frames)), groundedOnly: false, Kind.Freeze);
+        }
+
+        /// <summary>Single-target Freeze / Petrify (Ice Jar / Petrify Gas thrown hits).</summary>
+        public static void ApplyFreeze(ref MatchState state, int victimIndex, int frames)
+        {
+            if (victimIndex < 0 || victimIndex >= state.ActorCount || frames <= 0)
+            {
+                return;
+            }
+
+            ref ActorSlot victim = ref MatchStateAccess.Actor(ref state, victimIndex);
+            ApplyFreezeToVictim(ref victim, ClampUShort(CapHard(frames)));
         }
 
         private static void Apply(
@@ -132,7 +151,28 @@ namespace JewelBlitzArena.Sim
                         }
 
                         break;
+                    case Kind.Freeze:
+                        ApplyFreezeToVictim(ref victim, frames);
+                        break;
                 }
+            }
+        }
+
+        private static void ApplyFreezeToVictim(ref ActorSlot victim, int frames)
+        {
+            if (!victim.IsAlive || victim.IsEliminated || victim.InvulnFrames > 0)
+            {
+                return;
+            }
+
+            if (victim.FreezeImmuneFrames > 0)
+            {
+                return;
+            }
+
+            if (frames > victim.FreezeFrames)
+            {
+                victim.FreezeFrames = (ushort)frames;
             }
         }
 

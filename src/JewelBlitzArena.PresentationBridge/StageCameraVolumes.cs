@@ -47,7 +47,8 @@ namespace JewelBlitzArena.PresentationBridge
     /// <summary>
     /// Off-screen actor inset when the volume fit fails (combat-and-match §12).
     /// <see cref="EdgeU"/>/<see cref="EdgeV"/> are direction on the frame rim (−1..1).
-    /// Pips / held-item id are presentation HUD hints (not hashed).
+    /// Pips / held-item ids are presentation HUD hints (not hashed).
+    /// Right = Attack hand; Left = Clank Strong hand.
     /// </summary>
     public readonly struct EdgeBubble
     {
@@ -57,8 +58,15 @@ namespace JewelBlitzArena.PresentationBridge
         public float WorldX { get; }
         public float WorldZ { get; }
         public int JewelsHeld { get; }
-        public int HeldItemId { get; }
-        public bool HasHeldItem { get; }
+
+        /// <summary>Primary / right-hand item id (−1 empty). Alias of <see cref="HeldItemIdRight"/>.</summary>
+        public int HeldItemId => HeldItemIdRight;
+
+        public int HeldItemIdRight { get; }
+        public int HeldItemIdLeft { get; }
+        public bool HasHeldItemRight { get; }
+        public bool HasHeldItemLeft { get; }
+        public bool HasHeldItem => HasHeldItemRight || HasHeldItemLeft;
 
         public EdgeBubble(
             int actorIndex,
@@ -67,8 +75,10 @@ namespace JewelBlitzArena.PresentationBridge
             float worldX,
             float worldZ,
             int jewelsHeld = 0,
-            int heldItemId = -1,
-            bool hasHeldItem = false)
+            int heldItemIdRight = -1,
+            bool hasHeldItemRight = false,
+            int heldItemIdLeft = -1,
+            bool hasHeldItemLeft = false)
         {
             ActorIndex = actorIndex;
             EdgeU = edgeU;
@@ -76,8 +86,10 @@ namespace JewelBlitzArena.PresentationBridge
             WorldX = worldX;
             WorldZ = worldZ;
             JewelsHeld = jewelsHeld;
-            HeldItemId = heldItemId;
-            HasHeldItem = hasHeldItem;
+            HeldItemIdRight = heldItemIdRight;
+            HasHeldItemRight = hasHeldItemRight;
+            HeldItemIdLeft = heldItemIdLeft;
+            HasHeldItemLeft = hasHeldItemLeft;
         }
     }
 
@@ -434,17 +446,7 @@ namespace JewelBlitzArena.PresentationBridge
                 float inv = d > 0.0001f ? 1f / d : 0f;
                 float edgeU = ox * inv;
                 float edgeV = oz * inv;
-                int heldSlot = actor.HeldItemSlot != ActorSlot.NoHeldItem
-                    ? actor.HeldItemSlot
-                    : actor.HeldItemSlotLeft;
-                bool hasItem = heldSlot != ActorSlot.NoHeldItem;
-                int itemId = -1;
-                if (hasItem)
-                {
-                    LooseItemSlot loose = MatchStateAccess.GetLooseItem(ref state, heldSlot);
-                    itemId = loose.ItemId;
-                }
-
+                MatchHoldHud hold = MatchHoldHud.FromActor(ref state, in actor);
                 var bubble = new EdgeBubble(
                     i,
                     edgeU,
@@ -452,8 +454,10 @@ namespace JewelBlitzArena.PresentationBridge
                     ax,
                     az,
                     jewelsHeld: actor.JewelsHeld,
-                    heldItemId: itemId,
-                    hasHeldItem: hasItem);
+                    heldItemIdRight: hold.RightItemId,
+                    hasHeldItemRight: hold.HasRight,
+                    heldItemIdLeft: hold.LeftItemId,
+                    hasHeldItemLeft: hold.HasLeft);
                 switch (bubbleCount)
                 {
                     case 0: e0 = bubble; break;

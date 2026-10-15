@@ -47,7 +47,7 @@ namespace JewelBlitzArena.Data
         public int RecoveryFrames { get; set; }
         public bool UtilityExempt { get; set; }
 
-        /// <summary>None, Heal, Magnet, Utility, Stun, Blind, Dizzy, Slow, or Pin.</summary>
+        /// <summary>None, Heal, Magnet, Utility, Stun, Blind, Dizzy, Slow, Pin, or Freeze.</summary>
         public string Effect { get; set; } = "None";
     }
 

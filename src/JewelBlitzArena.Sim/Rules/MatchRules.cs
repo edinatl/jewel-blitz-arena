@@ -84,7 +84,20 @@ namespace JewelBlitzArena.Sim
         public const int PinDurationFrames = 75;
         public const int PinImmuneFrames = 240;
 
-        /// <summary>Hard-control cap for stun/dizzy/pin/grab sources (balance.md §4).</summary>
+        /// <summary>Freeze / Petrify (balance.md §4 max 90 f).</summary>
+        public static readonly Fix FreezeAreaRange = Fix.FromInt(4);
+        public const int FreezeDurationFrames = 90;
+        public const int FreezeImmuneFrames = 240;
+        public const int FreezeDamageTakenPercent = 50;
+        public const int FreezeBreakDamage = 100;
+
+        /// <summary>
+        /// S5 stub Petrify Gas item id (<see cref="JewelBlitzArena.Data.SampleContentFactory.PetrifyGasItemId"/>).
+        /// Thrown hit applies Freeze.
+        /// </summary>
+        public const int PetrifyGasItemId = 19;
+
+        /// <summary>Hard-control cap for stun/dizzy/freeze/pin/grab sources (balance.md §4).</summary>
         public const int HardControlCapFrames = 120;
 
         /// <summary>

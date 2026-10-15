@@ -9,8 +9,9 @@ namespace JewelBlitzArena.Data
         /// v5: move <c>effect</c> (Heal / Magnet / Utility) for Surge semantics.
         /// v6: move effects Stun / Blind (Bateria, Spare Chaff).
         /// v7: move effects Dizzy / Slow / Pin (Smoke Vault, Mine Field, Holdfast).
+        /// v8: move effect Freeze / Petrify (Petrify Gas thrown + area apply).
         /// </summary>
-        public const uint Version = 7;
+        public const uint Version = 8;
         public const string BlobExtension = ".jba";
         public static readonly byte[] Magic = { (byte)'J', (byte)'B', (byte)'A', (byte)'D' };
 
@@ -102,5 +103,7 @@ namespace JewelBlitzArena.Data
         Slow = 7,
         /// <summary>Area Pin (Holdfast); keeps hit damage; rooted but can attack.</summary>
         Pin = 8,
+        /// <summary>Area Freeze / Petrify; can't act; 50% damage taken; 100+ hit breaks.</summary>
+        Freeze = 9,
     }
 }

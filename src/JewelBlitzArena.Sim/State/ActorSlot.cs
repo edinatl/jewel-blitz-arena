@@ -71,6 +71,12 @@ namespace JewelBlitzArena.Sim
         /// <summary>Post-Pin immunity (240 f).</summary>
         public ushort PinImmuneFrames;
 
+        /// <summary>Freeze / Petrify timer — can't act; 50% damage; 100+ hit breaks (balance.md §4).</summary>
+        public ushort FreezeFrames;
+
+        /// <summary>Post-Freeze immunity (240 f).</summary>
+        public ushort FreezeImmuneFrames;
+
         public const byte FlagAlive = 1 << 0;
         public const byte FlagBlitzed = 1 << 1;
         public const byte FlagEliminated = 1 << 2;
@@ -122,6 +128,7 @@ namespace JewelBlitzArena.Sim
             && !IsEliminated
             && StunFrames <= 0
             && DizzyFrames == 0
+            && FreezeFrames == 0
             && KnockdownFrames <= 0
             && TransformFrames <= 0
             && RevertFrames <= 0

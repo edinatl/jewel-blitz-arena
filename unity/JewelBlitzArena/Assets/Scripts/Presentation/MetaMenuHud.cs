@@ -144,8 +144,11 @@ namespace JewelBlitzArena.Presentation
             {
                 ActorSlot a = MatchStateAccess.Actor(ref state, i);
                 string blitz = a.IsBlitzed ? " BLITZ" : string.Empty;
+                MatchHoldHud hold = MatchHoldHud.FromActor(ref state, in a);
+                string hands = hold.HasAny ? $"  hands {hold.FormatHands()}" : string.Empty;
+                string freeze = a.FreezeFrames > 0 ? $"  FRZ {a.FreezeFrames}" : string.Empty;
                 GUILayout.Label(
-                    $"P{i + 1}  Life {a.Life}/{a.MaxLife}  Jewels {a.JewelsHeld}  Luster {a.Luster}{blitz}");
+                    $"P{i + 1}  Life {a.Life}/{a.MaxLife}  Jewels {a.JewelsHeld}  Luster {a.Luster}{blitz}{hands}{freeze}");
             }
 
             GUILayout.EndArea();
@@ -188,7 +191,20 @@ namespace JewelBlitzArena.Presentation
                 GUI.Box(rect, string.Empty);
                 GUI.color = Color.white;
                 string pips = b.JewelsHeld > 0 ? $" ◆{b.JewelsHeld}" : string.Empty;
-                string item = b.HasHeldItem ? $" [{b.HeldItemId}]" : string.Empty;
+                string item = string.Empty;
+                if (b.HasHeldItemRight && b.HasHeldItemLeft)
+                {
+                    item = $" R{b.HeldItemIdRight} L{b.HeldItemIdLeft}";
+                }
+                else if (b.HasHeldItemRight)
+                {
+                    item = $" R{b.HeldItemIdRight}";
+                }
+                else if (b.HasHeldItemLeft)
+                {
+                    item = $" L{b.HeldItemIdLeft}";
+                }
+
                 GUI.Label(rect, $"P{b.ActorIndex + 1}{pips}{item}");
                 GUI.color = prev;
             }

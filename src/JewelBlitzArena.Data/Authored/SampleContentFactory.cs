@@ -24,6 +24,9 @@ namespace JewelBlitzArena.Data
         public const int TillyFighterId = 14;
         public const int CitrineBazaarStageId = 1;
 
+        /// <summary>S5 stub Petrify Gas — thrown hit applies Freeze (matches <c>MatchRules.PetrifyGasItemId</c>).</summary>
+        public const int PetrifyGasItemId = 19;
+
         public static AuthoredContentPack CreateS5StubPack()
         {
             return new AuthoredContentPack
@@ -548,7 +551,8 @@ namespace JewelBlitzArena.Data
             Add("Shortcake", "Healing", 2, 0, 150, 100, 40);
             Add("Steak", "Healing", 3, 0, 200, 160, 60);
             Add("Adhesive Spray", "Status", 2, 0, 0, 110, 40);
-            Add("Small Shield", "Status", 2, 0, 0, 130, 50);
+            // ItemId 19 — Petrify Gas applies Freeze 90 f on thrown hit (balance.md §4).
+            Add("Petrify Gas", "Status", 2, 0, 0, 130, 50);
             Add("Smoke Jar", "Status", 1, 0, 0, 70, 25);
             Add("Leg Irons", "Status", 3, 0, 0, 200, 75);
             Add("Rollerskates", "Mobility", 2, 0, 0, 150, 55);

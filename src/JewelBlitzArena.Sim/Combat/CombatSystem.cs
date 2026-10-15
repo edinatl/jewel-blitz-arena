@@ -47,7 +47,7 @@ namespace JewelBlitzArena.Sim
                 return;
             }
 
-            if (actor.StunFrames > 0 || actor.DizzyFrames > 0)
+            if (actor.StunFrames > 0 || actor.DizzyFrames > 0 || actor.FreezeFrames > 0)
             {
                 actor.VelX = Fix.Zero;
                 actor.VelZ = Fix.Zero;
@@ -225,14 +225,15 @@ namespace JewelBlitzArena.Sim
 
                     case SimEventKind.ThrownItemHitActor:
                         {
-                            // SlotA = loose item index, SlotB = victim. Flat stub damage for S1.
+                            // SlotA = loose item index, SlotB = victim.
+                            int itemSlot = ev.SlotA;
                             int victim = ev.SlotB;
                             if (victim < 0 || victim >= state.ActorCount)
                             {
                                 break;
                             }
 
-                            ApplyThrownItemHit(ref state, victim);
+                            ApplyThrownItemHit(ref state, itemSlot, victim);
                             break;
                         }
                 }
@@ -289,6 +290,19 @@ namespace JewelBlitzArena.Sim
             else if (actor.PinImmuneFrames > 0)
             {
                 actor.PinImmuneFrames--;
+            }
+
+            if (actor.FreezeFrames > 0)
+            {
+                actor.FreezeFrames--;
+                if (actor.FreezeFrames == 0)
+                {
+                    actor.FreezeImmuneFrames = MatchRules.FreezeImmuneFrames;
+                }
+            }
+            else if (actor.FreezeImmuneFrames > 0)
+            {
+                actor.FreezeImmuneFrames--;
             }
 
             if (actor.ComboResetTimer > 0)
@@ -458,7 +472,7 @@ namespace JewelBlitzArena.Sim
             }
         }
 
-        private static void ApplyThrownItemHit(ref MatchState state, int vic)
+        private static void ApplyThrownItemHit(ref MatchState state, int itemSlot, int vic)
         {
             ref ActorSlot victim = ref MatchStateAccess.Actor(ref state, vic);
             if (!victim.IsAlive || victim.IsEliminated || victim.InvulnFrames > 0)
@@ -466,10 +480,24 @@ namespace JewelBlitzArena.Sim
                 return;
             }
 
+            int itemId = 0;
+            if (itemSlot >= 0 && itemSlot < PoolCaps.LooseItems)
+            {
+                LooseItemSlot item = MatchStateAccess.GetLooseItem(ref state, itemSlot);
+                itemId = item.ItemId;
+            }
+
+            if (itemId == MatchRules.PetrifyGasItemId)
+            {
+                StatusRuntime.ApplyFreeze(ref state, vic, MatchRules.FreezeDurationFrames);
+            }
+
             const int thrownDamage = 40;
-            int damage = victim.IsBlitzed
-                ? (thrownDamage * MatchRules.BlitzedDamageTakenPercent) / 100
-                : thrownDamage;
+            int damage = ScaleIncomingDamage(ref victim, thrownDamage);
+            if (victim.IsBlitzed)
+            {
+                damage = (damage * MatchRules.BlitzedDamageTakenPercent) / 100;
+            }
 
             victim.Life -= damage;
             victim.LastHitFrame = state.Frame;
@@ -489,6 +517,8 @@ namespace JewelBlitzArena.Sim
             {
                 damage = 0;
             }
+
+            damage = ScaleIncomingDamage(ref victim, damage);
 
             victim.Life -= damage;
             victim.LastHitFrame = state.Frame;
@@ -668,10 +698,42 @@ namespace JewelBlitzArena.Sim
                         MatchRules.HoldfastPinRange,
                         MatchRules.PinDurationFrames);
                     break;
+                case MoveEffect.Freeze:
+                    actor.MoveDamage = move.Damage;
+                    StatusRuntime.ApplyAreaFreeze(
+                        ref state,
+                        actorIndex,
+                        MatchRules.FreezeAreaRange,
+                        MatchRules.FreezeDurationFrames);
+                    break;
                 default:
                     actor.MoveDamage = move.Damage;
                     break;
             }
+        }
+
+        /// <summary>
+        /// Freeze / Petrify: 50% damage taken; raw hits ≥ 100 break early (balance.md §4).
+        /// </summary>
+        private static int ScaleIncomingDamage(ref ActorSlot victim, int damage)
+        {
+            if (damage < 0)
+            {
+                return 0;
+            }
+
+            if (victim.FreezeFrames == 0)
+            {
+                return damage;
+            }
+
+            if (damage >= MatchRules.FreezeBreakDamage)
+            {
+                victim.FreezeFrames = 0;
+                victim.FreezeImmuneFrames = MatchRules.FreezeImmuneFrames;
+            }
+
+            return (damage * MatchRules.FreezeDamageTakenPercent) / 100;
         }
 
         private static void ApplySelfHeal(ref ActorSlot actor, int amount)
