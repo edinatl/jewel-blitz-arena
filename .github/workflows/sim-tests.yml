@@ -1,0 +1,22 @@
+name: Sim tests
+
+on:
+  push:
+    branches: ["main", "cursor/**"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+      - name: Restore
+        run: dotnet restore JewelBlitzArena.sln
+      - name: Build
+        run: dotnet build JewelBlitzArena.sln --configuration Release --no-restore
+      - name: Test
+        run: dotnet test JewelBlitzArena.sln --configuration Release --no-build --verbosity normal

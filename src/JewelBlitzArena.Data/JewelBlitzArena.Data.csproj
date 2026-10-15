@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <Deterministic>true</Deterministic>
+    <RootNamespace>JewelBlitzArena.Data</RootNamespace>
+    <AssemblyName>JewelBlitzArena.Data</AssemblyName>
+    <!-- Content tables (S5). Stub assembly for the dependency graph. -->
+  </PropertyGroup>
+
+</Project>

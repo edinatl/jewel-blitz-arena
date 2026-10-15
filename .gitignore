@@ -1,4 +1,4 @@
-# Unity generated
+# Unity generated (under the prototype / future Unity host)
 [Ll]ibrary/
 [Tt]emp/
 [Oo]bj/
@@ -6,16 +6,23 @@
 [Bb]uilds/
 [Ll]ogs/
 [Uu]ser[Ss]ettings/
-*.csproj
-*.sln
-*.user
-*.pidb
-*.booproj
-*.svd
-*.pdb
-*.mdb
-*.opendb
-*.VC.db
+unity/**/*.csproj
+unity/**/*.sln
+unity/**/*.user
+unity/**/*.pidb
+unity/**/*.booproj
+unity/**/*.svd
+unity/**/*.pdb
+unity/**/*.mdb
+unity/**/*.opendb
+unity/**/*.VC.db
 crashlytics-build.properties
 .DS_Store
 Thumbs.db
+
+# .NET build output (intentional solution lives at repo root / src / tests)
+**/bin/
+**/obj/
+*.user
+*.DotSettings.user
+.vs/
