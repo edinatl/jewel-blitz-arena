@@ -112,6 +112,14 @@ public static class PrototypeBuilder
         var visual = go.AddComponent<CharacterVisual>();
         visual.character = character;
         go.AddComponent<FighterAnimator>();
+        // v0.7: Soldier and Samurai fight as HD animated sprites (the
+        // generated sprite-sheet frames) via a camera-facing billboard;
+        // SpriteBillboard hides the primitive body at runtime.
+        if (character == "Soldier" || character == "Samurai")
+        {
+            var spr = go.AddComponent<SpriteBillboard>();
+            spr.character = character;
+        }
 
         var rb = go.AddComponent<Rigidbody>();
         rb.constraints = RigidbodyConstraints.FreezeRotation;
