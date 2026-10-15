@@ -36,6 +36,11 @@ public class PlayerCombat : MonoBehaviour
     public int gemsToTransform = 3;
 
     private int itemUsesLeft = 0;
+    private int busterShots = 0;
+    public string LastWeaponName { get; private set; }
+    public float SlowUntil { get; private set; }
+    public bool IsSlowed { get { return Time.time < SlowUntil; } }
+    public void ApplySlow(float seconds) { SlowUntil = Time.time + seconds; }
     private GameObject heldVisual;
     private float nextAttackTime = 0f;
     private float catchWindowUntil = -1f;
@@ -377,6 +382,7 @@ public class PlayerCombat : MonoBehaviour
         // otherwise GRAB a foe next to you (the PS2 Action moves).
         if (TryPickupNearest()) { nextAttackTime = Time.time + 0.25f; return; }
         if (TryGrab()) return;
+        StartCatchWindow(); // CIRCLE is the catch button too (Ben's call)
 
         if (IsTransformed)
         {
@@ -413,6 +419,11 @@ public class PlayerCombat : MonoBehaviour
                 Vector3 dir = flat.normalized; dir.y = 0.35f;
                 otherCombat.ApplyKnockback(dir, knockback);
                 otherCombat.RegisterHitTaken(damage);
+                // UNIQUE item twists on a landed swing:
+                if (HeldItem != null && HeldItem.Name == "Golden Club")
+                    GoldCoin.Spawn(players[i].transform.position + new Vector3(0f, 0.6f, 0f));
+                if (HeldItem != null && HeldItem.Name == "Spring Punch Glove")
+                    otherCombat.ApplyKnockback(dir, 16f); // BOING: huge extra launch
             }
         }
     }
@@ -522,6 +533,7 @@ public class PlayerCombat : MonoBehaviour
     void UseItem()
     {
         ItemDefinition def = HeldItem;
+        LastWeaponName = def.Name;
         Vector3 origin = transform.position + Vector3.up * 1.1f + transform.forward * 0.8f;
 
         switch (def.Archetype)
@@ -534,9 +546,32 @@ public class PlayerCombat : MonoBehaviour
 
             case ItemArchetype.Gun:
                 nextAttackTime = Time.time + def.Cooldown;
-                bool explosiveShot = def.Name == "Rocket Launcher" || def.Name == "Grenade Launcher";
-                Projectile.Fire(gameObject, origin, transform.forward, 20f, def.Damage, 0.28f,
-                                def.Color, explosiveShot, 0f);
+                if (def.Name == "Flame Thrower")
+                {
+                    // UNIQUE: a cone of three flame jets.
+                    for (int k = -1; k <= 1; k++)
+                    {
+                        Vector3 dir = Quaternion.Euler(0f, k * 9f, 0f) * transform.forward;
+                        Projectile.Fire(gameObject, origin, dir, 12f, 5f, 0.34f,
+                                        new Color(1f, 0.48f, 0.16f), false, 0f);
+                    }
+                }
+                else if (def.Name == "Mega Buster")
+                {
+                    // UNIQUE: rapid pellets; every 4th shot is a charged blast.
+                    busterShots++;
+                    bool charged = busterShots % 4 == 0;
+                    Projectile.Fire(gameObject, origin, transform.forward, 24f,
+                                    charged ? 18f : 6f, charged ? 0.5f : 0.2f,
+                                    charged ? new Color(0.62f, 0.91f, 1f) : new Color(1f, 0.88f, 0.3f),
+                                    charged, 0f);
+                }
+                else
+                {
+                    bool explosiveShot = def.Name == "Rocket Launcher" || def.Name == "Grenade Launcher";
+                    Projectile.Fire(gameObject, origin, transform.forward, 20f, def.Damage, 0.28f,
+                                    def.Color, explosiveShot, 0f);
+                }
                 break;
 
             case ItemArchetype.Food:
