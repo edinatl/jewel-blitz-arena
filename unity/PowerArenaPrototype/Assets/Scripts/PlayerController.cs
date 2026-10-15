@@ -50,8 +50,30 @@ public class PlayerController : MonoBehaviour
             moveInput = Vector3.zero;
             return;
         }
+        if (combat != null && combat.GrabbedBy != null)
+        {
+            // Held overhead: humans mash action buttons to break free,
+            // the bot wriggles out on its own sometimes.
+            if (aiEnabled && !aiTakenOver)
+            {
+                if (Random.value < Time.deltaTime * 1.6f) combat.EscapeGrab();
+            }
+            else if (Input.GetKeyDown(attackKey) || Input.GetKeyDown(heavyKey) ||
+                     Input.GetKeyDown(jumpKey) || Input.GetKeyDown(fusionKey))
+                combat.RegisterMash();
+            moveInput = Vector3.zero;
+            return;
+        }
         if (combat != null && combat.IsKnockedDown)
         {
+            // RECOVERY ROLL: jump late in the knockdown stands you into a roll.
+            if (aiEnabled && !aiTakenOver)
+            {
+                if (Random.value < Time.deltaTime * 2.4f && combat.TryRecoveryRoll())
+                    StartRoll(transform.forward);
+            }
+            else if (Input.GetKeyDown(jumpKey) && combat.TryRecoveryRoll())
+                StartRoll(transform.forward);
             moveInput = Vector3.zero;
             return;
         }
@@ -98,6 +120,7 @@ public class PlayerController : MonoBehaviour
     {
         if (rb == null) return;
         if (health != null && health.IsKO) return;
+        if (combat != null && combat.GrabbedBy != null) return; // held overhead: kinematic
 
         if (rollTimeLeft > 0f)
         {
