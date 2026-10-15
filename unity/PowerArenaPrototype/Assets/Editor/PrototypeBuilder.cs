@@ -75,7 +75,25 @@ public static class PrototypeBuilder
         gmGo.AddComponent<GameManager>();
         gmGo.AddComponent<Spawner>();
 
-        StageHazard.Create(new Vector3(0f, 1f, 5f));
+        // v0.8: the bouncing hazard orb is GONE (Ben's call). Instead,
+        // four gold ITEM PADS pop up random items; take one and a new
+        // item respawns on the pad 1 second later.
+        var padSpots = new[]
+        {
+            new Vector3(-4.6f, 0f, -4.6f), new Vector3(4.6f, 0f, -4.6f),
+            new Vector3(-4.6f, 0f, 4.6f),  new Vector3(4.6f, 0f, 4.6f)
+        };
+        for (int i = 0; i < padSpots.Length; i++)
+        {
+            var padGo = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            padGo.name = "ItemPad" + i;
+            padGo.transform.position = new Vector3(padSpots[i].x, 0.06f, padSpots[i].z);
+            padGo.transform.localScale = new Vector3(2f, 0.06f, 2f);
+            SetColor(padGo, new Color(1f, 0.78f, 0.25f));
+            var padCol = padGo.GetComponent<Collider>();
+            if (padCol != null) Object.DestroyImmediate(padCol);
+            padGo.AddComponent<ItemPad>();
+        }
 
         // --- Save -----------------------------------------------------------------
         if (!Directory.Exists("Assets/Scenes")) Directory.CreateDirectory("Assets/Scenes");
