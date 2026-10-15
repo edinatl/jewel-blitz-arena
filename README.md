@@ -30,5 +30,13 @@ dotnet run --project tools/JewelBlitzArena.GreyboxCli -c Release -- --frames 180
 
 `unity/PowerArenaPrototype` remains quarantined feel-lab — do not grow it into the ship host.
 
+## Meta skeleton (S6)
+
+Profile / Ledger / Custom+Sparring mode orchestrators live in `src/JewelBlitzArena.Meta` (no UnityEngine; never mutates Sim state).
+
+```bash
+dotnet test JewelBlitzArena.sln -c Release --filter MetaSkeleton
+```
+
 Design index: `PLAN.md`. Architecture: `docs/tech/architecture.md`.
 

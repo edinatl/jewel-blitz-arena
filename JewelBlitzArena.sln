@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JewelBlitzArena.Presentatio
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JewelBlitzArena.GreyboxCli", "tools\JewelBlitzArena.GreyboxCli\JewelBlitzArena.GreyboxCli.csproj", "{30A13755-13DE-4DD2-94F9-E0134B79777E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JewelBlitzArena.Meta", "src\JewelBlitzArena.Meta\JewelBlitzArena.Meta.csproj", "{3BF7F129-87CE-46B1-8BFD-D45A34A33753}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -103,6 +105,18 @@ Global
 		{30A13755-13DE-4DD2-94F9-E0134B79777E}.Release|x64.Build.0 = Release|Any CPU
 		{30A13755-13DE-4DD2-94F9-E0134B79777E}.Release|x86.ActiveCfg = Release|Any CPU
 		{30A13755-13DE-4DD2-94F9-E0134B79777E}.Release|x86.Build.0 = Release|Any CPU
+		{3BF7F129-87CE-46B1-8BFD-D45A34A33753}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3BF7F129-87CE-46B1-8BFD-D45A34A33753}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3BF7F129-87CE-46B1-8BFD-D45A34A33753}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{3BF7F129-87CE-46B1-8BFD-D45A34A33753}.Debug|x64.Build.0 = Debug|Any CPU
+		{3BF7F129-87CE-46B1-8BFD-D45A34A33753}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3BF7F129-87CE-46B1-8BFD-D45A34A33753}.Debug|x86.Build.0 = Debug|Any CPU
+		{3BF7F129-87CE-46B1-8BFD-D45A34A33753}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3BF7F129-87CE-46B1-8BFD-D45A34A33753}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3BF7F129-87CE-46B1-8BFD-D45A34A33753}.Release|x64.ActiveCfg = Release|Any CPU
+		{3BF7F129-87CE-46B1-8BFD-D45A34A33753}.Release|x64.Build.0 = Release|Any CPU
+		{3BF7F129-87CE-46B1-8BFD-D45A34A33753}.Release|x86.ActiveCfg = Release|Any CPU
+		{3BF7F129-87CE-46B1-8BFD-D45A34A33753}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -114,5 +128,6 @@ Global
 		{E2F43907-47DD-4FE5-B550-D12E040BFEBF} = {07C2787E-EAC7-C090-1BA3-A61EC2A24D84}
 		{4003EB0A-585E-4554-B748-BD5C2679A655} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{30A13755-13DE-4DD2-94F9-E0134B79777E} = {07C2787E-EAC7-C090-1BA3-A61EC2A24D84}
+		{3BF7F129-87CE-46B1-8BFD-D45A34A33753} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 EndGlobal
