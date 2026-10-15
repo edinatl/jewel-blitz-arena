@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Jewel Blitz Arena — Sprite Demo v0.7</title>
+<title>Jewel Blitz Arena — Sprite Demo v0.8</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html,body { width:100%; height:100%; background:#14161f; overflow:hidden; font-family:system-ui, sans-serif; touch-action:none; user-select:none; -webkit-user-select:none; }
@@ -66,7 +66,7 @@
     <div class="btn pbtn" id="btnAction"><span class="sym">○</span><span class="lab">ACTION</span></div>
     <div class="btn pbtn" id="btnJump"><span class="sym">✕</span><span class="lab">JUMP</span></div>
   </div>
-  <div id="help">PS-STYLE PAD · □ ATTACK · ○ ACTION = throw / catch · ✕ JUMP (move + ✕ = dodge roll) · △ FUSION / drop · Any hit knocks a gem loose · 3 gems = TRANSFORM</div>
+  <div id="help">PS-STYLE PAD · □ ATTACK (throwables aim at the closest foe) · ○ PICK UP / THROW in facing direction / CATCH / GRAB · ✕ JUMP (move + ✕ = dodge roll) · △ FUSION / drop · Any hit knocks a gem loose · 3 gems = TRANSFORM</div>
 </div>
 
 <script>
@@ -243,8 +243,11 @@ function useItem(f) {
   } else if (def.arch === 'food') {
     f.atkCd = def.cooldown; f.hp = Math.min(f.maxHp, f.hp + def.heal); floater(f.x, f.y - 28, '+' + def.heal, '#7dff8a'); spawnParticles(f.x, f.y, 8, ['#7dff8a', '#d2ffd8'], 90, .4, 3); clearItem(f);
     showFlash(f.name + ' ATE ' + def.name.toUpperCase() + ' +' + def.heal);
-  } else { // throw / boom: light attack throws too
-    f.atkCd = .45; throwHeld(f);
+  } else { // throw / boom: SQUARE throws AIMED at the closest character
+    f.atkCd = .45;
+    const o = fighters[1 - fighters.indexOf(f)];
+    if (o) { const dx = o.x - f.x, dy = o.y - f.y, d = Math.max(1, Math.hypot(dx, dy)); f.face = { x: dx / d, y: dy / d }; }
+    throwHeld(f);
   }
 }
 function tryAttack(f) { // □ ATTACK (Power Drive while transformed)
@@ -300,6 +303,12 @@ function tryAction(f) { // ○ ACTION: throw held item, or catch with empty hand
   if (over || f.atkCd > 0 || f.downT > 0) return;
   const now = performance.now() / 1000;
   if (f.grabbing) { throwFoe2D(f); return; }
+  if (!f.item) {
+    // CIRCLE = PICK UP: take the nearest ground item at your feet.
+    let bi = -1, bd = f.r + 17;
+    groundItems.forEach((g, i) => { const dd = Math.hypot(g.x - f.x, g.y - f.y); if (dd < bd) { bd = dd; bi = i; } });
+    if (bi >= 0) { const g = groundItems[bi]; equip(f, g.def); groundItems.splice(bi, 1); f.atkCd = .25; floater(f.x, f.y - 30, g.def.name.toUpperCase(), '#bfe3ff'); return; }
+  }
   if (!f.item && f.grabCd <= 0) { const o = fighters[1 - fighters.indexOf(f)]; if (o && !o.grabbedBy && o.downT <= 0 && o.throwFoeT <= 0 && o.transformed <= 0 && Math.hypot(o.x - f.x, o.y - f.y) < 48) { startGrab2D(f, o); return; } }
   if (f.item) { f.atkCd = .45; f.atkKind = 'throw'; throwHeld(f); return; }
   if (f.catchCd > 0) return;
@@ -394,6 +403,7 @@ function ai(f, dt, now) {
       }
     }
   }
+  if (!f.item) for (const it of groundItems) { if (Math.hypot(it.x - f.x, it.y - f.y) < f.r + 17) { tryAction(f); break; } }
   // Target: nearest gem (if close) > nearest item (if empty-handed) > opponent
   let tx = o.x, ty = o.y, stop = 40;
   let best = 175;
@@ -506,9 +516,7 @@ function step(dt, now) {
       }
     }
     // Item pickup
-    if (!f.item && f.downT <= 0 && !f.grabbedBy && !f.grabbing) for (let i = groundItems.length - 1; i >= 0; i--) {
-      if (Math.hypot(groundItems[i].x - f.x, groundItems[i].y - f.y) < f.r + 15) { equip(f, groundItems[i].def); groundItems.splice(i, 1); }
-    }
+
   }
   // Spawners
   gemTimer -= dt; if (gemTimer <= 0) { gemTimer = 6; if (gems.length < 2) gems.push({ x: ARENA.x + 20 + Math.random() * (ARENA.w - 40), y: ARENA.y + 20 + Math.random() * (ARENA.h - 40), born: now, ph: Math.random() * TAU }); }
