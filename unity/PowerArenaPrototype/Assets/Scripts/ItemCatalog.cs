@@ -65,7 +65,7 @@ public static class ItemCatalog
             "Baseball Bat","Cricket Bat","Wooden Club","Steel Pipe","Wrench","Hammer",
             "Mallet","Frying Pan","Katana","Broadsword","Rapier","Battle Axe",
             "War Mace","Spear","Halberd","Chainsaw","Laser Sword","Spiked Club",
-            "Golf Club","Tennis Racket","Broom","Shovel","Torch","Umbrella"
+            "Golf Club","Tennis Racket","Broom","Shovel","Torch","Umbrella","Golden Club"
         };
         for (int i = 0; i < melee.Length; i++)
             list.Add(Make(melee[i], ItemArchetype.Melee, 12f + (i % 5), 3 + (i % 3),
@@ -74,7 +74,7 @@ public static class ItemCatalog
         string[] guns = {
             "Blaster Pistol","Revolver","Shotgun","Machine Gun","Laser Gun","Plasma Rifle",
             "Flame Thrower","Freeze Ray","Rocket Launcher","Grenade Launcher","Crossbow","Bow",
-            "Slingshot","Water Cannon","Bubble Gun","Lightning Gun","Sonic Blaster","Railgun"
+            "Slingshot","Water Cannon","Bubble Gun","Lightning Gun","Sonic Blaster","Railgun","Mega Buster"
         };
         for (int i = 0; i < guns.Length; i++)
             list.Add(Make(guns[i], ItemArchetype.Gun, 9f + (i % 6), 3 + (i % 4),
@@ -114,7 +114,7 @@ public static class ItemCatalog
 
         string[] special = {
             "Fire Wand","Ice Wand","Lightning Rod","Wind Fan","Poison Dagger","Vampire Fang",
-            "Golden Hammer","Giant Glove","Shock Glove","Magnet Coil","Gravity Orb","Mirror Shield"
+            "Golden Hammer","Giant Glove","Shock Glove","Magnet Coil","Gravity Orb","Mirror Shield","Spring Punch Glove"
         };
         for (int i = 0; i < special.Length; i++)
             list.Add(Make(special[i], ItemArchetype.Special, 14f + (i % 5), 4,
