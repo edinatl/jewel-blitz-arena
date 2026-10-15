@@ -42,4 +42,13 @@ Profile / Ledger / Custom+Sparring mode orchestrators live in `src/JewelBlitzAre
 dotnet test JewelBlitzArena.sln -c Release --filter MetaSkeleton
 ```
 
+## Netcode scaffold (S7)
+
+GGPO-style session shell in `src/JewelBlitzArena.Net` (input delay, rollback window 8, 2-byte inputs via PresentationBridge quantize). Headless dual-peer loopback:
+
+```bash
+dotnet test JewelBlitzArena.sln -c Release --filter NetcodeScaffold
+dotnet run --project tools/JewelBlitzArena.NetSmoke -c Release -- --frames 180 --delivery-delay 3
+```
+
 Design index: `PLAN.md`. Architecture: `docs/tech/architecture.md`.
