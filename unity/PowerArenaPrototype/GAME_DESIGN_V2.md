@@ -31,7 +31,7 @@ Analog stick / D-pad / touch joystick: full 360° movement.
 | Button | Action |
 |---|---|
 | □ Attack | Attack / use held item. While transformed: **Power Drive** |
-| ○ Action | Pick up is automatic; Action = throw held item, **catch** incoming items, grab/board stage gimmicks (turret), revive in co-op 🔜 |
+| ○ Action | Pick up is automatic; Action = throw held item, **catch** incoming items, **grab opponents** ✅, board stage gimmicks (turret), revive in co-op 🔜 |
 | ✕ Jump | Jump. Jump + direction = **dodge roll** (i-frames). Jump at a wall = **wall jump** 🛠 |
 | △ | Transformed: **Power Fusion**. Otherwise: **Discard item** |
 
@@ -46,8 +46,20 @@ Keyboard (demo): F = □, G = ○, Space = ✕, H = △, R = rematch.
 - **Combos:** chained hits within 1.2s count up; the 3rd hit **knocks down**. 🛠
 - **Knockdowns** drop a Jewel or **gold coins**; the victim gets up with a
   **recovery roll** (direction + roll = i-frames). 🛠
-- **Grabs:** Action next to an opponent while empty-handed = throw them 🔜
-  (catch/throw of items is in ✅; opponent grabs are next).
+- **Grabs:** ✅ Action next to an opponent while empty-handed grabs them
+  overhead; any attack input throws them (they tumble, bowl into others
+  in the web demo, and take landing damage + a short knockdown). The
+  victim mashes buttons to escape. In all three builds (Unity v0.6).
+- **Perfect dodge:** ✅ rolling within a split second of an incoming hit
+  (web demos) — attacker is left open, brief hitstop freeze.
+- **Recovery roll:** ✅ press Jump late in a knockdown to stand straight
+  into an invincible roll instead of serving the full knockdown.
+- **Air combat:** ✅ thrown items and explosions now connect with airborne
+  fighters; ground melee still whiffs under a jump unless you jump too.
+- **Stage events:** ✅ (3D web demo) telegraphed falling debris that
+  crashes into throwable rocks, plus a halftime GEM RUSH event.
+- **4-fighter free-for-all:** ✅ (3D web demo v0.9) — Blaze/Ronin sprites
+  vs Bruno and Aegis bots, last fighter standing, character select.
 
 ## 4. Fighters — roster of 12 (+4 unlockable) 🛠 data / ✅ 8 modeled in Unity
 Each fighter: unique speed / power / defense, two Power Drives, one Fusion.
@@ -105,7 +117,7 @@ Stage objects are throwable; hazards (spikes, debris, traps) hurt everyone.
 1. **Duel (1-on-1)** ✅ demo form — story battles vs the roster.
 2. **Arcade (4-fighter)** 🔜 — top 2 advance each stage; SPHINX-9 mid-boss,
    Dr. Vex finale.
-3. **Original / Free Battle** 🔜 — 2–4 fighters, teams, stage & item pickers.
+3. **Original / Free Battle** 🛠 — 4-fighter free-for-all is live in the 3D web demo (v0.9); teams and stage/item pickers still 🔜.
 4. **Adventure** 📐 — runs earn **gold** 🛠 (drops in matches now) and cards;
    spend gold in **Mel's Item Shop**; **mix 2 items + a card in the furnace**
    to craft better gear (failures → Scrap); register up to **5 handy items**
