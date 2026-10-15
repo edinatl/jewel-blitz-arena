@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Jewel Blitz Arena — 3D Demo v1.0</title>
+<title>Jewel Blitz Arena — 3D Demo v1.1</title>
 <style>
   html, body { margin:0; padding:0; overflow:hidden; background:#1a140d; font-family:system-ui, sans-serif; -webkit-user-select:none; user-select:none; touch-action:none; }
   #c { position:fixed; inset:0; }
@@ -91,12 +91,12 @@ function mkCat(names, arch, dmg, uses, tDmg, tSpd, heal, cd, kb, scale, hueBase,
   }));
 }
 const CATALOG = [].concat(
-  mkCat(["Baseball Bat","Cricket Bat","Wooden Club","Steel Pipe","Wrench","Hammer","Mallet","Frying Pan","Katana","Broadsword","Rapier","Battle Axe","War Mace","Spear","Halberd","Chainsaw","Laser Sword","Spiked Club","Golf Club","Tennis Racket","Broom","Shovel","Torch","Umbrella"], 'melee', 12, 3, 7, 520, 0, .45, 170, .9, .08, 60),
-  mkCat(["Blaster Pistol","Revolver","Shotgun","Machine Gun","Laser Gun","Plasma Rifle","Flame Thrower","Freeze Ray","Rocket Launcher","Grenade Launcher","Crossbow","Bow","Slingshot","Water Cannon","Bubble Gun","Lightning Gun","Sonic Blaster","Railgun"], 'gun', 9, 4, 8, 560, 0, .38, 100, .55, .55, 60),
+  mkCat(["Baseball Bat","Cricket Bat","Wooden Club","Steel Pipe","Wrench","Hammer","Mallet","Frying Pan","Katana","Broadsword","Rapier","Battle Axe","War Mace","Spear","Halberd","Chainsaw","Laser Sword","Spiked Club","Golf Club","Tennis Racket","Broom","Shovel","Torch","Umbrella","Golden Club"], 'melee', 12, 3, 7, 520, 0, .45, 170, .9, .08, 60),
+  mkCat(["Blaster Pistol","Revolver","Shotgun","Machine Gun","Laser Gun","Plasma Rifle","Flame Thrower","Freeze Ray","Rocket Launcher","Grenade Launcher","Crossbow","Bow","Slingshot","Water Cannon","Bubble Gun","Lightning Gun","Sonic Blaster","Railgun","Mega Buster"], 'gun', 9, 4, 8, 560, 0, .38, 100, .55, .55, 60),
   mkCat(["Chair","Stool","Crate","Wooden Barrel","Metal Barrel","Rock","Brick","Book","Vase","Plant Pot","Cactus","Table Lamp","Bench","Small Table","Tire","Bowling Ball","Dumbbell","Kettle","Bucket","Toolbox","Backpack","Globe","Television","Microwave","Safe","Anvil","Treasure Chest","Ale Barrel","Statue Head"], 'throw', 6, 99, 11, 600, 0, .45, 140, .6, .35, 60),
   mkCat(["Bomb","Big Bomb","Dynamite Bundle","Grenade","Fire Bomb","Ice Bomb","Shock Bomb","Powder Keg","Oil Drum","Gas Can","Firework Crate","Land Mine","Sticky Bomb","Holy Bomb","Poison Bomb","Cluster Bomb"], 'boom', 19, 1, 12, 480, 0, .55, 170, .55, 0, 35),
   mkCat(["Cake","Roast Chicken","Pizza","Burger","Sushi Platter","Apple","Banana","Watermelon","Cheese Wheel","Honey Jar","Energy Drink","Magic Potion"], 'food', 4, 1, 5, 560, 24, .45, 60, .45, .22, 60),
-  mkCat(["Fire Wand","Ice Wand","Lightning Rod","Wind Fan","Poison Dagger","Vampire Fang","Golden Hammer","Giant Glove","Shock Glove","Magnet Coil","Gravity Orb","Mirror Shield"], 'special', 14, 4, 9, 520, 0, .42, 220, .65, .78, 60)
+  mkCat(["Fire Wand","Ice Wand","Lightning Rod","Wind Fan","Poison Dagger","Vampire Fang","Golden Hammer","Giant Glove","Shock Glove","Magnet Coil","Gravity Orb","Mirror Shield","Spring Punch Glove"], 'special', 14, 4, 9, 520, 0, .42, 220, .65, .78, 60)
 );
 CATALOG.forEach(d => { if (d.arch === 'throw') { const idx = CATALOG.indexOf(d); if (idx >= 66) { d.throwDamage = 16; d.throwSpeed = 400; d.knockback = 200; d.scale = .9; } } });
 const findItem = n => CATALOG.find(d => d.name === n);
@@ -232,7 +232,8 @@ function buildItemMesh(def) {
   let anim = 'none', glowMats = [], sparkColor = 0xffffff, fuseH = 0;
   const glow = m => { glowMats.push(m.material); };
   if (def.arch === 'melee') {
-    if (F('Katana')) bKatana(g);
+    if (F('Golden Club')) { pCyl(g, 0, .45, 0, .035, .045, .85, 0x8a6a20); pBox(g, .1, .9, 0, .34, .16, .12, 0xffd94d, 0xaa7700, .8); pBox(g, -.07, .88, 0, .1, .1, .1, 0xffd94d, 0xaa7700, .8); }
+    else if (F('Katana')) bKatana(g);
     else if (F('Broadsword')) { bSword(g, 0xb8c0cc, 0x8a6a20); pBox(g, 0, .62, 0, .1, .8, .04, 0xb8c0cc); }
     else if (F('Laser Sword')) { pBox(g, 0, .62, 0, .06, .8, .03, 0x66eeff, 0x2299cc, 1.6); glow(g.children[0]); pBox(g, 0, .22, 0, .2, .05, .06, 0x333344); pCyl(g, 0, .08, 0, .035, .035, .22, 0x333344); anim = 'glow'; }
     else if (F('Rapier')) { bSword(g, 0xd8dee8, 0x8a6a20); pTor(g, 0, .22, 0, .09, .02, 0x8a6a20); }
@@ -257,7 +258,8 @@ function buildItemMesh(def) {
     else bBat(g, 0x9a6a38);
   } else if (def.arch === 'gun') {
     const body = (l) => { pBox(g, 0, .5, 0, .16, .2, l, 0x3a3a44); pCyl(g, 0, .56, l / 2 + .1, .045, .045, .5, 0x555560).rotation.x = Math.PI / 2; pBox(g, 0, .32, -.14, .09, .2, .1, 0x2a2a32); };
-    if (F('Rocket Launcher')) { pCyl(g, 0, .55, 0, .14, .14, 1.1, 0x4a5a3a).rotation.x = Math.PI / 2; pCone(g, 0, .55, -.62, .14, .2, 0x3a4a2a); pBox(g, 0, .28, .12, .08, .16, .08, 0x2a2a32); }
+    if (F('Mega Buster')) { pCyl(g, 0, .5, .1, .13, .16, .62, 0x2a4bd7, 0x1a2f80, .5).rotation.x = Math.PI / 2; pCyl(g, 0, .5, .45, .1, .1, .1, 0x9fe8ff, 0x33aaff, 1.4); pBox(g, 0, .34, -.1, .2, .16, .34, 0x2456a8); pBox(g, 0, .52, -.24, .1, .22, .1, 0xd8dee8); }
+    else if (F('Rocket Launcher')) { pCyl(g, 0, .55, 0, .14, .14, 1.1, 0x4a5a3a).rotation.x = Math.PI / 2; pCone(g, 0, .55, -.62, .14, .2, 0x3a4a2a); pBox(g, 0, .28, .12, .08, .16, .08, 0x2a2a32); }
     else if (F('Grenade Launcher')) { pCyl(g, 0, .55, 0, .1, .1, .95, 0x555560).rotation.x = Math.PI / 2; pCyl(g, 0, .42, -.12, .12, .12, .22, 0x777780); }
     else if (F('Machine Gun')) { body(.7); pBox(g, 0, .34, 0, .09, .22, .12, 0x2a2a32); pCyl(g, 0, .62, .32, .05, .05, .34, 0x555560).rotation.x = Math.PI / 2; }
     else if (F('Shotgun')) { body(.6); pCyl(g, 0, .56, .3, .05, .05, .5, 0x555560).rotation.x = Math.PI / 2; pCyl(g, 0, .47, -.18, .05, .05, .4, 0x555560).rotation.x = Math.PI / 2; pBox(g, 0, .5, 0, .2, .08, .7, 0x6b4a2a); }
@@ -340,7 +342,8 @@ function buildItemMesh(def) {
     else if (F('Magic Potion')) { glow(pSph(g, 0, .35, 0, .2, 0x9a4ae8, 0x5a1a9a, 1.4)); pCyl(g, 0, .58, 0, .06, .08, .18, 0xb8c0cc); }
     anim = 'sparkle'; sparkColor = 0xfff6c8;
   } else if (def.arch === 'special') {
-    if (F('Fire Wand')) { pCyl(g, 0, .5, 0, .035, .035, .9, 0x6b4a2a); glow(pSph(g, 0, 1.05, 0, .12, 0xff6a2a, 0xcc3300, 1.8)); }
+    if (F('Spring Punch')) { pBox(g, 0, .64, 0, .34, .3, .3, 0xcc2222); pBox(g, 0, .64, .19, .36, .12, .1, 0xcc2222); for (let i = 0; i < 3; i++) pTor(g, 0, .28 + i * .11, 0, .11, .028, 0xb8c0cc); pBox(g, 0, .1, 0, .3, .14, .3, 0x555560); anim = 'pulse'; }
+    else if (F('Fire Wand')) { pCyl(g, 0, .5, 0, .035, .035, .9, 0x6b4a2a); glow(pSph(g, 0, 1.05, 0, .12, 0xff6a2a, 0xcc3300, 1.8)); }
     else if (F('Ice Wand')) { pCyl(g, 0, .5, 0, .035, .035, .9, 0x6b4a2a); glow(pCone(g, 0, 1.08, 0, .09, .2, 0x9fe8ff, 0x33aaff, 1.8)); }
     else if (F('Lightning Rod')) { pCyl(g, 0, .5, 0, .035, .035, .95, 0x555560); glow(pSph(g, 0, 1.06, 0, .1, 0xffee55, 0xccaa00, 1.8)); }
     else if (F('Wind Fan')) { pCyl(g, 0, .3, 0, .035, .035, .5, 0x8a6a20); const f1 = pBox(g, 0, .62, 0, .5, .06, .06, 0xd8b45a); f1.rotation.z = .5; const f2 = pBox(g, 0, .62, 0, .5, .06, .06, 0xd8b45a); f2.rotation.z = -.5; }
@@ -516,15 +519,32 @@ const bot = makeFighter('Samurai', 'RONIN', 4.5, 0, true);
 const p3 = makeFighter('Warrior', 'BRUNO', -4.5, -4.5, true);
 const p4 = makeFighter('Gladiator', 'AEGIS', 4.5, 4.5, true);
 function foesOf(f) { return fighters.filter(x => x !== f && !x.dead); }
+const BOT_ATTACKS = false; // Ben (2026-10-15): bots are test dummies for now
 function nearestFoe(f) { let best = null, bd = 1e9; foesOf(f).forEach(x => { const d = Math.hypot(x.x - f.x, x.z - f.z); if (d < bd) { bd = d; best = x; } }); return best; }
 function aliveCount() { return fighters.filter(x => !x.dead).length; }
 
-// Hazard orb
-const hazard = { mesh: sph(.55, 0xb44dff), x: 0, z: -6, vx: 120, vz: 95 };
-hazard.mesh.material.emissive = new THREE.Color(0x7a2bd0);
-hazard.mesh.position.set(0, .8, -6);
-scene.add(hazard.mesh);
 buildTurret();
+
+// Item pads: gold circles on the ground that pop up a random item.
+// Take the item (CIRCLE at its feet) and a new one respawns 1s later.
+const pads = [];
+[[-4.6, -4.6], [4.6, -4.6], [-4.6, 4.6], [4.6, 4.6]].forEach(([px, pz]) => {
+  const ring = new THREE.Mesh(new THREE.RingGeometry(.78, 1.02, 36), new THREE.MeshBasicMaterial({ color: 0xffc740, transparent: true, opacity: .85, side: THREE.DoubleSide }));
+  ring.rotation.x = -Math.PI / 2; ring.position.set(px, .04, pz); scene.add(ring);
+  const disc = new THREE.Mesh(new THREE.CircleGeometry(.78, 36), new THREE.MeshBasicMaterial({ color: 0xffc740, transparent: true, opacity: .15 }));
+  disc.rotation.x = -Math.PI / 2; disc.position.set(px, .03, pz); scene.add(disc);
+  pads.push({ x: px, z: pz, ring, entry: null, timer: Math.random() * .6 });
+});
+function spawnPadItem(pad) {
+  const def = randItem();
+  const mesh = buildItemMesh(def);
+  mesh.position.set(pad.x, 0, pad.z);
+  scene.add(mesh);
+  const entry = { def, mesh, x: pad.x, z: pad.z, ph: Math.random() * 6, born: -9, pad };
+  groundItems.push(entry);
+  pad.entry = entry;
+  burst(pad.x, .7, pad.z, 0xffc740, 8, 2, .4);
+}
 
 function spawnGem(x, z, delay) {
   const mesh = new THREE.Mesh(new THREE.OctahedronGeometry(.34), new THREE.MeshStandardMaterial({ color: 0xff2b3a, emissive: 0xa01020, roughness: .3 }));
@@ -676,14 +696,39 @@ function tryAttack(f) { // SQUARE: attack (Power Drive while transformed; fires 
   if (def.arch === 'melee' || def.arch === 'special') {
     burst(f.x + f.face.x, 1.2, f.z + f.face.z, 0xffffff, 3, 1.6, .25);
     smashBoxes(f, 1.9);
-    if (dist(f, foe) < 1.95) hurt(foe, def.damage, def.knockback, f.x, f.z, 'melee', f);
+    if (dist(f, foe) < 1.95) {
+      const spring = def.name === 'Spring Punch Glove';
+      hurt(foe, def.damage + (spring ? 2 : 0), spring ? def.knockback * 3 : def.knockback, f.x, f.z, 'melee', f);
+      if (spring) { foe.vx += f.face.x * 5; foe.vz += f.face.z * 5; ringFx(foe.x, foe.z, 0xff9a3a, 1.8); if (f === player || foe === player) flashMsg('BOING! SPRING PUNCH!'); }
+      if (def.name === 'Golden Club') { spawnCoin(foe.x, foe.z); burst(foe.x, 1.4, foe.z, 0xffd94d, 6, 2, .4); }
+    }
   } else if (def.arch === 'gun') {
-    const big = def.name === 'Rocket Launcher' || def.name === 'Grenade Launcher';
-    const mesh = sph(big ? .3 : .14, big ? 0xffc740 : 0x7df9ff);
-    mesh.position.set(f.x + f.face.x * .8, 1.15, f.z + f.face.z * .8);
-    scene.add(mesh);
-    shots.push({ mesh, x: mesh.position.x, z: mesh.position.z, vx: f.face.x * 15, vz: f.face.z * 15, dmg: def.damage, boom: big, owner: f, t: 0 });
-    burst(mesh.position.x, 1.15, mesh.position.z, 0xffd23a, 4, 1.6, .25);
+    const n = def.name;
+    if (n === 'Flame Thrower') {
+      // UNIQUE: a cone of three short-lived flame jets.
+      for (let k = 0; k < 3; k++) { const a = Math.atan2(f.face.z, f.face.x) + (k - 1) * .15;
+        const mesh = sph(.24, 0xff7a2a); mesh.position.set(f.x + Math.cos(a) * .8, 1.1, f.z + Math.sin(a) * .8);
+        scene.add(mesh);
+        shots.push({ mesh, x: mesh.position.x, z: mesh.position.z, vx: Math.cos(a) * 10.5, vz: Math.sin(a) * 10.5, dmg: 5, boom: false, owner: f, t: 0, life: .42 });
+      }
+      burst(f.x + f.face.x, 1.1, f.z + f.face.z, 0xff8c3a, 6, 2, .3);
+    } else if (n === 'Mega Buster') {
+      // UNIQUE: rapid lemon pellets; every 4th shot is a charged blast.
+      f.busterN = (f.busterN || 0) + 1;
+      const charged = f.busterN % 4 === 0;
+      const mesh = sph(charged ? .3 : .13, charged ? 0x9fe8ff : 0xffe14d);
+      mesh.position.set(f.x + f.face.x * .8, 1.15, f.z + f.face.z * .8);
+      scene.add(mesh);
+      shots.push({ mesh, x: mesh.position.x, z: mesh.position.z, vx: f.face.x * 19, vz: f.face.z * 19, dmg: charged ? 18 : 6, boom: charged, owner: f, t: 0 });
+      burst(mesh.position.x, 1.15, mesh.position.z, 0x9fe8ff, 4, 1.6, .25);
+    } else {
+      const big = n === 'Rocket Launcher' || n === 'Grenade Launcher';
+      const mesh = sph(big ? .3 : .14, big ? 0xffc740 : 0x7df9ff);
+      mesh.position.set(f.x + f.face.x * .8, 1.15, f.z + f.face.z * .8);
+      scene.add(mesh);
+      shots.push({ mesh, x: mesh.position.x, z: mesh.position.z, vx: f.face.x * 15, vz: f.face.z * 15, dmg: def.damage, boom: big, owner: f, t: 0, freeze: n === 'Freeze Ray', chain: n === 'Lightning Gun' });
+      burst(mesh.position.x, 1.15, mesh.position.z, 0xffd23a, 4, 1.6, .25);
+    }
     smashBoxes(f, 1.5);
   } else if (def.arch === 'food') {
     f.hp = Math.min(f.maxHp, f.hp + def.heal);
@@ -755,6 +800,7 @@ function tryAction(f) { // CIRCLE: throw / catch / board turret
       f.item = g.def; f.itemUses = g.def.uses; refreshHeld(f);
       burst(g.x, .8, g.z, 0xffffff, 5, 1.6, .35);
       scene.remove(g.mesh); groundItems.splice(bi, 1);
+      if (g.pad) { g.pad.entry = null; g.pad.timer = 1; }
       if (f === player) flashMsg('Picked up ' + g.def.name);
       f.atkCd = .25;
       return;
@@ -874,7 +920,7 @@ function endMatch(winner) {
 // ============ BOT AI ============
 function botThink(f, dt) {
   if (f.boarded || f.grabbedBy) return;
-  if (f.grabbing) { if (Math.random() < .45) tryAttack(f); return; }
+  if (f.grabbing) { if (BOT_ATTACKS && Math.random() < .45) tryAttack(f); return; }
   f.aiT -= dt;
   const foe = nearestFoe(f), now = perfNow();
   if (!foe) return;
@@ -891,11 +937,12 @@ function botThink(f, dt) {
   let mx = tx - f.x, mz = tz - f.z;
   const md = Math.hypot(mx, mz); if (md > .01) { mx /= md; mz /= md; }
   if (tx === foe.x && d < 5.2) { const px = -mz * .5, pz = mx * .5; mx += px; mz += pz; const n = Math.hypot(mx, mz) || 1; mx /= n; mz /= n; }
-  const sp = 5.7 * (f.transformed > 0 ? 1.25 : 1);
+  const sp = 5.7 * (f.transformed > 0 ? 1.25 : 1) * (f.slowT > 0 ? .55 : 1);
   f.vx += (mx * sp - f.vx) * Math.min(1, dt * 7);
   f.vz += (mz * sp - f.vz) * Math.min(1, dt * 7);
   if (md > .3) f.face = { x: mx, z: mz }; else f.face = aimFace(f, foe);
   if (!f.item && groundItems.some(g => Math.hypot(g.x - f.x, g.z - f.z) < 1.15)) { tryAction(f); }
+  if (!BOT_ATTACKS) return; // passive mode: roam + collect only, never attack
   if (f.aiT > 0) return;
   f.aiT = .22;
   if (f.item && (f.item.arch === 'gun')) { if (d < 11) { f.face = aimFace(f, foe); tryAttack(f); return; } }
@@ -941,7 +988,7 @@ function step(dt) {
     f.atkCd = Math.max(0, f.atkCd - dt);
     f.hazardCd = Math.max(0, f.hazardCd - dt);
     f.jumpT = Math.max(0, f.jumpT - dt); f.catchCd -= dt; f.rollT = Math.max(0, f.rollT - dt); f.downT = Math.max(0, f.downT - dt); f.comboT -= dt; if (f.comboT <= 0) f.combo = 0;
-    f.grabCd = Math.max(0, f.grabCd - dt);
+    f.grabCd = Math.max(0, f.grabCd - dt); f.slowT = Math.max(0, (f.slowT || 0) - dt);
     if (f.grabbing) { f.grabT -= dt; if (f.grabT <= 0) throwFoe(f); }
     if (f.grabbedBy && f.isBot && Math.random() < dt * 1.1) escapeGrab(f);
     if (f.throwFoeT > 0) {
@@ -962,7 +1009,7 @@ function step(dt) {
         if (k === 'KeyA' || k === 'ArrowLeft') ix -= 1; if (k === 'KeyD' || k === 'ArrowRight') ix += 1;
       });
       const il = Math.hypot(ix, iz); if (il > 1) { ix /= il; iz /= il; }
-      const sp = 6.2 * (f.transformed > 0 ? 1.25 : 1);
+      const sp = 6.2 * (f.transformed > 0 ? 1.25 : 1) * (f.slowT > 0 ? .55 : 1);
       f.vx += (ix * sp - f.vx) * Math.min(1, dt * 9);
       f.vz += (iz * sp - f.vz) * Math.min(1, dt * 9);
       if (f.downT > 0) { ix = 0; iz = 0; }
@@ -990,27 +1037,23 @@ function step(dt) {
         }
       }
     }
-    if (f.jumpT <= 0 && f.hazardCd <= 0 && Math.hypot(hazard.x - f.x, hazard.z - f.z) < 1.05 && !state.over) {
-      f.hazardCd = 1; hurt(f, 9, 320, hazard.x, hazard.z, 'hazard');
-    }
     if (f.heldMesh && f.heldMesh.userData.anim === 'glow' && f.heldMesh.userData.glowMats) f.heldMesh.userData.glowMats.forEach(m => { m.emissiveIntensity = .8 + Math.sin(now * 5) * .4; });
     animateFighter(f, dt, now);
   });
-  // Hazard patrol
-  hazard.x += hazard.vx * dt * .022; hazard.z += hazard.vz * dt * .022;
-  if (Math.abs(hazard.x) > 7.6) hazard.vx *= -1;
-  if (Math.abs(hazard.z) > 7.6) hazard.vz *= -1;
-  hazard.mesh.position.set(hazard.x, .8 + Math.sin(now * 3) * .12, hazard.z);
-  const hs = 1 + Math.sin(now * 5) * .14; hazard.mesh.scale.setScalar(hs);
   // Projectiles
   for (let i = shots.length - 1; i >= 0; i--) {
     const s = shots[i]; s.t += dt; s.x += s.vx * dt; s.z += s.vz * dt;
     s.mesh.position.set(s.x, 1.15, s.z);
-    let dead = s.t > 1.6 || Math.abs(s.x) > 9.4 || Math.abs(s.z) > 9.4;
+    let dead = s.t > (s.life || 1.6) || Math.abs(s.x) > 9.4 || Math.abs(s.z) > 9.4;
     if (!dead) for (const foe of fighters) {
       if (foe === s.owner || foe.dead) continue;
       if (Math.hypot(foe.x - s.x, foe.z - s.z) < .85) {
-        if (s.boom) explode(s.x, s.z, s.dmg, s.owner); else hurt(foe, s.dmg * (s.owner.transformed > 0 ? 1.5 : 1), 120, s.x - s.vx * .1, s.z - s.vz * .1, 'shot', s.owner);
+        if (s.boom) explode(s.x, s.z, s.dmg, s.owner);
+        else {
+          hurt(foe, s.dmg * (s.owner.transformed > 0 ? 1.5 : 1), 120, s.x - s.vx * .1, s.z - s.vz * .1, 'shot', s.owner);
+          if (s.freeze) { foe.slowT = 1.2; burst(foe.x, 1.2, foe.z, 0x9fe8ff, 8, 2, .4); if (foe === player) flashMsg('FROZEN!'); }
+          if (s.chain) { const other = fighters.find(x => x !== foe && x !== s.owner && !x.dead && Math.hypot(x.x - foe.x, x.z - foe.z) < 3.2); if (other) { hurt(other, 6, 90, foe.x, foe.z, 'shot', s.owner); burst(other.x, 1.3, other.z, 0xa8e6ff, 6, 2, .3); } }
+        }
         dead = true; break;
       }
     }
@@ -1089,6 +1132,10 @@ function step(dt) {
     if (coins[i]) c.mesh.position.set(c.x, .5 + Math.sin(now * 3 + c.ph) * .08, c.z); }
   for (let i = pendingBooms.length - 1; i >= 0; i--) { const pb = pendingBooms[i]; pb.t -= dt;
     if (pb.t <= 0) { explode(pb.x, pb.z, 16, pb.owner); pendingBooms.splice(i, 1); } }
+  pads.forEach(pad => {
+    pad.ring.material.opacity = .6 + Math.sin(now * 3 + pad.x) * .25;
+    if (!pad.entry && !state.over) { pad.timer -= dt; if (pad.timer <= 0) spawnPadItem(pad); }
+  });
   boxTimer -= dt; if (boxTimer <= 0) { boxTimer = 7; if (boxes.length < 2) { const bm = buildBoxMesh(); const bx = (Math.random() * 2 - 1) * 6.5, bz = (Math.random() * 2 - 1) * 6.5; bm.position.set(bx, .45, bz); scene.add(bm); boxes.push({ mesh: bm, x: bx, z: bz, hp: 2, ph: Math.random() * 6 }); } }
   gems.forEach(g => { g.mesh.rotation.y += dt * 3; if (!(perfNow() > g.pickupAt)) return; if (Math.hypot(g.mesh.position.x - g.x) > .01) return; g.mesh.position.y = .9 + Math.sin(now * 3 + g.x) * .12; });
 }
@@ -1195,6 +1242,7 @@ function resetMatch() {
   gems.length = groundItems.length = shots.length = throwns.length = parts.length = rings.length = 0;
   boxes.length = 0; coins.length = 0; pendingBooms.length = 0; boxTimer = 7;
   debris.forEach(d => { scene.remove(d.warn); scene.remove(d.rock); }); debris.length = 0; debrisTimer = 8;
+  pads.forEach(pad => { pad.entry = null; pad.timer = Math.random() * .5; });
   turret.user = null; turret.cd = 0;
   fighters.forEach((f, i) => {
     f.hp = f.maxHp; f.gems = 0; f.transformed = 0; f.gauge = 0; f.gold = 0; f.item = null; f.dead = false; f.vx = f.vz = 0;
