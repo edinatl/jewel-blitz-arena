@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Jewel Blitz Arena — 3D Demo v1.5</title>
+<title>Jewel Blitz Arena — 3D Demo v1.6</title>
 <style>
   html, body { margin:0; padding:0; overflow:hidden; background:#1a140d; font-family:system-ui, sans-serif; -webkit-user-select:none; user-select:none; touch-action:none; }
   #c { position:fixed; inset:0; }
@@ -853,8 +853,25 @@ function tryAction(f) { // CIRCLE: throw / catch / board turret
     if (gfoe && !gfoe.grabbedBy && gfoe.downT <= 0 && gfoe.throwFoeT <= 0 && gfoe.transformed <= 0 && dist(f, gfoe) < 1.65) { startGrab(f, gfoe); return; }
   }
   if (f.item) {
-    // CIRCLE with an item: throwables THROW in facing direction;
-    // anything else DROPS at your feet (Ben's call).
+    // CIRCLE while holding + standing over another item: SWAP — drop what you
+    // hold (its remaining uses are kept) and pick the new one up instead.
+    let bi = -1, bd = 2.0;
+    groundItems.forEach((g, i) => { const dd = Math.hypot(g.x - f.x, g.z - f.z); if (dd < bd) { bd = dd; bi = i; } });
+    if (bi >= 0) {
+      const g = groundItems[bi];
+      scene.remove(g.mesh); groundItems.splice(bi, 1);
+      if (g.pad) { g.pad.entry = null; g.pad.timer = 1; }
+      dropItem3D(f);
+      f.item = g.def; f.itemUses = (g.uses != null ? g.uses : g.def.uses); refreshHeld(f);
+      burst(g.x, .8, g.z, 0xffffff, 5, 1.6, .35);
+      if (f === player) flashMsg('Swapped for ' + g.def.name);
+      f.atkCd = .25;
+      return;
+    }
+  }
+  if (f.item) {
+    // CIRCLE with an item (nothing underfoot): throwables THROW in facing
+    // direction; anything else DROPS at your feet (Ben's call).
     const d = f.item;
     if (d.arch === 'throw' || d.arch === 'boom') { f.atkCd = .45; f.atkKind = 'throw'; throwItem(f); if (f === player) flashMsg('Threw ' + d.name); }
     else { dropItem3D(f); if (f === player) flashMsg('Dropped ' + d.name); }
