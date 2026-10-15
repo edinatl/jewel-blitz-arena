@@ -6,6 +6,10 @@ namespace JewelBlitzArena.Sim
         public const int LusterMax = 1200;
         public const int LusterDrainPerFrame = 1;
         public const int SurgeLusterCost = 420;
+
+        /// <summary>Tilly Invoice (Surge A) only — balance.md §3.3 / cast.md §5.</summary>
+        public const int InvoiceSurgeLusterCost = 180;
+
         public const int BlitzTransformFrames = 30;
         public const int RevertFrames = 20;
         public const int DrossFrames = 6 * 60;
@@ -36,6 +40,65 @@ namespace JewelBlitzArena.Sim
         {
             int r = reachRating < 1 ? 3 : (reachRating > 5 ? 5 : reachRating);
             return HitRangeBaseRaw + (HitRangePerReachRaw * r);
+        }
+
+        /// <summary>
+        /// Luster cost for a Surge press. InvoiceRepeatable kits pay
+        /// <see cref="InvoiceSurgeLusterCost"/> on Surge A only; Surge B and all other kits use
+        /// <see cref="SurgeLusterCost"/>.
+        /// </summary>
+        public static int SurgeLusterCostFor(KitBehavior behavior, bool surgeA)
+        {
+            if (surgeA && behavior == KitBehavior.InvoiceRepeatable)
+            {
+                return InvoiceSurgeLusterCost;
+            }
+
+            return SurgeLusterCost;
+        }
+
+        /// <summary>
+        /// Clank Toolbox / Spare Parts direction index: 0 neutral, 1 forward, 2 up, 3 down
+        /// (names.md / cast.md §2). Magnitude 0 → neutral; stick near +Z → up, −Z → down;
+        /// otherwise forward.
+        /// </summary>
+        public static int SurgeVariantIndex(in InputFrame input)
+        {
+            if (input.Magnitude == 0)
+            {
+                return 0;
+            }
+
+            int d = input.Direction & 31;
+            int distUp = DirDistance(d, 8);
+            int distDown = DirDistance(d, 24);
+            if (distUp <= 4 && distUp <= distDown)
+            {
+                return 2;
+            }
+
+            if (distDown <= 4)
+            {
+                return 3;
+            }
+
+            return 1;
+        }
+
+        private static int DirDistance(int a, int b)
+        {
+            int diff = a - b;
+            if (diff < 0)
+            {
+                diff = -diff;
+            }
+
+            if (diff > 16)
+            {
+                diff = 32 - diff;
+            }
+
+            return diff;
         }
     }
 }

@@ -96,27 +96,27 @@
           "name": "Flick",
           "class": "Attack",
           "damage": 32,
-          "startupFrames": 4,
+          "startupFrames": 3,
           "activeFrames": 2,
-          "recoveryFrames": 8,
+          "recoveryFrames": 6,
           "utilityExempt": false
         },
         {
           "name": "Vanish",
           "class": "Strong",
           "damage": 85,
-          "startupFrames": 10,
-          "activeFrames": 3,
-          "recoveryFrames": 18,
+          "startupFrames": 6,
+          "activeFrames": 2,
+          "recoveryFrames": 30,
           "utilityExempt": false
         },
         {
           "name": "Air Flick",
           "class": "AirAttack",
           "damage": 42,
-          "startupFrames": 6,
-          "activeFrames": 3,
-          "recoveryFrames": 12,
+          "startupFrames": 4,
+          "activeFrames": 2,
+          "recoveryFrames": 10,
           "utilityExempt": false
         },
         {
@@ -132,27 +132,27 @@
           "name": "Blink Strike",
           "class": "Flare",
           "damage": 40,
-          "startupFrames": 6,
-          "activeFrames": 3,
-          "recoveryFrames": 10,
+          "startupFrames": 4,
+          "activeFrames": 2,
+          "recoveryFrames": 8,
           "utilityExempt": false
         },
         {
           "name": "Curtain Call",
           "class": "Surge",
           "damage": 320,
-          "startupFrames": 12,
-          "activeFrames": 6,
-          "recoveryFrames": 24,
+          "startupFrames": 10,
+          "activeFrames": 8,
+          "recoveryFrames": 22,
           "utilityExempt": false
         },
         {
           "name": "Smoke Vault",
           "class": "Surge",
           "damage": 0,
-          "startupFrames": 14,
-          "activeFrames": 8,
-          "recoveryFrames": 28,
+          "startupFrames": 12,
+          "activeFrames": 4,
+          "recoveryFrames": 24,
           "utilityExempt": false
         }
       ]
@@ -174,27 +174,27 @@
           "name": "Slam String",
           "class": "Attack",
           "damage": 38,
-          "startupFrames": 4,
-          "activeFrames": 2,
-          "recoveryFrames": 8,
+          "startupFrames": 5,
+          "activeFrames": 3,
+          "recoveryFrames": 10,
           "utilityExempt": false
         },
         {
           "name": "Command Grab",
           "class": "Strong",
           "damage": 100,
-          "startupFrames": 10,
-          "activeFrames": 3,
-          "recoveryFrames": 18,
+          "startupFrames": 12,
+          "activeFrames": 2,
+          "recoveryFrames": 22,
           "utilityExempt": false
         },
         {
           "name": "Air Slam",
           "class": "AirAttack",
           "damage": 48,
-          "startupFrames": 6,
+          "startupFrames": 8,
           "activeFrames": 3,
-          "recoveryFrames": 12,
+          "recoveryFrames": 14,
           "utilityExempt": false
         },
         {
@@ -210,26 +210,26 @@
           "name": "Ground Pound",
           "class": "Flare",
           "damage": 50,
-          "startupFrames": 6,
-          "activeFrames": 3,
-          "recoveryFrames": 10,
+          "startupFrames": 8,
+          "activeFrames": 4,
+          "recoveryFrames": 14,
           "utilityExempt": false
         },
         {
           "name": "Beacon",
           "class": "Surge",
           "damage": 200,
-          "startupFrames": 12,
-          "activeFrames": 6,
-          "recoveryFrames": 24,
+          "startupFrames": 14,
+          "activeFrames": 8,
+          "recoveryFrames": 26,
           "utilityExempt": false
         },
         {
           "name": "Groundswell",
           "class": "Surge",
           "damage": 160,
-          "startupFrames": 14,
-          "activeFrames": 8,
+          "startupFrames": 16,
+          "activeFrames": 6,
           "recoveryFrames": 28,
           "utilityExempt": false
         }
@@ -564,9 +564,9 @@
           "name": "Clank Hit",
           "class": "Attack",
           "damage": 36,
-          "startupFrames": 4,
-          "activeFrames": 2,
-          "recoveryFrames": 8,
+          "startupFrames": 6,
+          "activeFrames": 3,
+          "recoveryFrames": 12,
           "utilityExempt": false
         },
         {
@@ -582,9 +582,9 @@
           "name": "Air Clank",
           "class": "AirAttack",
           "damage": 46,
-          "startupFrames": 6,
+          "startupFrames": 7,
           "activeFrames": 3,
-          "recoveryFrames": 12,
+          "recoveryFrames": 14,
           "utilityExempt": false
         },
         {
@@ -606,21 +606,75 @@
           "utilityExempt": false
         },
         {
-          "name": "Toolbox",
+          "name": "Toolbox Mortar",
           "class": "Surge",
           "damage": 280,
-          "startupFrames": 12,
-          "activeFrames": 6,
+          "startupFrames": 14,
+          "activeFrames": 4,
           "recoveryFrames": 24,
           "utilityExempt": false
         },
         {
-          "name": "Spare Parts",
+          "name": "Toolbox Ram",
+          "class": "Surge",
+          "damage": 280,
+          "startupFrames": 10,
+          "activeFrames": 6,
+          "recoveryFrames": 22,
+          "utilityExempt": false
+        },
+        {
+          "name": "Toolbox Drop Weight",
+          "class": "Surge",
+          "damage": 320,
+          "startupFrames": 18,
+          "activeFrames": 4,
+          "recoveryFrames": 28,
+          "utilityExempt": false
+        },
+        {
+          "name": "Toolbox Mine Field",
+          "class": "Surge",
+          "damage": 70,
+          "startupFrames": 12,
+          "activeFrames": 8,
+          "recoveryFrames": 20,
+          "utilityExempt": false
+        },
+        {
+          "name": "Spare Magnet",
+          "class": "Surge",
+          "damage": 0,
+          "startupFrames": 10,
+          "activeFrames": 6,
+          "recoveryFrames": 18,
+          "utilityExempt": false
+        },
+        {
+          "name": "Spare Flame",
           "class": "Surge",
           "damage": 200,
-          "startupFrames": 14,
+          "startupFrames": 12,
           "activeFrames": 8,
-          "recoveryFrames": 28,
+          "recoveryFrames": 24,
+          "utilityExempt": false
+        },
+        {
+          "name": "Spare Chaff",
+          "class": "Surge",
+          "damage": 40,
+          "startupFrames": 8,
+          "activeFrames": 4,
+          "recoveryFrames": 16,
+          "utilityExempt": false
+        },
+        {
+          "name": "Spare Repair",
+          "class": "Surge",
+          "damage": 280,
+          "startupFrames": 14,
+          "activeFrames": 2,
+          "recoveryFrames": 22,
           "utilityExempt": false
         }
       ]
@@ -1032,9 +1086,9 @@
           "name": "Setter Pick",
           "class": "Attack",
           "damage": 30,
-          "startupFrames": 4,
+          "startupFrames": 5,
           "activeFrames": 2,
-          "recoveryFrames": 8,
+          "recoveryFrames": 9,
           "utilityExempt": false
         },
         {
@@ -1077,17 +1131,17 @@
           "name": "Invoice",
           "class": "Surge",
           "damage": 135,
-          "startupFrames": 12,
+          "startupFrames": 8,
           "activeFrames": 6,
-          "recoveryFrames": 24,
+          "recoveryFrames": 14,
           "utilityExempt": false
         },
         {
           "name": "Closing Time",
           "class": "Surge",
           "damage": 150,
-          "startupFrames": 14,
-          "activeFrames": 8,
+          "startupFrames": 16,
+          "activeFrames": 6,
           "recoveryFrames": 28,
           "utilityExempt": false
         }

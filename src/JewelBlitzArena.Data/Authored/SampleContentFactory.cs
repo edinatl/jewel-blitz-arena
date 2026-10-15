@@ -102,13 +102,17 @@ namespace JewelBlitzArena.Data
                 air: 3,
                 power: 2,
                 kitBehavior: "VanishStrong");
-            f.Moves = StandardMoves(
-                "Flick", 32,
-                "Vanish", 85,
-                "Air Flick", 42,
-                surgeA: ("Curtain Call", 320),
-                surgeB: ("Smoke Vault", 0),
-                flare: ("Blink Strike", 40));
+            // Vanish Strong: short-range reappear; long recovery stands in for 30 f cooldown.
+            f.Moves = new List<AuthoredMove>
+            {
+                Move("Flick", "Attack", 32, 3, 2, 6),
+                Move("Vanish", "Strong", 85, 6, 2, 30),
+                Move("Air Flick", "AirAttack", 42, 4, 2, 10),
+                Move("Throw", "Throw", 100, 5, 2, 20),
+                Move("Blink Strike", "Flare", 40, 4, 2, 8),
+                Move("Curtain Call", "Surge", 320, 10, 8, 22),
+                Move("Smoke Vault", "Surge", 0, 12, 4, 24),
+            };
             return f;
         }
 
@@ -123,15 +127,17 @@ namespace JewelBlitzArena.Data
                 air: 1,
                 power: 5,
                 kitBehavior: "CommandGrabCarry");
-            f.Moves = StandardMoves(
-                "Slam String", 38,
-                "Command Grab", 100,
-                "Air Slam", 48,
-                surgeA: ("Beacon", 200),
-                surgeB: ("Groundswell", 160),
-                flare: ("Ground Pound", 50),
-                throwName: "Carry Throw",
-                throwDamage: 100);
+            // Command grab: 12 f startup (cast.md §2); carry throw separate.
+            f.Moves = new List<AuthoredMove>
+            {
+                Move("Slam String", "Attack", 38, 5, 3, 10),
+                Move("Command Grab", "Strong", 100, 12, 2, 22),
+                Move("Air Slam", "AirAttack", 48, 8, 3, 14),
+                Move("Carry Throw", "Throw", 100, 5, 2, 20),
+                Move("Ground Pound", "Flare", 50, 8, 4, 14),
+                Move("Beacon", "Surge", 200, 14, 8, 26),
+                Move("Groundswell", "Surge", 160, 16, 6, 28),
+            };
             return f;
         }
 
@@ -233,13 +239,23 @@ namespace JewelBlitzArena.Data
                 air: 1,
                 power: 3,
                 kitBehavior: "DoubleHold");
-            f.Moves = StandardMoves(
-                "Clank Hit", 36,
-                "Spring Grab", 95,
-                "Air Clank", 46,
-                surgeA: ("Toolbox", 280),
-                surgeB: ("Spare Parts", 200),
-                flare: ("Shoulder Battery", 45));
+            // Surge order: Toolbox N/F/U/D then Spare Parts N/F/U/D (cast.md §2 / §5).
+            f.Moves = new List<AuthoredMove>
+            {
+                Move("Clank Hit", "Attack", 36, 6, 3, 12),
+                Move("Spring Grab", "Strong", 95, 10, 3, 18),
+                Move("Air Clank", "AirAttack", 46, 7, 3, 14),
+                Move("Throw", "Throw", 100, 5, 2, 20),
+                Move("Shoulder Battery", "Flare", 45, 6, 3, 10),
+                Move("Toolbox Mortar", "Surge", 280, 14, 4, 24),
+                Move("Toolbox Ram", "Surge", 280, 10, 6, 22),
+                Move("Toolbox Drop Weight", "Surge", 320, 18, 4, 28),
+                Move("Toolbox Mine Field", "Surge", 70, 12, 8, 20),
+                Move("Spare Magnet", "Surge", 0, 10, 6, 18),
+                Move("Spare Flame", "Surge", 200, 12, 8, 24),
+                Move("Spare Chaff", "Surge", 40, 8, 4, 16),
+                Move("Spare Repair", "Surge", 280, 14, 2, 22),
+            };
             return f;
         }
 
@@ -363,13 +379,17 @@ namespace JewelBlitzArena.Data
                 air: 4,
                 power: 1,
                 kitBehavior: "InvoiceRepeatable");
-            f.Moves = StandardMoves(
-                "Setter Pick", 30,
-                "Item Hook", 82,
-                "Air Pick", 40,
-                surgeA: ("Invoice", 135),
-                surgeB: ("Closing Time", 150),
-                flare: ("Cast and Reel", 38));
+            // Invoice: 3 × 45 = 135, 180 Luster (combat charges via KitBehavior).
+            f.Moves = new List<AuthoredMove>
+            {
+                Move("Setter Pick", "Attack", 30, 5, 2, 9),
+                Move("Item Hook", "Strong", 82, 10, 3, 18),
+                Move("Air Pick", "AirAttack", 40, 6, 3, 12),
+                Move("Throw", "Throw", 100, 5, 2, 20),
+                Move("Cast and Reel", "Flare", 38, 6, 3, 10),
+                Move("Invoice", "Surge", 135, 8, 6, 14),
+                Move("Closing Time", "Surge", 150, 16, 6, 28),
+            };
             return f;
         }
 

@@ -203,7 +203,9 @@ namespace JewelBlitzArena.Sim
 
         /// <summary>
         /// When Blitzed, prefer Flare (Attack) in reach and occasionally fire Surge A/B.
-        /// Invoice kits gate Surge A at the repeatable 180 Luster cost (balance.md §3.3).
+        /// Invoice Surge A uses <see cref="MatchRules.InvoiceSurgeLusterCost"/>; other Surges use
+        /// <see cref="MatchRules.SurgeLusterCost"/>. Clank (DoubleHold) also picks a stick
+        /// direction so Combat resolves Toolbox / Spare Parts variants.
         /// Only consumes CPU RNG while Blitzed so non-Blitz paths stay hash-stable.
         /// </summary>
         private static void ApplyBlitzPressure(
@@ -220,20 +222,24 @@ namespace JewelBlitzArena.Sim
                 return;
             }
 
-            int surgeCost = behavior == KitBehavior.InvoiceRepeatable
-                ? 180
-                : MatchRules.SurgeLusterCost;
             uint roll = (uint)(rng.NextUInt64() & 0xFF);
+            bool preferSurgeA = behavior == KitBehavior.InvoiceRepeatable || (roll & 1) == 0;
+            int surgeCost = MatchRules.SurgeLusterCostFor(behavior, surgeA: preferSurgeA);
 
             if (self.Luster >= surgeCost && roll < (uint)(24 + level * 10))
             {
-                if (behavior == KitBehavior.InvoiceRepeatable || (roll & 1) == 0)
+                if (preferSurgeA)
                 {
                     frame.SurgeA = true;
                 }
                 else
                 {
                     frame.SurgeB = true;
+                }
+
+                if (behavior == KitBehavior.DoubleHold)
+                {
+                    ApplyClankSurgeStick(ref frame, roll);
                 }
 
                 return;
@@ -245,6 +251,30 @@ namespace JewelBlitzArena.Sim
                 {
                     frame.Attack = true;
                 }
+            }
+        }
+
+        /// <summary>Set stick to a Clank Surge variant cardinal (N/F/U/D) from RNG nibble.</summary>
+        private static void ApplyClankSurgeStick(ref InputFrame frame, uint roll)
+        {
+            int variant = (int)(roll >> 6) & 0x3; // 0..3
+            switch (variant)
+            {
+                case 0: // neutral
+                    frame.Magnitude = 0;
+                    break;
+                case 1: // forward +X
+                    frame.Direction = 0;
+                    frame.Magnitude = 2;
+                    break;
+                case 2: // up +Z
+                    frame.Direction = 8;
+                    frame.Magnitude = 2;
+                    break;
+                default: // down −Z
+                    frame.Direction = 24;
+                    frame.Magnitude = 2;
+                    break;
             }
         }
 

@@ -8,6 +8,8 @@ namespace JewelBlitzArena.Sim
     /// </summary>
     public sealed class KitRuntime
     {
+        public const int SurgeVariantCount = 4;
+
         public int FighterId;
         public int MaxLife = Simulation.DefaultLife;
         public int ReachRating = 3;
@@ -23,6 +25,14 @@ namespace JewelBlitzArena.Sim
         public MoveRecord? Flare;
         public MoveRecord? SurgeA;
         public MoveRecord? SurgeB;
+
+        /// <summary>Clank Toolbox (Surge A) variants: neutral / forward / up / down.</summary>
+        public readonly MoveRecord?[] SurgeAVariants = new MoveRecord?[SurgeVariantCount];
+
+        /// <summary>Clank Spare Parts (Surge B) variants: neutral / forward / up / down.</summary>
+        public readonly MoveRecord?[] SurgeBVariants = new MoveRecord?[SurgeVariantCount];
+
+        public bool HasSurgeVariants;
 
         public static KitRuntime FromDefaults(int fighterId)
         {
@@ -51,7 +61,7 @@ namespace JewelBlitzArena.Sim
                 Behavior = (KitBehavior)record.KitBehavior,
             };
 
-            int surgeIndex = 0;
+            var surges = new System.Collections.Generic.List<MoveRecord>(8);
             foreach (MoveRecord move in record.Moves)
             {
                 switch (move.Class)
@@ -73,16 +83,7 @@ namespace JewelBlitzArena.Sim
                         kit.Flare ??= move;
                         break;
                     case MoveClass.Surge:
-                        if (surgeIndex == 0)
-                        {
-                            kit.SurgeA = move;
-                        }
-                        else if (surgeIndex == 1)
-                        {
-                            kit.SurgeB = move;
-                        }
-
-                        surgeIndex++;
+                        surges.Add(move);
                         break;
                 }
             }
@@ -91,9 +92,57 @@ namespace JewelBlitzArena.Sim
             kit.Flare ??= kit.Attack ?? StubMove("Flare", MoveClass.Flare, 40, 6, 3, 10);
             kit.Attack ??= StubMove("Jab", MoveClass.Attack, 35, 4, 2, 8);
             kit.Strong ??= StubMove("Strong", MoveClass.Strong, 90, 10, 3, 18);
-            kit.SurgeA ??= StubMove("SurgeA", MoveClass.Surge, 300, 12, 6, 24);
-            kit.SurgeB ??= StubMove("SurgeB", MoveClass.Surge, 170, 14, 8, 28);
+
+            if (kit.Behavior == KitBehavior.DoubleHold && surges.Count >= SurgeVariantCount * 2)
+            {
+                kit.HasSurgeVariants = true;
+                for (int i = 0; i < SurgeVariantCount; i++)
+                {
+                    kit.SurgeAVariants[i] = surges[i];
+                    kit.SurgeBVariants[i] = surges[SurgeVariantCount + i];
+                }
+
+                kit.SurgeA = kit.SurgeAVariants[0];
+                kit.SurgeB = kit.SurgeBVariants[0];
+            }
+            else
+            {
+                kit.SurgeA = surges.Count > 0
+                    ? surges[0]
+                    : StubMove("SurgeA", MoveClass.Surge, 300, 12, 6, 24);
+                kit.SurgeB = surges.Count > 1
+                    ? surges[1]
+                    : StubMove("SurgeB", MoveClass.Surge, 170, 14, 8, 28);
+                for (int i = 0; i < SurgeVariantCount; i++)
+                {
+                    kit.SurgeAVariants[i] = kit.SurgeA;
+                    kit.SurgeBVariants[i] = kit.SurgeB;
+                }
+            }
+
             return kit;
+        }
+
+        public MoveRecord? ResolveSurgeA(in InputFrame input)
+        {
+            if (!HasSurgeVariants)
+            {
+                return SurgeA;
+            }
+
+            int idx = MatchRules.SurgeVariantIndex(in input);
+            return SurgeAVariants[idx] ?? SurgeA;
+        }
+
+        public MoveRecord? ResolveSurgeB(in InputFrame input)
+        {
+            if (!HasSurgeVariants)
+            {
+                return SurgeB;
+            }
+
+            int idx = MatchRules.SurgeVariantIndex(in input);
+            return SurgeBVariants[idx] ?? SurgeB;
         }
 
         private static MoveRecord StubMove(

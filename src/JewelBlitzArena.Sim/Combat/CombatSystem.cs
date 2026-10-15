@@ -97,15 +97,24 @@ namespace JewelBlitzArena.Sim
 
             if (actor.IsBlitzed)
             {
+                var behavior = (KitBehavior)actor.KitBehavior;
                 if (input.SurgeA)
                 {
-                    TryStartMove(ref actor, kit.SurgeA, ActorAction.SurgeA, MatchRules.SurgeLusterCost);
+                    TryStartMove(
+                        ref actor,
+                        kit.ResolveSurgeA(in input),
+                        ActorAction.SurgeA,
+                        MatchRules.SurgeLusterCostFor(behavior, surgeA: true));
                     return;
                 }
 
                 if (input.SurgeB)
                 {
-                    TryStartMove(ref actor, kit.SurgeB, ActorAction.SurgeB, MatchRules.SurgeLusterCost);
+                    TryStartMove(
+                        ref actor,
+                        kit.ResolveSurgeB(in input),
+                        ActorAction.SurgeB,
+                        MatchRules.SurgeLusterCostFor(behavior, surgeA: false));
                     return;
                 }
 
