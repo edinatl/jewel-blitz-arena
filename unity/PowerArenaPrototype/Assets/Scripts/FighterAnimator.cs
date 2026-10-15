@@ -110,6 +110,10 @@ public class FighterAnimator : MonoBehaviour
         float flinch = sinceHit < 0.18f ? Mathf.Sin((sinceHit / 0.18f) * Mathf.PI) : 0f;
         flinchBlend = flinch;
 
+        // Held overhead by a grab: arms up. Holding a foe: arms up too.
+        if (combat != null && combat.GrabbedBy != null) { armLx = -2.9f; armRx = -2.9f; }
+        if (combat != null && combat.Grabbing != null) { armLx = -2.7f; armRx = -2.7f; }
+
         // --- apply poses -------------------------------------------------------
         visual.ArmL.localRotation = Quaternion.Euler(armLx, 0f, 0.10f);
         visual.ArmR.localRotation = Quaternion.Euler(armRx, 0f, -0.10f);
