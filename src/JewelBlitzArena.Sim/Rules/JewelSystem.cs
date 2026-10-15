@@ -8,6 +8,11 @@ namespace JewelBlitzArena.Sim
     {
         public static void BeginBlitz(ref MatchState state, int actorIndex)
         {
+            if (StageRuntime.IsBlitzSuppressed(in state))
+            {
+                return;
+            }
+
             ref ActorSlot actor = ref MatchStateAccess.Actor(ref state, actorIndex);
             JewelRuntime.ConsumeOwnedJewels(ref state, actorIndex);
 

@@ -48,6 +48,17 @@ namespace JewelBlitzArena.Sim
         public fixed int PlacementBySlot[PoolCaps.Actors];
         public fixed int JewelRespawnFrame[PoolCaps.Jewels];
 
+        // S4 stage graph runtime (hashed)
+        public int PhaseIndex;
+        public int PhaseElapsedFrames;
+        public int PhaseDurationFrames;
+        public int TransitionRemainingFrames;
+        public int ActiveGeometrySetId;
+        public int StageFlags;
+        public int PhaseClockPermille;
+        public int ActiveHazardCount;
+        public int ActiveKinematicCount;
+
         public const int JewelStride = 52;
         public const int LooseItemStride = 56; // S2: includes velocities
         public const int ProjectileStride = 56;
@@ -158,6 +169,50 @@ namespace JewelBlitzArena.Sim
             unsafe
             {
                 return state.PlacementBySlot[slot];
+            }
+        }
+
+        public static GenericPoolSlot GetHazard(ref MatchState state, int index)
+        {
+            unsafe
+            {
+                fixed (byte* p = state.HazardVolumes)
+                {
+                    return ((GenericPoolSlot*)p)[index];
+                }
+            }
+        }
+
+        public static void SetHazard(ref MatchState state, int index, in GenericPoolSlot slot)
+        {
+            unsafe
+            {
+                fixed (byte* p = state.HazardVolumes)
+                {
+                    ((GenericPoolSlot*)p)[index] = slot;
+                }
+            }
+        }
+
+        public static GenericPoolSlot GetKinematic(ref MatchState state, int index)
+        {
+            unsafe
+            {
+                fixed (byte* p = state.KinematicBodies)
+                {
+                    return ((GenericPoolSlot*)p)[index];
+                }
+            }
+        }
+
+        public static void SetKinematic(ref MatchState state, int index, in GenericPoolSlot slot)
+        {
+            unsafe
+            {
+                fixed (byte* p = state.KinematicBodies)
+                {
+                    ((GenericPoolSlot*)p)[index] = slot;
+                }
             }
         }
     }

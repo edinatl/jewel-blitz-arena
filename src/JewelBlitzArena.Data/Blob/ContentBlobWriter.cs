@@ -83,11 +83,49 @@ namespace JewelBlitzArena.Data
             bw.Write(s.StageId);
             WriteString(bw, s.Name);
             bw.Write(s.JewelCrateChancePercent);
+            bw.Write(s.FallIsKo);
+            bw.Write(s.JewelCapOverride);
             bw.Write(s.Phases.Length);
             foreach (StagePhaseRecord p in s.Phases)
             {
                 WriteString(bw, p.Name);
                 bw.Write(p.DurationFrames);
+                bw.Write(p.GeometrySetId);
+                bw.Write(p.BlitzSuppressed);
+                bw.Write(p.TransitionFrames);
+                bw.Write((byte)p.CarryItems);
+                bw.Write((byte)p.CarryJewels);
+                bw.Write(p.CarryJewelsDropPermille);
+                bw.Write(p.CameraCenterXRaw);
+                bw.Write(p.CameraCenterYRaw);
+                bw.Write(p.CameraCenterZRaw);
+                bw.Write(p.CameraRadiusRaw);
+                bw.Write(p.Hazards.Length);
+                foreach (StageHazardRecord h in p.Hazards)
+                {
+                    bw.Write(h.HazardId);
+                    WriteString(bw, h.Name);
+                    bw.Write((byte)h.Trigger);
+                    bw.Write(h.PeriodFrames);
+                    bw.Write(h.TelegraphFrames);
+                    bw.Write(h.Damage);
+                    bw.Write(h.CenterXRaw);
+                    bw.Write(h.CenterYRaw);
+                    bw.Write(h.CenterZRaw);
+                    bw.Write(h.RadiusRaw);
+                }
+
+                bw.Write(p.Kinematics.Length);
+                foreach (StageKinematicRecord k in p.Kinematics)
+                {
+                    bw.Write(k.TrackId);
+                    WriteString(bw, k.Name);
+                    bw.Write(k.PeriodFrames);
+                    bw.Write(k.AmplitudeRaw);
+                    bw.Write(k.OriginXRaw);
+                    bw.Write(k.OriginYRaw);
+                    bw.Write(k.OriginZRaw);
+                }
             }
         }
 

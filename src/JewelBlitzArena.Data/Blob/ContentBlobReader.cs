@@ -117,17 +117,66 @@ namespace JewelBlitzArena.Data
                 StageId = br.ReadInt32(),
                 Name = ReadString(br),
                 JewelCrateChancePercent = br.ReadInt32(),
+                FallIsKo = br.ReadBoolean(),
+                JewelCapOverride = br.ReadInt32(),
             };
 
             int phaseCount = br.ReadInt32();
             s.Phases = new StagePhaseRecord[phaseCount];
             for (int i = 0; i < phaseCount; i++)
             {
-                s.Phases[i] = new StagePhaseRecord
+                var phase = new StagePhaseRecord
                 {
                     Name = ReadString(br),
                     DurationFrames = br.ReadInt32(),
+                    GeometrySetId = br.ReadInt32(),
+                    BlitzSuppressed = br.ReadBoolean(),
+                    TransitionFrames = br.ReadInt32(),
+                    CarryItems = (CarryItemsMode)br.ReadByte(),
+                    CarryJewels = (CarryJewelsMode)br.ReadByte(),
+                    CarryJewelsDropPermille = br.ReadInt32(),
+                    CameraCenterXRaw = br.ReadInt64(),
+                    CameraCenterYRaw = br.ReadInt64(),
+                    CameraCenterZRaw = br.ReadInt64(),
+                    CameraRadiusRaw = br.ReadInt64(),
                 };
+
+                int hazardCount = br.ReadInt32();
+                phase.Hazards = new StageHazardRecord[hazardCount];
+                for (int h = 0; h < hazardCount; h++)
+                {
+                    phase.Hazards[h] = new StageHazardRecord
+                    {
+                        HazardId = br.ReadInt32(),
+                        Name = ReadString(br),
+                        Trigger = (HazardTriggerKind)br.ReadByte(),
+                        PeriodFrames = br.ReadInt32(),
+                        TelegraphFrames = br.ReadInt32(),
+                        Damage = br.ReadInt32(),
+                        CenterXRaw = br.ReadInt64(),
+                        CenterYRaw = br.ReadInt64(),
+                        CenterZRaw = br.ReadInt64(),
+                        RadiusRaw = br.ReadInt64(),
+                    };
+                }
+
+                int kinCount = br.ReadInt32();
+                phase.Kinematics = new StageKinematicRecord[kinCount];
+                for (int k = 0; k < kinCount; k++)
+                {
+                    phase.Kinematics[k] = new StageKinematicRecord
+                    {
+                        TrackId = br.ReadInt32(),
+                        Name = ReadString(br),
+                        PeriodFrames = br.ReadInt32(),
+                        AmplitudeRaw = br.ReadInt64(),
+                        OriginXRaw = br.ReadInt64(),
+                        OriginYRaw = br.ReadInt64(),
+                        OriginZRaw = br.ReadInt64(),
+                    };
+                }
+
+                s.Phases[i] = phase;
             }
 
             return s;

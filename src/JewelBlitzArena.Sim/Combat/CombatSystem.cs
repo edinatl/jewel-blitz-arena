@@ -170,7 +170,8 @@ namespace JewelBlitzArena.Sim
                         {
                             ref ActorSlot actor = ref MatchStateAccess.Actor(ref state, ev.SlotA);
                             if (actor.IsAlive && !actor.IsEliminated && !actor.IsBlitzed
-                                && actor.JewelsHeld >= MatchRules.BlitzJewelCount)
+                                && actor.JewelsHeld >= MatchRules.BlitzJewelCount
+                                && !StageRuntime.IsBlitzSuppressed(in state))
                             {
                                 JewelSystem.BeginBlitz(ref state, ev.SlotA);
                             }

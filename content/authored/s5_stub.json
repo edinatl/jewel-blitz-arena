@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "fighters": [
     {
       "fighterId": 1,
@@ -75,18 +75,105 @@
       "stageId": 1,
       "name": "Citrine Bazaar",
       "jewelCrateChancePercent": 8,
+      "fallIsKo": false,
+      "jewelCapOverride": 0,
       "phases": [
         {
           "name": "Bazaar",
-          "durationSeconds": "25"
+          "durationSeconds": "25",
+          "geometrySetId": 0,
+          "blitzSuppressed": false,
+          "transitionSeconds": "0",
+          "carryItems": "all",
+          "carryJewels": "all",
+          "carryJewelsDropChance": "0",
+          "cameraCenterX": "0",
+          "cameraCenterY": "8",
+          "cameraCenterZ": "0",
+          "cameraRadius": "12",
+          "hazards": [
+            {
+              "hazardId": 1,
+              "name": "CandiedDropZone",
+              "trigger": "timer",
+              "periodSeconds": "10",
+              "telegraphFrames": 30,
+              "damage": 0,
+              "centerX": "0",
+              "centerY": "0",
+              "centerZ": "2",
+              "radius": "1.5"
+            }
+          ],
+          "kinematics": []
         },
         {
           "name": "Breakaway",
-          "durationSeconds": "25"
+          "durationSeconds": "25",
+          "geometrySetId": 1,
+          "blitzSuppressed": false,
+          "transitionSeconds": "2",
+          "carryItems": "all",
+          "carryJewels": "drop_chance",
+          "carryJewelsDropChance": "0.5",
+          "cameraCenterX": "0",
+          "cameraCenterY": "8",
+          "cameraCenterZ": "0",
+          "cameraRadius": "14",
+          "hazards": [
+            {
+              "hazardId": 2,
+              "name": "StallCollision",
+              "trigger": "timer",
+              "periodSeconds": "8",
+              "telegraphFrames": 40,
+              "damage": 80,
+              "centerX": "0",
+              "centerY": "0",
+              "centerZ": "0",
+              "radius": "2"
+            }
+          ],
+          "kinematics": [
+            {
+              "trackId": 1,
+              "name": "StallDrift",
+              "periodSeconds": "8",
+              "amplitude": "2",
+              "originX": "0",
+              "originY": "0",
+              "originZ": "0"
+            }
+          ]
         },
         {
           "name": "Geode shelf",
-          "durationSeconds": "0"
+          "durationSeconds": "0",
+          "geometrySetId": 2,
+          "blitzSuppressed": false,
+          "transitionSeconds": "1",
+          "carryItems": "all",
+          "carryJewels": "all",
+          "carryJewelsDropChance": "0",
+          "cameraCenterX": "0",
+          "cameraCenterY": "8",
+          "cameraCenterZ": "0",
+          "cameraRadius": "16",
+          "hazards": [
+            {
+              "hazardId": 3,
+              "name": "SpikeTurretZone",
+              "trigger": "phase_enter",
+              "periodSeconds": "8",
+              "telegraphFrames": 40,
+              "damage": 90,
+              "centerX": "3",
+              "centerY": "0",
+              "centerZ": "-2",
+              "radius": "1.2"
+            }
+          ],
+          "kinematics": []
         }
       ]
     }

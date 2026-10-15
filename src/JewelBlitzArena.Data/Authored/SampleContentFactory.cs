@@ -54,11 +54,93 @@ namespace JewelBlitzArena.Data
                 StageId = CitrineBazaarStageId,
                 Name = "Citrine Bazaar",
                 JewelCrateChancePercent = 8,
+                FallIsKo = false,
+                JewelCapOverride = 0,
                 Phases = new List<AuthoredPhase>
                 {
-                    new AuthoredPhase { Name = "Bazaar", DurationSeconds = "25" },
-                    new AuthoredPhase { Name = "Breakaway", DurationSeconds = "25" },
-                    new AuthoredPhase { Name = "Geode shelf", DurationSeconds = "0" },
+                    new AuthoredPhase
+                    {
+                        Name = "Bazaar",
+                        DurationSeconds = "25",
+                        GeometrySetId = 0,
+                        CameraRadius = "12",
+                        Hazards = new List<AuthoredHazard>
+                        {
+                            new AuthoredHazard
+                            {
+                                HazardId = 1,
+                                Name = "CandiedDropZone",
+                                Trigger = "timer",
+                                PeriodSeconds = "10",
+                                TelegraphFrames = 30,
+                                Damage = 0,
+                                CenterX = "0",
+                                CenterZ = "2",
+                                Radius = "1.5",
+                            },
+                        },
+                    },
+                    new AuthoredPhase
+                    {
+                        Name = "Breakaway",
+                        DurationSeconds = "25",
+                        GeometrySetId = 1,
+                        TransitionSeconds = "2",
+                        CarryJewels = "drop_chance",
+                        CarryJewelsDropChance = "0.5",
+                        CarryItems = "all",
+                        CameraRadius = "14",
+                        Hazards = new List<AuthoredHazard>
+                        {
+                            new AuthoredHazard
+                            {
+                                HazardId = 2,
+                                Name = "StallCollision",
+                                Trigger = "timer",
+                                PeriodSeconds = "8",
+                                TelegraphFrames = 40,
+                                Damage = 80,
+                                CenterX = "0",
+                                CenterZ = "0",
+                                Radius = "2",
+                            },
+                        },
+                        Kinematics = new List<AuthoredKinematic>
+                        {
+                            new AuthoredKinematic
+                            {
+                                TrackId = 1,
+                                Name = "StallDrift",
+                                PeriodSeconds = "8",
+                                Amplitude = "2",
+                                OriginX = "0",
+                                OriginZ = "0",
+                            },
+                        },
+                    },
+                    new AuthoredPhase
+                    {
+                        Name = "Geode shelf",
+                        DurationSeconds = "0",
+                        GeometrySetId = 2,
+                        TransitionSeconds = "1",
+                        CameraRadius = "16",
+                        Hazards = new List<AuthoredHazard>
+                        {
+                            new AuthoredHazard
+                            {
+                                HazardId = 3,
+                                Name = "SpikeTurretZone",
+                                Trigger = "phase_enter",
+                                PeriodSeconds = "8",
+                                TelegraphFrames = 40,
+                                Damage = 90,
+                                CenterX = "3",
+                                CenterZ = "-2",
+                                Radius = "1.2",
+                            },
+                        },
+                    },
                 },
             };
         }

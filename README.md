@@ -30,5 +30,9 @@ dotnet run --project tools/JewelBlitzArena.GreyboxCli -c Release -- --frames 180
 
 `unity/PowerArenaPrototype` remains quarantined feel-lab — do not grow it into the ship host.
 
+## Stage graph (S4)
+
+Phase timers/transitions/hazards/kinematics step inside Sim (`Stages/StageRuntime`). Content schema v2; Citrine Bazaar three-phase stub in `content/authored/s5_stub.json`.
+
 Design index: `PLAN.md`. Architecture: `docs/tech/architecture.md`.
 

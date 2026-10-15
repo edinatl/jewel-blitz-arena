@@ -22,6 +22,9 @@ namespace JewelBlitzArena.Sim
         /// <summary>0 = free-for-all (Rally off). Non-zero reserved for teams (S6+).</summary>
         public int TeamMode;
 
+        /// <summary>House Rule 7 Phase Clock as permille (1000 = 100%). Scales every phase timer.</summary>
+        public int PhaseClockPermille;
+
         public fixed int FighterIds[PoolCaps.Actors];
         public fixed int StartingLife[PoolCaps.Actors];
         public fixed byte Teams[PoolCaps.Actors];
@@ -36,6 +39,7 @@ namespace JewelBlitzArena.Sim
                 JewelCap = 0,
                 HouseRulesBits = MatchRules.HouseLusterTimer,
                 TeamMode = 0,
+                PhaseClockPermille = 1000,
             };
 
             for (int i = 0; i < PoolCaps.Actors; i++)

@@ -20,6 +20,7 @@ namespace JewelBlitzArena.Sim
 
         private MatchState _state;
         private ContentCatalog? _catalog;
+        private StageGraph _stageGraph = StageGraph.Empty;
         private SimContactBuffer _contacts;
         private readonly KitRuntime[] _kits = new KitRuntime[PoolCaps.Actors];
         private readonly Fix[] _dtWalk = new Fix[PoolCaps.Actors];
@@ -34,6 +35,8 @@ namespace JewelBlitzArena.Sim
         public bool MatchOver => _state.MatchOver;
 
         public ContentCatalog? Catalog => _catalog;
+
+        public StageGraph StageGraph => _stageGraph;
 
         public ref readonly MatchState State => ref _state;
 
@@ -125,10 +128,18 @@ namespace JewelBlitzArena.Sim
             }
 
             ItemRuntime.InitializeMatch(ref _state);
+            _stageGraph = StageRuntime.ResolveGraph(catalog, config.StageId);
             int jewelCap = config.JewelCap > 0
                 ? config.JewelCap
-                : MatchRules.DefaultJewelCap(_state.ActorCount);
+                : (_stageGraph.JewelCapOverride > 0
+                    ? _stageGraph.JewelCapOverride
+                    : MatchRules.DefaultJewelCap(_state.ActorCount));
             JewelRuntime.InitializeMatch(ref _state, jewelCap);
+            StageRuntime.InitializeMatch(
+                ref _state,
+                _stageGraph,
+                config.PhaseClockPermille,
+                ref _contacts);
         }
 
         public void Step(InputFrame i0, InputFrame i1, InputFrame i2, InputFrame i3)
@@ -167,6 +178,9 @@ namespace JewelBlitzArena.Sim
             // S1 consumes S2 contacts (Blitz, thrown-item damage), then ticks combat.
             CombatSystem.ConsumeContacts(ref _state, ref _contacts);
             CombatSystem.TickActors(ref _state, _kits);
+
+            // S4 stage graph: timers, transitions, hazards, kinematics.
+            StageRuntime.Tick(ref _state, _stageGraph, ref _contacts);
 
             _state.ActiveJewelCount = JewelRuntime.CountTowardCap(ref _state);
             _state.ActiveLooseItemCount = CrateSpawner.CountActiveItems(ref _state);
