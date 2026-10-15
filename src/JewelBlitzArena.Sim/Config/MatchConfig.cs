@@ -13,6 +13,9 @@ namespace JewelBlitzArena.Sim
         public int StageId;
         public int ActorCount;
 
+        /// <summary>0 = auto from actor count (2→3, 3–4→5). House Rule 2 may set 3–7.</summary>
+        public int JewelCap;
+
         /// <summary>Fighter registry ids for slots 0..3 (unused slots ignored).</summary>
         public fixed int FighterIds[PoolCaps.Actors];
 
@@ -26,6 +29,7 @@ namespace JewelBlitzArena.Sim
                 Seed = seed,
                 StageId = 0,
                 ActorCount = actorCount < 1 ? 1 : (actorCount > PoolCaps.Actors ? PoolCaps.Actors : actorCount),
+                JewelCap = 0,
             };
 
             for (int i = 0; i < PoolCaps.Actors; i++)

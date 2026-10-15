@@ -16,5 +16,7 @@ dotnet run --project tools/JewelBlitzArena.ContentExport -c Release -- stub cont
 dotnet run --project tools/JewelBlitzArena.ContentExport -c Release -- validate content/export/s5_stub.jba
 ```
 
+S2 adds fixed-point physics, jewel circulation, and item pickup/throw/catch stubs inside `JewelBlitzArena.Sim` (see `Physics/`, `Jewels/`, `Items/`). S1 owns damage/Blitz from contact events.
+
 Design index: `PLAN.md`. Architecture: `docs/tech/architecture.md`.
 

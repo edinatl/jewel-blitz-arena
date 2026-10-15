@@ -2,7 +2,6 @@ using System.Runtime.InteropServices;
 
 namespace JewelBlitzArena.Sim
 {
-    /// <summary>Placeholder blittable slots so <see cref="MatchState"/> reserves real pool caps.</summary>
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public struct JewelSlot
     {
@@ -12,9 +11,30 @@ namespace JewelBlitzArena.Sim
         public Fix VelX;
         public Fix VelY;
         public Fix VelZ;
-        public byte OwnerSlot; // 255 = free on field
+        public byte OwnerSlot; // 255 = free on field / inactive
         public byte Flags;
-        public ushort Reserved;
+        public ushort PickupDelayFrames;
+
+        public const byte FlagActive = 1 << 0;
+        public const byte NoOwner = 255;
+
+        public bool IsActive
+        {
+            get => (Flags & FlagActive) != 0;
+            set
+            {
+                if (value)
+                {
+                    Flags = (byte)(Flags | FlagActive);
+                }
+                else
+                {
+                    Flags = (byte)(Flags & ~FlagActive);
+                }
+            }
+        }
+
+        public bool IsOnField => IsActive && OwnerSlot == NoOwner;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -23,10 +43,51 @@ namespace JewelBlitzArena.Sim
         public Fix PosX;
         public Fix PosY;
         public Fix PosZ;
+        public Fix VelX;
+        public Fix VelY;
+        public Fix VelZ;
         public int ItemId;
-        public byte HolderSlot; // 255 = on field
+        public byte HolderSlot; // 255 = on field / inactive
         public byte Flags;
-        public ushort Reserved;
+        public ushort FlightFrames;
+
+        public const byte FlagActive = 1 << 0;
+        public const byte FlagInFlight = 1 << 1;
+        public const byte NoHolder = 255;
+
+        public bool IsActive
+        {
+            get => (Flags & FlagActive) != 0;
+            set
+            {
+                if (value)
+                {
+                    Flags = (byte)(Flags | FlagActive);
+                }
+                else
+                {
+                    Flags = (byte)(Flags & ~FlagActive);
+                }
+            }
+        }
+
+        public bool InFlight
+        {
+            get => (Flags & FlagInFlight) != 0;
+            set
+            {
+                if (value)
+                {
+                    Flags = (byte)(Flags | FlagInFlight);
+                }
+                else
+                {
+                    Flags = (byte)(Flags & ~FlagInFlight);
+                }
+            }
+        }
+
+        public bool IsOnField => IsActive && HolderSlot == NoHolder && !InFlight;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]

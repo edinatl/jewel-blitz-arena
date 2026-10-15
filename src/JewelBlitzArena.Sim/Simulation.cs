@@ -19,9 +19,11 @@ namespace JewelBlitzArena.Sim
 
         private MatchState _state;
         private ContentCatalog? _catalog;
+        private SimContactBuffer _contacts;
         private readonly Fix[] _dtWalk = new Fix[PoolCaps.Actors];
         private readonly Fix[] _dtRun = new Fix[PoolCaps.Actors];
         private readonly Fix[] _dtFull = new Fix[PoolCaps.Actors];
+        private readonly InputFrame[] _lastInputs = new InputFrame[PoolCaps.Actors];
 
         public int Frame => _state.Frame;
 
@@ -31,15 +33,15 @@ namespace JewelBlitzArena.Sim
 
         public ref readonly MatchState State => ref _state;
 
+        /// <summary>Events from the last <see cref="Step"/> (not hashed / not snapshotted). S1 reads these.</summary>
+        public ref readonly SimContactBuffer Contacts => ref _contacts;
+
         public void Reset(in MatchConfig config) => Reset(config, catalog: null);
 
-        /// <summary>
-        /// Reset from match config. When <paramref name="catalog"/> is provided, Life and
-        /// movement speeds resolve from fighter kits (S5). Modes still never let Sim read a profile.
-        /// </summary>
         public void Reset(in MatchConfig config, ContentCatalog? catalog)
         {
             _catalog = catalog;
+            _contacts.Clear();
             _state = default;
             _state.Seed = config.Seed;
             _state.StageId = config.StageId;
@@ -62,6 +64,7 @@ namespace JewelBlitzArena.Sim
                     _dtWalk[i] = DefaultSpeedWalk / TickRateHz;
                     _dtRun[i] = DefaultSpeedRun / TickRateHz;
                     _dtFull[i] = DefaultSpeedFull / TickRateHz;
+                    _lastInputs[i] = InputFrame.Neutral;
                 }
 
                 for (int i = 0; i < _state.ActorCount; i++)
@@ -69,6 +72,7 @@ namespace JewelBlitzArena.Sim
                     ref ActorSlot actor = ref MatchStateAccess.Actor(ref _state, i);
                     actor = default;
                     actor.FighterId = config.FighterIds[i];
+                    actor.HeldItemSlot = ActorSlot.NoHeldItem;
 
                     int life = config.StartingLife[i];
                     if (life <= 0 && catalog != null
@@ -89,16 +93,42 @@ namespace JewelBlitzArena.Sim
                     actor.PosZ = Fix.Zero;
                 }
             }
+
+            ItemRuntime.InitializeMatch(ref _state);
+            JewelRuntime.InitializeMatch(ref _state, config.JewelCap);
         }
 
         public void Step(InputFrame i0, InputFrame i1, InputFrame i2, InputFrame i3)
         {
+            _contacts.Clear();
+            _lastInputs[0] = i0;
+            _lastInputs[1] = i1;
+            _lastInputs[2] = i2;
+            _lastInputs[3] = i3;
+
             ApplyActorInput(0, i0);
             ApplyActorInput(1, i1);
             ApplyActorInput(2, i2);
             ApplyActorInput(3, i3);
 
-            IntegrateActors();
+            for (int a = 0; a < _state.ActorCount; a++)
+            {
+                ItemRuntime.ProcessActorButtons(ref _state, a, _lastInputs[a], ref _contacts);
+            }
+
+            // Horizontal actor integrate (input velocity).
+            IntegrateActorsHorizontal();
+
+            PhysicsWorld.StepActorsJewelsItems(ref _state, ref _contacts);
+            ItemRuntime.TickThrownHits(ref _state, ref _contacts);
+            JewelRuntime.TickPickups(ref _state, ref _contacts);
+            JewelRuntime.TickSpawns(ref _state);
+
+            // Keep Active* counts honest for snapshots.
+            _state.ActiveJewelCount = JewelRuntime.CountTowardCap(ref _state);
+            _state.ActiveLooseItemCount = CrateSpawner.CountActiveItems(ref _state);
+
+            // Gameplay RNG touch remains part of the hashed surface.
             _ = _state.GameplayRng.NextUInt64();
             _state.Frame++;
         }
@@ -110,6 +140,21 @@ namespace JewelBlitzArena.Sim
             InputFrame i2 = inputs.Length > 2 ? inputs[2] : InputFrame.Neutral;
             InputFrame i3 = inputs.Length > 3 ? inputs[3] : InputFrame.Neutral;
             Step(i0, i1, i2, i3);
+        }
+
+        /// <summary>S1 helper: drop one jewel (knockdown). Returns false if none held.</summary>
+        public bool DebugDropOneJewel(int actorIndex) =>
+            JewelRuntime.TryDropOneHeldJewel(ref _state, actorIndex);
+
+        /// <summary>S2/test helper: spawn a loose item at a position.</summary>
+        public int SpawnLooseItem(int itemId, Fix x, Fix y, Fix z) =>
+            CrateSpawner.TrySpawnLooseItem(ref _state, itemId, new FixVec3(x, y, z));
+
+        /// <summary>S2/test helper: roll + spawn an always-eligible crate item.</summary>
+        public int SpawnCrateItemAt(Fix x, Fix z)
+        {
+            int id = CrateSpawner.RollAlwaysEligible(ref _state, _catalog);
+            return CrateSpawner.TrySpawnLooseItem(ref _state, id, new FixVec3(x, Fix.Zero, z));
         }
 
         public ulong Hash()
@@ -141,7 +186,7 @@ namespace JewelBlitzArena.Sim
                 {
                     result.Placements[i] = 0;
                     result.Kos[i] = 0;
-                    result.JewelsCollected[i] = 0;
+                    result.JewelsCollected[i] = MatchStateAccess.Actor(ref _state, i).JewelsHeld;
                 }
 
                 for (int place = 1; place <= _state.ActorCount; place++)
@@ -200,10 +245,9 @@ namespace JewelBlitzArena.Sim
             FixVec2 dir = DirectionLut.GetUnit(input.Direction);
             actor.VelX = dir.X * stepSpeed;
             actor.VelZ = dir.Y * stepSpeed;
-            _ = input.Jump;
         }
 
-        private void IntegrateActors()
+        private void IntegrateActorsHorizontal()
         {
             for (int i = 0; i < _state.ActorCount; i++)
             {
@@ -214,7 +258,6 @@ namespace JewelBlitzArena.Sim
                 }
 
                 actor.PosX += actor.VelX;
-                actor.PosY += actor.VelY;
                 actor.PosZ += actor.VelZ;
             }
         }

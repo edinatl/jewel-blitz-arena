@@ -9,20 +9,17 @@ namespace JewelBlitzArena.Sim
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public unsafe struct MatchState
     {
-        // --- RNG ---
         public Xoshiro256StarStar GameplayRng;
         public Xoshiro256StarStar CpuRng0;
         public Xoshiro256StarStar CpuRng1;
         public Xoshiro256StarStar CpuRng2;
         public Xoshiro256StarStar CpuRng3;
 
-        // --- Actors (explicit slots; fixed buffers cannot hold custom structs) ---
         public ActorSlot Actor0;
         public ActorSlot Actor1;
         public ActorSlot Actor2;
         public ActorSlot Actor3;
 
-        // --- Reserved pools (byte buffers; stride checked in tests) ---
         public fixed byte Jewels[PoolCaps.Jewels * JewelStride];
         public fixed byte LooseItems[PoolCaps.LooseItems * LooseItemStride];
         public fixed byte Projectiles[PoolCaps.Projectiles * ProjectileStride];
@@ -35,7 +32,6 @@ namespace JewelBlitzArena.Sim
         public fixed byte StageCreatures[PoolCaps.StageCreatures * GenericStride];
         public fixed byte CpuBrains[PoolCaps.CpuBrains * CpuBrainStride];
 
-        // --- Match header ---
         public ulong Seed;
         public int Frame;
         public int ActorCount;
@@ -43,11 +39,11 @@ namespace JewelBlitzArena.Sim
         public int ActiveJewelCount;
         public int ActiveLooseItemCount;
         public int ActiveProjectileCount;
-        public uint ReservedHeader;
+        public int JewelCap;
+        public int NextJewelSpawnFrame;
 
-        // Strides must equal sizeof(T) for the corresponding slot type (enforced by tests).
         public const int JewelStride = 52;
-        public const int LooseItemStride = 32;
+        public const int LooseItemStride = 56;
         public const int ProjectileStride = 56;
         public const int GenericStride = 36;
         public const int CpuBrainStride = 16;
@@ -55,7 +51,6 @@ namespace JewelBlitzArena.Sim
         public static int SizeOf => sizeof(MatchState);
     }
 
-    /// <summary>Helpers that take <c>ref MatchState</c> so accessors do not return refs from a struct copy.</summary>
     public static class MatchStateAccess
     {
         public static ref ActorSlot Actor(ref MatchState state, int index)
@@ -79,6 +74,50 @@ namespace JewelBlitzArena.Sim
                 case 2: return ref state.CpuRng2;
                 case 3: return ref state.CpuRng3;
                 default: return ref state.CpuRng0;
+            }
+        }
+
+        public static JewelSlot GetJewel(ref MatchState state, int index)
+        {
+            unsafe
+            {
+                fixed (byte* p = state.Jewels)
+                {
+                    return ((JewelSlot*)p)[index];
+                }
+            }
+        }
+
+        public static void SetJewel(ref MatchState state, int index, in JewelSlot jewel)
+        {
+            unsafe
+            {
+                fixed (byte* p = state.Jewels)
+                {
+                    ((JewelSlot*)p)[index] = jewel;
+                }
+            }
+        }
+
+        public static LooseItemSlot GetLooseItem(ref MatchState state, int index)
+        {
+            unsafe
+            {
+                fixed (byte* p = state.LooseItems)
+                {
+                    return ((LooseItemSlot*)p)[index];
+                }
+            }
+        }
+
+        public static void SetLooseItem(ref MatchState state, int index, in LooseItemSlot item)
+        {
+            unsafe
+            {
+                fixed (byte* p = state.LooseItems)
+                {
+                    ((LooseItemSlot*)p)[index] = item;
+                }
             }
         }
     }
