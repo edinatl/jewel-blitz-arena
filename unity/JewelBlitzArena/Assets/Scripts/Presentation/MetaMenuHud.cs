@@ -187,7 +187,9 @@ namespace JewelBlitzArena.Presentation
                 GUI.color = new Color(0.12f, 0.14f, 0.18f, 0.85f);
                 GUI.Box(rect, string.Empty);
                 GUI.color = Color.white;
-                GUI.Label(rect, $"P{b.ActorIndex + 1}");
+                string pips = b.JewelsHeld > 0 ? $" ◆{b.JewelsHeld}" : string.Empty;
+                string item = b.HasHeldItem ? $" [{b.HeldItemId}]" : string.Empty;
+                GUI.Label(rect, $"P{b.ActorIndex + 1}{pips}{item}");
                 GUI.color = prev;
             }
         }

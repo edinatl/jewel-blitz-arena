@@ -26,3 +26,8 @@ jobs:
           # Rebuild stub and ensure golden hash matches committed blob
           dotnet run --project tools/JewelBlitzArena.ContentExport -c Release --no-build -- stub /tmp/s5_stub_check.jba
           cmp content/export/s5_stub.jba /tmp/s5_stub_check.jba
+      # S8 gates — keep after unit tests so a red corpus/ban never hides a compile break.
+      - name: Determinism corpus
+        run: dotnet run --project tools/JewelBlitzArena.CorpusRunner -c Release --no-build -- run --corpus corpus
+      - name: Sim ban check (float / nondeterminism)
+        run: python3 tools/scripts/check-sim-bans.py

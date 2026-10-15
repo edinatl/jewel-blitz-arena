@@ -28,6 +28,7 @@
     <ProjectReference Include="..\..\src\JewelBlitzArena.PresentationBridge\JewelBlitzArena.PresentationBridge.csproj" />
     <ProjectReference Include="..\..\src\JewelBlitzArena.Meta\JewelBlitzArena.Meta.csproj" />
     <ProjectReference Include="..\..\src\JewelBlitzArena.Net\JewelBlitzArena.Net.csproj" />
+    <ProjectReference Include="..\..\src\JewelBlitzArena.Tools\JewelBlitzArena.Tools.csproj" />
   </ItemGroup>
 
 </Project>

@@ -22,8 +22,19 @@ namespace JewelBlitzArena.Net
             {
                 Frame = frame,
                 PlayerIndex = playerIndex,
-                Reserved = 0,
+                Reserved = NetPacketKinds.Input,
                 Bits = input.Bits,
             };
+
+        public static InputFramePacket CpuHandoffPropose(int agreeFrame, byte targetPlayer, byte proposer) =>
+            new InputFramePacket
+            {
+                Frame = agreeFrame,
+                PlayerIndex = targetPlayer,
+                Reserved = NetPacketKinds.CpuHandoffPropose,
+                Bits = proposer,
+            };
+
+        public bool IsCpuHandoffPropose => Reserved == NetPacketKinds.CpuHandoffPropose;
     }
 }

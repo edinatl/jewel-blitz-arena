@@ -47,6 +47,7 @@ namespace JewelBlitzArena.PresentationBridge
     /// <summary>
     /// Off-screen actor inset when the volume fit fails (combat-and-match §12).
     /// <see cref="EdgeU"/>/<see cref="EdgeV"/> are direction on the frame rim (−1..1).
+    /// Pips / held-item id are presentation HUD hints (not hashed).
     /// </summary>
     public readonly struct EdgeBubble
     {
@@ -55,14 +56,28 @@ namespace JewelBlitzArena.PresentationBridge
         public float EdgeV { get; }
         public float WorldX { get; }
         public float WorldZ { get; }
+        public int JewelsHeld { get; }
+        public int HeldItemId { get; }
+        public bool HasHeldItem { get; }
 
-        public EdgeBubble(int actorIndex, float edgeU, float edgeV, float worldX, float worldZ)
+        public EdgeBubble(
+            int actorIndex,
+            float edgeU,
+            float edgeV,
+            float worldX,
+            float worldZ,
+            int jewelsHeld = 0,
+            int heldItemId = -1,
+            bool hasHeldItem = false)
         {
             ActorIndex = actorIndex;
             EdgeU = edgeU;
             EdgeV = edgeV;
             WorldX = worldX;
             WorldZ = worldZ;
+            JewelsHeld = jewelsHeld;
+            HeldItemId = heldItemId;
+            HasHeldItem = hasHeldItem;
         }
     }
 
@@ -369,7 +384,23 @@ namespace JewelBlitzArena.PresentationBridge
                 float inv = d > 0.0001f ? 1f / d : 0f;
                 float edgeU = ox * inv;
                 float edgeV = oz * inv;
-                var bubble = new EdgeBubble(i, edgeU, edgeV, ax, az);
+                bool hasItem = actor.HeldItemSlot != ActorSlot.NoHeldItem;
+                int itemId = -1;
+                if (hasItem)
+                {
+                    LooseItemSlot loose = MatchStateAccess.GetLooseItem(ref state, actor.HeldItemSlot);
+                    itemId = loose.ItemId;
+                }
+
+                var bubble = new EdgeBubble(
+                    i,
+                    edgeU,
+                    edgeV,
+                    ax,
+                    az,
+                    jewelsHeld: actor.JewelsHeld,
+                    heldItemId: itemId,
+                    hasHeldItem: hasItem);
                 switch (bubbleCount)
                 {
                     case 0: e0 = bubble; break;

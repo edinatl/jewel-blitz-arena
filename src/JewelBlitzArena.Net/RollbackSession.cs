@@ -6,7 +6,8 @@ namespace JewelBlitzArena.Net
 {
     /// <summary>
     /// GGPO-style session shell: input delay, rollback window, repeat-last prediction,
-    /// snapshot restore, and periodic hash probes. Transport is injected (loopback / LAN).
+    /// snapshot restore, periodic hash probes, and dual-peer agree-frame CPU handoff.
+    /// Transport is injected (loopback / LAN).
     /// </summary>
     public sealed class RollbackSession
     {
@@ -28,6 +29,12 @@ namespace JewelBlitzArena.Net
         private int _stallFrames;
         private int _stalledRemotePlayer = -1;
         private int _cpuReplacedMask;
+
+        // Agree-frame CPU handoff (modes §7): remaining peers vote on (target, agreeFrame).
+        private int _handoffTarget = -1;
+        private int _handoffAgreeFrame = -1;
+        private int _handoffVotes;
+        private bool _localHandoffProposed;
 
         public RollbackSession(SessionConfig config, INetTransport transport)
         {
@@ -71,7 +78,7 @@ namespace JewelBlitzArena.Net
         /// <summary>True once stall has lasted ~3 s — lobby should show disconnect timer.</summary>
         public bool ShowDisconnectWarning => _stallFrames >= SessionConfig.StallDisconnectWarnFrames;
 
-        /// <summary>True once stall has lasted ~10 s — peer is auto-replaced by CPU.</summary>
+        /// <summary>True once stall has lasted ~10 s — local should propose a CPU handoff.</summary>
         public bool DisconnectReplaceReady => _stallFrames >= SessionConfig.StallDisconnectReplaceFrames;
 
         /// <summary>Bitmask of player indices handed to a CPU after disconnect.</summary>
@@ -81,6 +88,15 @@ namespace JewelBlitzArena.Net
             playerIndex >= 0
             && playerIndex < SessionConfig.MaxPlayers
             && (_cpuReplacedMask & (1 << playerIndex)) != 0;
+
+        /// <summary>Target slot of the pending agree-frame handoff, or -1.</summary>
+        public int PendingHandoffTarget => _handoffTarget;
+
+        /// <summary>Sim frame at which the pending handoff applies, or -1.</summary>
+        public int PendingHandoffAgreeFrame => _handoffAgreeFrame;
+
+        /// <summary>Bitmask of peers who voted for the pending handoff.</summary>
+        public int HandoffVoteMask => _handoffVotes;
 
         public void Reset(in MatchConfig matchConfig, ContentCatalog? catalog = null)
         {
@@ -95,6 +111,7 @@ namespace JewelBlitzArena.Net
             _stallFrames = 0;
             _stalledRemotePlayer = -1;
             _cpuReplacedMask = 0;
+            ClearHandoffProposal();
             _snapshots.Reset();
             _snapshots.Store(0, _sim.Snapshot());
             for (int i = 0; i < _rings.Length; i++)
@@ -111,11 +128,17 @@ namespace JewelBlitzArena.Net
         public bool Advance(InputFrame localInput)
         {
             PollRemote();
+            TryCommitAgreedHandoff();
 
-            if (DisconnectReplaceReady)
+            if (DisconnectReplaceReady
+                && _stalledRemotePlayer >= 0
+                && !IsCpuReplaced(_stalledRemotePlayer)
+                && !_localHandoffProposed)
             {
-                TryReplaceStalledPeerWithCpu();
+                ProposeCpuHandoff(_stalledRemotePlayer, _simFrame);
             }
+
+            TryCommitAgreedHandoff();
 
             int assignFrame = _simFrame + _config.InputDelay;
             _rings[_config.LocalPlayerIndex].SetLocalScheduled(assignFrame, localInput);
@@ -133,12 +156,66 @@ namespace JewelBlitzArena.Net
 
             TrimRings();
             MaybeRecordHash();
+            TryCommitAgreedHandoff();
             return true;
         }
 
         /// <summary>
-        /// Hand the stalled remote peer to a Sim CPU brain (modes §7 / architecture §3).
-        /// Clears the stall so the match can continue; CPU inputs need no network traffic.
+        /// Propose handing <paramref name="targetPlayer"/> to a CPU at <paramref name="agreeFrame"/>
+        /// (modes §7). Remaining peers must vote; when votes meet the quorum and
+        /// <see cref="SimFrame"/> ≥ agree frame, the handoff applies.
+        /// </summary>
+        public bool ProposeCpuHandoff(int targetPlayer, int agreeFrame)
+        {
+            if (targetPlayer < 0 || targetPlayer >= _config.PlayerCount)
+            {
+                return false;
+            }
+
+            if (IsCpuReplaced(targetPlayer))
+            {
+                return false;
+            }
+
+            if (agreeFrame < _simFrame)
+            {
+                agreeFrame = _simFrame;
+            }
+
+            if (_handoffTarget >= 0 && _handoffTarget != targetPlayer)
+            {
+                return false; // one handoff in flight
+            }
+
+            if (_handoffTarget < 0)
+            {
+                _handoffTarget = targetPlayer;
+                _handoffAgreeFrame = agreeFrame;
+                _handoffVotes = 0;
+            }
+            else if (agreeFrame != _handoffAgreeFrame)
+            {
+                // Deterministic merge: later agree frame wins; votes reset.
+                int merged = agreeFrame > _handoffAgreeFrame ? agreeFrame : _handoffAgreeFrame;
+                if (merged != _handoffAgreeFrame)
+                {
+                    _handoffAgreeFrame = merged;
+                    _handoffVotes = 0;
+                }
+            }
+
+            RegisterHandoffVote(_config.LocalPlayerIndex);
+            _localHandoffProposed = true;
+            _transport.Send(InputFramePacket.CpuHandoffPropose(
+                _handoffAgreeFrame,
+                (byte)_handoffTarget,
+                (byte)_config.LocalPlayerIndex));
+            return TryCommitAgreedHandoff();
+        }
+
+        /// <summary>
+        /// Disconnect-timer path: propose an agree-frame handoff for the stalled peer.
+        /// For a solo remaining peer (2P), quorum is 1 and the handoff commits immediately.
         /// </summary>
         public bool TryReplaceStalledPeerWithCpu()
         {
@@ -158,10 +235,7 @@ namespace JewelBlitzArena.Net
                 return false;
             }
 
-            _cpuReplacedMask |= 1 << peer;
-            _sim.SetCpuControlled(peer, controlled: true);
-            ClearStall();
-            return true;
+            return ProposeCpuHandoff(peer, _simFrame);
         }
 
         private bool TryBeginStall()
@@ -240,6 +314,12 @@ namespace JewelBlitzArena.Net
 
         private void ApplyRemotePacket(InputFramePacket packet)
         {
+            if (packet.IsCpuHandoffPropose)
+            {
+                ApplyHandoffProposal(packet);
+                return;
+            }
+
             int player = packet.PlayerIndex;
             if (player < 0 || player >= _config.PlayerCount || player == _config.LocalPlayerIndex)
             {
@@ -260,17 +340,146 @@ namespace JewelBlitzArena.Net
             }
         }
 
+        private void ApplyHandoffProposal(InputFramePacket packet)
+        {
+            int target = packet.PlayerIndex;
+            int agreeFrame = packet.Frame;
+            int proposer = packet.Bits & 0xFF;
+            if (target < 0 || target >= _config.PlayerCount)
+            {
+                return;
+            }
+
+            if (proposer < 0 || proposer >= _config.PlayerCount)
+            {
+                return;
+            }
+
+            if (IsCpuReplaced(target))
+            {
+                return;
+            }
+
+            if (_handoffTarget >= 0 && _handoffTarget != target)
+            {
+                return;
+            }
+
+            if (_handoffTarget < 0)
+            {
+                _handoffTarget = target;
+                _handoffAgreeFrame = agreeFrame < _simFrame ? _simFrame : agreeFrame;
+                _handoffVotes = 0;
+            }
+            else if (agreeFrame > _handoffAgreeFrame)
+            {
+                _handoffAgreeFrame = agreeFrame;
+                _handoffVotes = 0;
+            }
+
+            RegisterHandoffVote(proposer);
+
+            // Remaining peer auto-acks when also seeing the stalled target (dual-peer agree).
+            if (!_localHandoffProposed
+                && _config.LocalPlayerIndex != target
+                && (DisconnectReplaceReady || _stalledRemotePlayer == target || _isStalling))
+            {
+                ProposeCpuHandoff(target, _handoffAgreeFrame);
+            }
+            else
+            {
+                TryCommitAgreedHandoff();
+            }
+        }
+
+        private void RegisterHandoffVote(int voter)
+        {
+            if (voter < 0 || voter >= SessionConfig.MaxPlayers)
+            {
+                return;
+            }
+
+            _handoffVotes |= 1 << voter;
+        }
+
+        private int HandoffVotesNeeded(int target)
+        {
+            int n = 0;
+            for (int i = 0; i < _config.PlayerCount; i++)
+            {
+                if (i == target || IsCpuReplaced(i))
+                {
+                    continue;
+                }
+
+                n++;
+            }
+
+            return n < 1 ? 1 : n;
+        }
+
+        private bool TryCommitAgreedHandoff()
+        {
+            if (_handoffTarget < 0 || _handoffAgreeFrame < 0 || IsCpuReplaced(_handoffTarget))
+            {
+                return false;
+            }
+
+            int needed = HandoffVotesNeeded(_handoffTarget);
+            if (CountEligibleHandoffVotes(_handoffTarget) < needed)
+            {
+                return false;
+            }
+
+            if (_simFrame < _handoffAgreeFrame)
+            {
+                return false;
+            }
+
+            return ApplyCpuHandoffNow(_handoffTarget);
+        }
+
+        private int CountEligibleHandoffVotes(int target)
+        {
+            int n = 0;
+            for (int i = 0; i < _config.PlayerCount; i++)
+            {
+                if (i == target || IsCpuReplaced(i))
+                {
+                    continue;
+                }
+
+                if ((_handoffVotes & (1 << i)) != 0)
+                {
+                    n++;
+                }
+            }
+
+            return n;
+        }
+
+        private bool ApplyCpuHandoffNow(int peer)
+        {
+            _cpuReplacedMask |= 1 << peer;
+            _sim.SetCpuControlled(peer, controlled: true);
+            ClearStall();
+            ClearHandoffProposal();
+            return true;
+        }
+
+        private void ClearHandoffProposal()
+        {
+            _handoffTarget = -1;
+            _handoffAgreeFrame = -1;
+            _handoffVotes = 0;
+            _localHandoffProposed = false;
+        }
+
         private void RollbackAndResimulate(int fromFrame)
         {
-            // Restore snapshot taken after completing fromFrame (state before stepping fromFrame again
-            // means we need the snapshot at fromFrame — i.e. after frames 0..fromFrame-1 completed,
-            // Sim.Frame == fromFrame before the next Step). We store after each Advance where
-            // _simFrame == Sim.Frame. So to resimulate starting at frame F (0-based next step index),
-            // load snapshot where completed frames == F.
             int restoreCompleted = fromFrame;
             if (!_snapshots.TryLoad(restoreCompleted, out MatchState snap))
             {
-                // Fall back to oldest available: cannot roll further than window.
                 bool found = false;
                 for (int f = fromFrame; f >= Math.Max(0, _simFrame - _config.RollbackWindow); f--)
                 {

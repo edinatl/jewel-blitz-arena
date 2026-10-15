@@ -51,5 +51,25 @@ namespace JewelBlitzArena.Sim
 
             return config;
         }
+
+        public void SetFighterId(int slot, int fighterId)
+        {
+            if ((uint)slot >= PoolCaps.Actors)
+            {
+                throw new System.ArgumentOutOfRangeException(nameof(slot));
+            }
+
+            FighterIds[slot] = fighterId;
+        }
+
+        public void SetStartingLife(int slot, int life)
+        {
+            if ((uint)slot >= PoolCaps.Actors)
+            {
+                throw new System.ArgumentOutOfRangeException(nameof(slot));
+            }
+
+            StartingLife[slot] = life;
+        }
     }
 }

@@ -58,9 +58,11 @@ public sealed class CameraStallHostTests
         var volume = new CameraVolume(0f, 8f, 0f, 4f);
         var state = new MatchState { ActorCount = 2 };
         state.Actor0.IsAlive = true;
+        state.Actor0.HeldItemSlot = ActorSlot.NoHeldItem;
         state.Actor0.PosX = Fix.FromInt(-20);
         state.Actor0.PosZ = Fix.FromInt(0);
         state.Actor1.IsAlive = true;
+        state.Actor1.HeldItemSlot = ActorSlot.NoHeldItem;
         state.Actor1.PosX = Fix.FromInt(20);
         state.Actor1.PosZ = Fix.FromInt(0);
 
@@ -75,6 +77,8 @@ public sealed class CameraStallHostTests
         Assert.That(b.ActorIndex, Is.EqualTo(1));
         Assert.That(a.EdgeU, Is.LessThan(0f));
         Assert.That(b.EdgeU, Is.GreaterThan(0f));
+        Assert.That(a.JewelsHeld, Is.EqualTo(0));
+        Assert.That(a.HasHeldItem, Is.False);
     }
 
     [Test]
