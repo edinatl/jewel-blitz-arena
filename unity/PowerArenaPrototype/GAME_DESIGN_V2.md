@@ -66,6 +66,12 @@ Keyboard (demo): F = □, G = ○, Space = ✕, H = △, R = rematch.
   testing (they roam and collect only) — one flag re-arms them.
 - **Hazard orb:** ❌ removed from all builds at Ben's direction (falling
   debris remains the stage hazard in the web demos).
+- **Circle drop:** ✅ ○ throws throwables (facing) and DROPS any other
+  held item at your feet; pickup radius widened + in-range highlight
+  ring in the web demos so pickup finally reads clearly.
+- **Ignis + Kira:** ✅ 3D fighters built from Ben's uploaded concept
+  art, fighting as the FFA bots in the 3D web demo and defined in
+  Unity's CharacterVisual with full procedural animation.
 - **Unique item abilities:** ✅ Mega Buster (charge every 4th shot),
   Spring Punch Glove (huge launch), Golden Club (coins on hit), Flame
   Thrower (3-jet cone), Freeze Ray (slow), Lightning Gun (chain arc).
@@ -88,6 +94,8 @@ Each fighter: unique speed / power / defense, two Power Drives, one Fusion.
 | **Pyra** 🆕 | fire mage | 3 | 4 | 2 | Fire Serpent / Flame Trap | Inferno Pillar |
 | **Gusto** 🆕 | chef (transforms beastly) | 3 | 4 | 3 | Skillet Slam / Soup Splash | T-Rex Rampage |
 | **Dusty** 🆕 | outlaw gunslinger | 4 | 3 | 3 | Trick Shot / Dynamite Hat | Dead Man's Hand |
+| **Ignis** 🆕 | fire-gauntlet brawler (Ben's art) | 3 | 5 | 3 | Furnace Uppercut / Gauntlet Slam | Meltdown Barrage |
+| **Kira** 🆕 | chain-sickle kunoichi (Ben's art) | 5 | 3 | 2 | Chain Snare / Sickle Cyclone | Thousand Chains |
 
 Unlockables 📐: **Tinker** (inventor kid), **Madame Mirror** (dual-personality
 duelist), **Mel the Shopkeep** (gains wings in form), **The Colonel** (Blaze's
