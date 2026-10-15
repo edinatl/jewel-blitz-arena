@@ -1,7 +1,17 @@
-# Power Arena — Prototype v0.4
+# Power Arena — Prototype v0.5
 
 An original arena brawler inspired by Power Stone 2's formula.
 2 fighters, 1 arena, local play + a solo bot. No Capcom assets, names, or characters.
+
+## What changed in v0.5 (Design v2 systems — same rules as the web demos)
+
+- **Every item has its own 3D model** (`ItemVisual.cs`): all 111 items are built part-by-part at runtime in Power Stone item families — swords with guards and hilts, guns with barrels and drums, bombs with fuses, food, glowing wands — with idle animation (explosives pulse, special items and TVs glow). The old single-primitive look is gone.
+- **Power Gauge transformation:** 3 gems now fill a 100-point gauge that drains over ~12s. □/Light while transformed fires your **Power Drive** (25 gauge — Soldier: 3-shell Rocket Salvo, Samurai: Blade Wave); △ **Power Fusion** (50 gauge) rains three telegraphed explosions on your opponent. Untransformed △ discards your held item.
+- **Dodge roll, wall jump, air attack:** jump while moving to dodge roll (fully invincible, 0.38s), press jump again near a wall mid-air to wall jump toward center, attack mid-air for a diving strike.
+- **Combo knockdowns + gold:** the 3rd hit inside 1.2s knocks a fighter down (0.85s, can't act or be hit), dropping an extra gem — or 3 gold coins worth 10 each when gem-less.
+- **4 new fighters** in `CharacterVisual.cs` — **Jester** (bells + ruff), **Pyra** (flame hair + fire staff), **Gusto** (chef hat + frying pan), **Dusty** (cowboy hat + six-shooter) — 12 on the roster; the arena still duels Soldier vs Samurai.
+- **Bug fix:** the Samurai's horns used `PrimitiveType.Cone`, which doesn't exist in Unity and would not compile — horns, item cones, and rings are now a tiny procedural mesh shared by `CharacterVisual` and `ItemVisual`.
+- Design doc: `GAME_DESIGN_V2.md` in this folder. Re-run **Prototype → Build Arena Scene** once after updating to v0.5.
 
 ## What changed in v0.4 (3D animation + health x4)
 - **Real 3D animated fighters.** The invisible-capsule fighters are now comic characters built from primitives at runtime (`CharacterVisual.cs`) — Soldier vs Samurai in the arena, with Warrior, Gladiator, Knight, Ninja, Pirate and Robot also defined with signature gear (katana, shield + gladius, axe, sword + cape, nunchucks, cutlass + eyepatch, boxing-glove robot).
@@ -20,7 +30,7 @@ An original arena brawler inspired by Power Stone 2's formula.
 - **ANY hit knocks a gem loose.** No damage threshold. Melee, shots, bombs, thrown
   items, explosions, and the stage hazard all shake one gem out of whoever got hit.
   The gem flings away and can't be re-grabbed for 0.6s — it's a scramble, not a refund.
-- **110 items in the game** (see the catalog below), all procedurally spawned.
+- **111 items in the game** (see the catalog below), all procedurally spawned.
 - **Throwing is a core verb.** Heavy attack throws whatever you're holding.
   Stage furniture (chairs, crates, barrels, tables...) is placed around the arena
   at match start specifically to be picked up and thrown.
@@ -43,9 +53,10 @@ An original arena brawler inspired by Power Stone 2's formula.
 | Action | Player 1 (Blue) | Player 2 (Red) |
 |---|---|---|
 | Move | WASD | Arrow keys |
-| Jump | Space | Right Shift |
-| Light attack / use held item / **CATCH (empty hands)** | F | . (Period) |
-| Heavy attack / **THROW held item** / transformed special | G | / (Slash) |
+| Jump / **DODGE ROLL (while moving)** / wall jump (again, near a wall) | Space | Right Shift |
+| □ Light attack / use held item / **CATCH (empty hands)** / **Power Drive (transformed)** | F | . (Period) |
+| ○ Heavy attack / **THROW held item** | G | / (Slash) |
+| △ **Power Fusion (transformed, 50 gauge)** / discard held item | H | , (Comma) |
 | Restart match | R | R |
 
 **Solo play:** Player 2 starts as AI. Any Player 2 keypress takes manual control.
@@ -53,9 +64,11 @@ An original arena brawler inspired by Power Stone 2's formula.
 ## How a match works
 
 - **120-second timer.** KO, or lead on health at time-up.
-- **Power Gems (red):** collect **3** → transform for 12s: gold, bigger, faster,
-  double light damage, energy wave on Heavy (empty-handed). One gem is knocked
-  out of you by *any* hit while you're carrying them.
+- **Power Gems (red):** collect **3** → transform: gold, bigger, faster, and a
+  **Power Gauge (100)** that drains over ~12s, spent on your Power Drive (25)
+  and Power Fusion (50). One gem is knocked out of you by *any* hit while
+  you're carrying them. A 3-hit combo **knocks you down**: you drop another
+  gem — or spill **gold coins** (10 each) if you're gem-less.
 - **Items:** walk over an item with empty hands to pick it up.
   Light = use it (swing / shoot / eat). Heavy = throw it at the other fighter.
   Thrown items that miss land back on the floor as pickups again.
@@ -88,15 +101,17 @@ size, shape, and color — stats drive the behavior, so items play differently.
   Vampire Fang, Golden Hammer, Giant Glove, Shock Glove, Magnet Coil, Gravity Orb,
   Mirror Shield — hard-hitting melee with big knockback
 
-Total: **110 items.**
+Total: **111 items.**
 
 ## Scripts
 
 ```
 Assets/Scripts/
-  PlayerController.cs  movement, keys, jump, AI (chases gems/items, throws, catches)
-  PlayerCombat.cs      melee, items, throwing, catch window, gems, transformation
-  ItemCatalog.cs       all 110 item definitions + procedural visuals
+  PlayerController.cs  movement, keys, jump/dodge roll/wall jump, AI (chases gems/items, throws, catches, rolls, Fusions)
+  PlayerCombat.cs      melee, items, throwing, catch window, gems, Power Gauge, Drive/Fusion, knockdowns
+  ItemCatalog.cs       all 111 item definitions
+  ItemVisual.cs        per-item multi-part 3D models + idle animation (pulse/glow)
+  GoldCoin.cs          knockdown gold coins (magnet + pickup)
   ItemPickup.cs        an item on the ground
   ThrownItem.cs        flight physics, catch check, hit check, landing/explosion
   Projectile.cs        gun shots and transformed energy wave
@@ -112,8 +127,8 @@ Assets/Editor/
 
 ## Honest shortcuts
 
-- Items are colored primitives (a "Television" is a box with TV stats) — stats first,
-  real models in the art pass.
+- Items are procedural primitive assemblies (no model files) — every one of the
+  111 has its own built shape now, but they're still primitives under the hood.
 - Guns share a projectile system (Rocket/Grenade Launcher shots explode); elemental
   effects (freeze, burn, poison) are named but not simulated yet.
 - Throwable-class items have effectively unlimited swings — because you don't swing
