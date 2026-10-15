@@ -51,6 +51,107 @@ public class PlayerCombat : MonoBehaviour
     public bool IsRolling { get { return Time.time < rollUntil; } }
     public bool IsKnockedDown { get { return Time.time < knockdownUntil; } }
 
+    // v0.6: opponent grabs. Heavy (the Action button) with empty hands
+    // next to a foe grabs them overhead; any attack input then throws
+    // them. The victim mashes action buttons to escape early.
+    public PlayerCombat Grabbing { get; private set; }
+    public PlayerCombat GrabbedBy { get; private set; }
+    public float thrownFoeUntil = -1f;
+    private float grabUntil = -1f;
+    private float nextGrabTime = 0f;
+    private int mashCount = 0;
+    public bool IsGrabbed { get { return GrabbedBy != null; } }
+
+    public void SetHeldKinematic(bool held)
+    {
+        if (rb != null) rb.isKinematic = held;
+    }
+
+    bool TryGrab()
+    {
+        if (Grabbing != null || GrabbedBy != null || IsTransformed || Time.time < nextGrabTime) return false;
+        GameObject opp = FindOpponent();
+        if (opp == null) return false;
+        Vector3 to = opp.transform.position - transform.position; to.y = 0f;
+        if (to.magnitude > 1.9f || to.magnitude < 0.01f) return false;
+        if (Vector3.Dot(transform.forward, to.normalized) < 0.2f) return false;
+        var oc = opp.GetComponent<PlayerCombat>();
+        var oh = opp.GetComponent<Health>();
+        if (oc == null || oh == null || oh.IsKO) return false;
+        if (oc.IsTransformed || oc.IsRolling || oc.IsKnockedDown || oc.GrabbedBy != null) return false;
+        Grabbing = oc;
+        oc.GrabbedBy = this;
+        oc.mashCount = 0;
+        oc.SetHeldKinematic(true);
+        oc.thrownFoeUntil = -1f;
+        grabUntil = Time.time + 1.1f;
+        nextAttackTime = Time.time + 0.3f;
+        LastAttackTime = Time.time;
+        return true;
+    }
+
+    public void ThrowGrabbed()
+    {
+        if (Grabbing == null) return;
+        var v = Grabbing;
+        Grabbing = null;
+        v.GrabbedBy = null;
+        v.SetHeldKinematic(false);
+        nextGrabTime = Time.time + 0.8f;
+        nextAttackTime = Time.time + 0.4f;
+        LastAttackTime = Time.time;
+        v.thrownFoeUntil = Time.time + 0.55f;
+        var vrb = v.GetComponent<Rigidbody>();
+        if (vrb != null) vrb.velocity = transform.forward * 11f + Vector3.up * 3.5f;
+    }
+
+    public void BreakGrab()
+    {
+        if (Grabbing == null) return;
+        var v = Grabbing;
+        Grabbing = null;
+        v.GrabbedBy = null;
+        v.SetHeldKinematic(false);
+        nextGrabTime = Time.time + 0.8f;
+    }
+
+    public void EscapeGrab()
+    {
+        if (GrabbedBy == null) return;
+        var g = GrabbedBy;
+        GrabbedBy = null;
+        g.Grabbing = null;
+        SetHeldKinematic(false);
+        g.nextGrabTime = Time.time + 0.8f;
+        if (rb != null) rb.velocity = -g.transform.forward * 4f + Vector3.up * 3f;
+    }
+
+    public void RegisterMash()
+    {
+        if (GrabbedBy == null) return;
+        mashCount++;
+        if (mashCount >= 4) EscapeGrab();
+    }
+
+    void TakeThrownLanding()
+    {
+        if (health != null) health.TakeDamage(12f);
+        if (gems > 0 && !IsTransformed) DropOneGem();
+        knockdownUntil = Time.time + 0.45f;
+        LastHitTime = Time.time;
+    }
+
+    // Recovery roll: jump pressed late in a knockdown stands you
+    // straight into the roll instead of serving the full 0.85s.
+    public bool TryRecoveryRoll()
+    {
+        if (!IsKnockedDown) return false;
+        if (knockdownUntil - Time.time > 0.42f) return false;
+        knockdownUntil = -1f;
+        hitStreak = 0;
+        return true;
+    }
+
     public void StartRoll()
     {
         rollUntil = Time.time + RollDuration;
@@ -83,6 +184,20 @@ public class PlayerCombat : MonoBehaviour
 
     void Update()
     {
+        if (Grabbing != null)
+        {
+            if (health.IsKO) BreakGrab();
+            else
+            {
+                Grabbing.transform.position = transform.position + Vector3.up * 2.15f + transform.forward * 0.35f;
+                if (Time.time >= grabUntil) ThrowGrabbed();
+            }
+        }
+        if (thrownFoeUntil > 0f && Time.time >= thrownFoeUntil)
+        {
+            thrownFoeUntil = -1f;
+            if (!health.IsKO) TakeThrownLanding();
+        }
         if (IsTransformed)
         {
             PowerGauge -= Time.deltaTime * (100f / transformDuration);
@@ -107,6 +222,8 @@ public class PlayerCombat : MonoBehaviour
     public void TryLightAttack()
     {
         if (health.IsKO || IsKnockedDown || Time.time < nextAttackTime) return;
+        if (GrabbedBy != null) return;
+        if (Grabbing != null) { ThrowGrabbed(); return; }
         LastAttackTime = Time.time;
 
         // Transformed: light attack is your POWER DRIVE (costs 25 gauge).
@@ -167,6 +284,8 @@ public class PlayerCombat : MonoBehaviour
     public void TryFusion()
     {
         if (health.IsKO || IsKnockedDown) return;
+        if (GrabbedBy != null) return;
+        if (Grabbing != null) { ThrowGrabbed(); return; }
         if (IsTransformed)
         {
             if (PowerGauge < 50f || Time.time < nextAttackTime) return;
@@ -242,6 +361,8 @@ public class PlayerCombat : MonoBehaviour
     public void TryHeavyAttack()
     {
         if (health.IsKO || IsKnockedDown || Time.time < nextAttackTime) return;
+        if (GrabbedBy != null) return;
+        if (Grabbing != null) { ThrowGrabbed(); return; }
         LastAttackTime = Time.time;
 
         // Holding anything? Heavy = THROW it. This is the heart of the game.
@@ -251,6 +372,9 @@ public class PlayerCombat : MonoBehaviour
             ThrowHeldItem();
             return;
         }
+
+        // Empty hands + heavy next to a foe = GRAB (the PS2 Action move).
+        if (TryGrab()) return;
 
         if (IsTransformed)
         {
@@ -319,6 +443,7 @@ public class PlayerCombat : MonoBehaviour
             {
                 hitStreak = 0;
                 knockdownUntil = Time.time + 0.85f;
+                if (GrabbedBy != null) GrabbedBy.BreakGrab();
                 if (gems > 0) DropOneGem();
                 else for (int i = 0; i < 3; i++)
                     GoldCoin.Spawn(transform.position + new Vector3(Random.Range(-0.7f, 0.7f), 0f, Random.Range(-0.7f, 0.7f)));
