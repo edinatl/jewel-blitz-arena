@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Jewel Blitz Arena — 3D Demo v1.2</title>
+<title>Jewel Blitz Arena — 3D Demo v1.3</title>
 <style>
   html, body { margin:0; padding:0; overflow:hidden; background:#1a140d; font-family:system-ui, sans-serif; -webkit-user-select:none; user-select:none; touch-action:none; }
   #c { position:fixed; inset:0; }
@@ -822,7 +822,7 @@ function tryAction(f) { // CIRCLE: throw / catch / board turret
   if (state.over || f.dead || f.atkCd > 0 || f.downT > 0) return;
   if (f.boarded) { unboard(f); return; }
   if (f.grabbing) { throwFoe(f); return; }
-  if (!f.item && f.catchCd <= 0 && thrown.some(t => t.owner !== f && Math.hypot(t.x - f.x, t.z - f.z) < 2.4)) {
+  if (!f.item && f.catchCd <= 0 && throwns.some(t => t.owner !== f && Math.hypot(t.x - f.x, t.z - f.z) < 2.4)) {
     // An incoming throw beats picking up — CIRCLE catches it.
     f.catchCd = .9; f.catchUntil = now + .28; f.atkCd = .3; f.atkT = now; f.atkMax = .3; f.atkKind = 'catch';
     ringFx(f.x, f.z, 0x7df9ff, 1); return;
