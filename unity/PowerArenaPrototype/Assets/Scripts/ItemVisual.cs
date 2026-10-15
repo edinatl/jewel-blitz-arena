@@ -263,7 +263,13 @@ public static class ItemVisual
 
         if (def.Archetype == ItemArchetype.Melee)
         {
-            if (n.Contains("Katana"))
+            if (n.Contains("Golden Club"))
+            {
+                Cyl(g, 0f, .45f, 0f, .04f, .85f, H(0x8a6a20), "Shaft");
+                Box(g, .1f, .9f, 0f, .34f, .16f, .12f, H(0xffd94d), "Head");
+                Box(g, -.07f, .88f, 0f, .1f, .1f, .1f, H(0xffd94d), "Neck");
+            }
+            else if (n.Contains("Katana"))
             {
                 Box(g, 0f, .62f, 0f, .06f, .78f, .025f, H(0xd8dee8), "Blade");
                 Box(g, 0f, .24f, 0f, .02f, .14f, .02f, H(0xd8dee8), "BladeBase");
@@ -334,7 +340,13 @@ public static class ItemVisual
         }
         else if (def.Archetype == ItemArchetype.Gun)
         {
-            if (n.Contains("Rocket Launcher"))
+            if (n.Contains("Mega Buster"))
+            {
+                Rot(Cyl(g, 0f, .5f, .1f, .15f, .62f, H(0x2a4bd7), "Cannon"), 90f, 0f, 0f);
+                Cyl(g, 0f, .5f, .45f, .1f, .1f, H(0x9fe8ff), "Muzzle");
+                Box(g, 0f, .34f, -.1f, .2f, .16f, .34f, H(0x2456a8), "Base");
+            }
+            else if (n.Contains("Rocket Launcher"))
             {
                 Rot(Cyl(g, 0f, .55f, 0f, .14f, 1.1f, H(0x4a5a3a), "Tube"), 90f, 0f, 0f);
                 Rot(Cone(g, 0f, .55f, -.62f, .14f, .2f, H(0x3a4a2a), "Back"), -90f, 0f, 0f);
@@ -626,7 +638,8 @@ public static class ItemVisual
         }
         else // Special
         {
-            if (n.Contains("Fire Wand")) { Cyl(g, 0f, .5f, 0f, .035f, .9f, H(0x6b4a2a), "Rod"); SphG(g, 0f, 1.05f, 0f, .12f, H(0xff6a2a), H(0xcc3300) * 1.8f, "Orb"); }
+            if (n.Contains("Spring Punch")) { Box(g, 0f, .64f, 0f, .34f, .3f, .3f, H(0xcc2222), "Glove"); Box(g, 0f, .64f, .19f, .36f, .12f, .1f, H(0xcc2222), "Thumb"); Tor(g, 0f, .4f, 0f, .11f, H(0xb8c0cc), "Coil1"); Tor(g, 0f, .29f, 0f, .11f, H(0xb8c0cc), "Coil2"); Tor(g, 0f, .18f, 0f, .11f, H(0xb8c0cc), "Coil3"); Box(g, 0f, .08f, 0f, .3f, .12f, .3f, H(0x555560), "Base"); }
+            else if (n.Contains("Fire Wand")) { Cyl(g, 0f, .5f, 0f, .035f, .9f, H(0x6b4a2a), "Rod"); SphG(g, 0f, 1.05f, 0f, .12f, H(0xff6a2a), H(0xcc3300) * 1.8f, "Orb"); }
             else if (n.Contains("Ice Wand")) { Cyl(g, 0f, .5f, 0f, .035f, .9f, H(0x6b4a2a), "Rod"); ConeG(g, 0f, 1.08f, 0f, .09f, .2f, H(0x9fe8ff), H(0x33aaff) * 1.8f, "Crystal"); }
             else if (n.Contains("Lightning Rod")) { Cyl(g, 0f, .5f, 0f, .035f, .95f, H(0x555560), "Rod"); SphG(g, 0f, 1.06f, 0f, .1f, H(0xffee55), H(0xccaa00) * 1.8f, "Orb"); }
             else if (n.Contains("Wind Fan"))
