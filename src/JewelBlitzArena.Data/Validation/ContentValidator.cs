@@ -56,6 +56,13 @@ namespace JewelBlitzArena.Data
                         $"Fighter '{fighter.Name}' has invalid Life rating {fighter.LifeRating}."));
                 }
 
+                if (!TryParseKitBehavior(fighter.KitBehavior, out _))
+                {
+                    result.Errors.Add(new ValidationIssue(
+                        "kit_behavior",
+                        $"Fighter '{fighter.Name}' has unknown kitBehavior '{fighter.KitBehavior}'."));
+                }
+
                 foreach (AuthoredMove move in fighter.Moves)
                 {
                     if (!TryParseMoveClass(move.Class, out MoveClass moveClass))
@@ -266,6 +273,60 @@ namespace JewelBlitzArena.Data
         public static bool TryParseMoveClass(string text, out MoveClass value)
         {
             return Enum.TryParse(text, ignoreCase: true, out value);
+        }
+
+        /// <summary>
+        /// Parses authored kit-behavior names into Sim ordinals (architecture §2.5).
+        /// Kept as byte here so Data stays free of a Sim enum reference.
+        /// </summary>
+        public static bool TryParseKitBehavior(string? text, out byte value)
+        {
+            value = 0; // None
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return true;
+            }
+
+            switch (text.Trim().ToLowerInvariant())
+            {
+                case "none":
+                    value = 0;
+                    return true;
+                case "vanishstrong":
+                case "vanish_strong":
+                    value = 1;
+                    return true;
+                case "commandgrabcarry":
+                case "command_grab_carry":
+                    value = 2;
+                    return true;
+                case "ripostestrong":
+                case "riposte_strong":
+                    value = 3;
+                    return true;
+                case "extendeddodge":
+                case "extended_dodge":
+                    value = 4;
+                    return true;
+                case "triplejumpglide":
+                case "triple_jump_glide":
+                    value = 5;
+                    return true;
+                case "doublehold":
+                case "double_hold":
+                    value = 6;
+                    return true;
+                case "swappartners":
+                case "swap_partners":
+                    value = 7;
+                    return true;
+                case "invoicerepeatable":
+                case "invoice_repeatable":
+                    value = 8;
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         public static bool TryParseCategory(string text, out ItemCategory value)

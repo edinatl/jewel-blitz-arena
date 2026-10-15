@@ -48,7 +48,7 @@ namespace JewelBlitzArena.Sim
                 WalkSpeedRaw = record.WalkSpeedRaw,
                 RunSpeedRaw = record.RunSpeedRaw,
                 FullSpeedRaw = record.FullSpeedRaw,
-                Behavior = KitBehavior.None,
+                Behavior = (KitBehavior)record.KitBehavior,
             };
 
             int surgeIndex = 0;

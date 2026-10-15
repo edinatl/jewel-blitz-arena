@@ -37,6 +37,7 @@ namespace JewelBlitzArena.Data
                     });
                 }
 
+                ContentValidator.TryParseKitBehavior(src.KitBehavior, out byte kitBehavior);
                 fighters.Add(new FighterKitRecord
                 {
                     FighterId = src.FighterId,
@@ -50,6 +51,7 @@ namespace JewelBlitzArena.Data
                     WalkSpeedRaw = DecimalFixParser.ParseToRaw(src.WalkSpeed),
                     RunSpeedRaw = DecimalFixParser.ParseToRaw(src.RunSpeed),
                     FullSpeedRaw = DecimalFixParser.ParseToRaw(src.FullSpeed),
+                    KitBehavior = kitBehavior,
                     Moves = moves.ToArray(),
                 });
             }

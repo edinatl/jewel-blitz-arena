@@ -17,6 +17,9 @@ namespace JewelBlitzArena.Data
         public long RunSpeedRaw { get; set; }
         public long FullSpeedRaw { get; set; }
 
+        /// <summary>Named kit exception id (matches Sim <c>KitBehavior</c> enum ordinal).</summary>
+        public byte KitBehavior { get; set; }
+
         public MoveRecord[] Moves { get; set; } = System.Array.Empty<MoveRecord>();
     }
 

@@ -89,6 +89,7 @@ namespace JewelBlitzArena.Data
                 WalkSpeedRaw = br.ReadInt64(),
                 RunSpeedRaw = br.ReadInt64(),
                 FullSpeedRaw = br.ReadInt64(),
+                KitBehavior = br.ReadByte(),
             };
 
             int moveCount = br.ReadInt32();

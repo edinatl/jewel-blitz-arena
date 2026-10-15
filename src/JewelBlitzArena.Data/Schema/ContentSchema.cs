@@ -5,8 +5,9 @@ namespace JewelBlitzArena.Data
         /// <summary>
         /// v2: stage graph phase transitions, hazards, kinematics, camera volumes.
         /// v3: optional authored <c>scripted_camera</c> path keys per phase enter-transition.
+        /// v4: fighter <c>kitBehavior</c> named exception enum (architecture §2.5).
         /// </summary>
-        public const uint Version = 3;
+        public const uint Version = 4;
         public const string BlobExtension = ".jba";
         public static readonly byte[] Magic = { (byte)'J', (byte)'B', (byte)'A', (byte)'D' };
 

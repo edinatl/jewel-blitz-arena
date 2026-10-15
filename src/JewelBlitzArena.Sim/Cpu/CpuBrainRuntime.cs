@@ -2,8 +2,9 @@ namespace JewelBlitzArena.Sim
 {
     /// <summary>
     /// Deterministic CPU brain (architecture §2.6 / combat §10.1). Thinks on a staggered
-    /// schedule keyed by CPU level 1–8; uses kit <see cref="ActorSlot.ReachRating"/> for
-    /// in-range Attack pressure. Holds <see cref="CpuBrainSlot.LastDecision"/> between thinks.
+    /// schedule keyed by CPU level 1–8; branches on named <see cref="KitBehavior"/> personalities
+    /// (architecture §2.5) using kit reach and input buttons. Holds
+    /// <see cref="CpuBrainSlot.LastDecision"/> between thinks.
     /// </summary>
     public static class CpuBrainRuntime
     {
@@ -172,23 +173,262 @@ namespace JewelBlitzArena.Sim
                 return InputFrame.FromStick(0, 0);
             }
 
-            int dir = BestDirection(dx, dz);
+            int chaseDir = BestDirection(dx, dz);
             int mag = StickMagnitudeForLevel(level);
-            var frame = InputFrame.FromStick(dir, mag);
-
-            // Kit-aware in-range pressure: ReachRating metres (Q48.16) as attack radius.
             long reachRaw = Fix.FromInt(self.ReachRating > 0 ? self.ReachRating : 3).Raw;
             long distSq = ((dx.Raw >> 8) * (dx.Raw >> 8)) + ((dz.Raw >> 8) * (dz.Raw >> 8));
             long reachSq = (reachRaw >> 8) * (reachRaw >> 8);
+            long midSq = reachSq * 4; // ~2× reach
+
+            ref Xoshiro256StarStar rng = ref MatchStateAccess.CpuRng(ref state, slot);
+            var behavior = (KitBehavior)self.KitBehavior;
+            return behavior switch
+            {
+                KitBehavior.VanishStrong => DecideVanishStrong(chaseDir, mag, distSq, reachSq, midSq, level, ref rng),
+                KitBehavior.CommandGrabCarry => DecideCommandGrab(
+                    ref self, chaseDir, mag, distSq, reachSq, level, ref rng),
+                KitBehavior.RiposteStrong => DecideRiposte(dx, dz, chaseDir, mag, distSq, reachSq, midSq, level, ref rng),
+                KitBehavior.ExtendedDodge => DecideExtendedDodge(chaseDir, mag, distSq, reachSq, level, ref rng),
+                KitBehavior.TripleJumpGlide => DecideTripleJump(chaseDir, mag, distSq, reachSq, level, ref rng),
+                KitBehavior.DoubleHold => DecideDoubleHold(ref self, chaseDir, mag, distSq, reachSq, level, ref rng),
+                KitBehavior.SwapPartners => DecideSwapStrafe(dx, dz, mag, distSq, reachSq, level, ref rng),
+                KitBehavior.InvoiceRepeatable => DecideInvoice(chaseDir, mag, distSq, reachSq, level, ref rng),
+                _ => DecideDefaultPressure(chaseDir, mag, distSq, reachSq, level, ref rng),
+            };
+        }
+
+        private static InputFrame DecideDefaultPressure(
+            int chaseDir,
+            int mag,
+            long distSq,
+            long reachSq,
+            int level,
+            ref Xoshiro256StarStar rng)
+        {
+            var frame = InputFrame.FromStick(chaseDir, mag);
             if (distSq <= reachSq && level >= 3)
             {
-                ref Xoshiro256StarStar rng = ref MatchStateAccess.CpuRng(ref state, slot);
+                MaybePressAttack(ref frame, level, ref rng, preferStrong: false);
+            }
+
+            return frame;
+        }
+
+        /// <summary>Sable-style: approach then prefer Strong (vanish) at mid/close range.</summary>
+        private static InputFrame DecideVanishStrong(
+            int chaseDir,
+            int mag,
+            long distSq,
+            long reachSq,
+            long midSq,
+            int level,
+            ref Xoshiro256StarStar rng)
+        {
+            var frame = InputFrame.FromStick(chaseDir, mag);
+            if (distSq <= midSq && level >= 3)
+            {
                 uint roll = (uint)(rng.NextUInt64() & 0xFF);
-                // Higher levels attack more often when in kit reach.
-                int threshold = 40 + (level * 20); // L3≈100/255 … L8≈200/255
-                if (threshold > 230)
+                int threshold = 50 + (level * 18);
+                if (roll < (uint)threshold)
                 {
-                    threshold = 230;
+                    frame.Strong = true;
+                    if (distSq <= reachSq && (roll & 0x3) == 0)
+                    {
+                        frame.Attack = true;
+                    }
+                }
+            }
+
+            return frame;
+        }
+
+        /// <summary>Bulwark-style: close for Action (command grab / carry); Attack if already holding.</summary>
+        private static InputFrame DecideCommandGrab(
+            ref ActorSlot self,
+            int chaseDir,
+            int mag,
+            long distSq,
+            long reachSq,
+            int level,
+            ref Xoshiro256StarStar rng)
+        {
+            var frame = InputFrame.FromStick(chaseDir, mag);
+            if (distSq > reachSq || level < 3)
+            {
+                return frame;
+            }
+
+            uint roll = (uint)(rng.NextUInt64() & 0xFF);
+            if (!self.HasEmptyHands)
+            {
+                if (roll < (uint)(60 + level * 15))
+                {
+                    frame.Attack = true;
+                }
+            }
+            else if (roll < (uint)(80 + level * 12))
+            {
+                frame.Action = true;
+            }
+
+            return frame;
+        }
+
+        /// <summary>Lune-style: space out beyond mid-range, Strong when the foe enters reach.</summary>
+        private static InputFrame DecideRiposte(
+            Fix dx,
+            Fix dz,
+            int chaseDir,
+            int mag,
+            long distSq,
+            long reachSq,
+            long midSq,
+            int level,
+            ref Xoshiro256StarStar rng)
+        {
+            int dir = chaseDir;
+            int useMag = mag;
+            if (distSq > midSq)
+            {
+                // Hold spacing — retreat.
+                dir = BestDirection(-dx, -dz);
+                useMag = StickMagnitudeForLevel(level <= 4 ? level : 4);
+            }
+
+            var frame = InputFrame.FromStick(dir, useMag);
+            if (distSq <= reachSq && level >= 3)
+            {
+                uint roll = (uint)(rng.NextUInt64() & 0xFF);
+                if (roll < (uint)(70 + level * 16))
+                {
+                    frame.Strong = true;
+                }
+            }
+
+            return frame;
+        }
+
+        /// <summary>Extended dodge: Jump when pressured in reach; otherwise chase.</summary>
+        private static InputFrame DecideExtendedDodge(
+            int chaseDir,
+            int mag,
+            long distSq,
+            long reachSq,
+            int level,
+            ref Xoshiro256StarStar rng)
+        {
+            var frame = InputFrame.FromStick(chaseDir, mag);
+            if (distSq <= reachSq && level >= 2)
+            {
+                uint roll = (uint)(rng.NextUInt64() & 0xFF);
+                if (roll < (uint)(90 + level * 10))
+                {
+                    frame.Jump = true;
+                }
+                else if (level >= 4 && roll < (uint)(40 + level * 8))
+                {
+                    frame.Attack = true;
+                }
+            }
+
+            return frame;
+        }
+
+        /// <summary>Aerial approach: Jump while closing, Attack in reach.</summary>
+        private static InputFrame DecideTripleJump(
+            int chaseDir,
+            int mag,
+            long distSq,
+            long reachSq,
+            int level,
+            ref Xoshiro256StarStar rng)
+        {
+            var frame = InputFrame.FromStick(chaseDir, mag);
+            uint roll = (uint)(rng.NextUInt64() & 0xFF);
+            if (distSq > reachSq && roll < (uint)(50 + level * 12))
+            {
+                frame.Jump = true;
+            }
+            else if (distSq <= reachSq && level >= 3)
+            {
+                MaybePressAttack(ref frame, level, ref rng, preferStrong: false);
+            }
+
+            return frame;
+        }
+
+        /// <summary>Clank-style: prioritize Action to fill hands, then Attack.</summary>
+        private static InputFrame DecideDoubleHold(
+            ref ActorSlot self,
+            int chaseDir,
+            int mag,
+            long distSq,
+            long reachSq,
+            int level,
+            ref Xoshiro256StarStar rng)
+        {
+            var frame = InputFrame.FromStick(chaseDir, mag);
+            uint roll = (uint)(rng.NextUInt64() & 0xFF);
+            if (self.HasEmptyHands && level >= 2 && roll < (uint)(100 + level * 10))
+            {
+                frame.Action = true;
+                return frame;
+            }
+
+            if (distSq <= reachSq && level >= 3)
+            {
+                MaybePressAttack(ref frame, level, ref rng, preferStrong: false);
+            }
+
+            return frame;
+        }
+
+        /// <summary>Pip & Pepper-style: strafe (perpendicular) while pressuring.</summary>
+        private static InputFrame DecideSwapStrafe(
+            Fix dx,
+            Fix dz,
+            int mag,
+            long distSq,
+            long reachSq,
+            int level,
+            ref Xoshiro256StarStar rng)
+        {
+            uint roll = (uint)(rng.NextUInt64() & 0xFF);
+            int dir = (roll & 1) == 0
+                ? BestDirection(-dz, dx)
+                : BestDirection(dz, -dx);
+            if (distSq > reachSq * 9 && (roll & 0x3) == 0)
+            {
+                // Occasionally cut in.
+                dir = BestDirection(dx, dz);
+            }
+
+            var frame = InputFrame.FromStick(dir, mag);
+            if (distSq <= reachSq && level >= 3)
+            {
+                MaybePressAttack(ref frame, level, ref rng, preferStrong: false);
+            }
+
+            return frame;
+        }
+
+        /// <summary>Invoice-style: dense Attack strings in reach; rare Strong.</summary>
+        private static InputFrame DecideInvoice(
+            int chaseDir,
+            int mag,
+            long distSq,
+            long reachSq,
+            int level,
+            ref Xoshiro256StarStar rng)
+        {
+            var frame = InputFrame.FromStick(chaseDir, mag);
+            if (distSq <= reachSq && level >= 2)
+            {
+                uint roll = (uint)(rng.NextUInt64() & 0xFF);
+                int threshold = 100 + (level * 18);
+                if (threshold > 240)
+                {
+                    threshold = 240;
                 }
 
                 if (roll < (uint)threshold)
@@ -196,13 +436,41 @@ namespace JewelBlitzArena.Sim
                     frame.Attack = true;
                 }
 
-                if (level >= 6 && (roll & 0x7) == 0)
+                if (level >= 5 && (roll & 0xF) == 0)
                 {
                     frame.Strong = true;
                 }
             }
 
             return frame;
+        }
+
+        private static void MaybePressAttack(
+            ref InputFrame frame,
+            int level,
+            ref Xoshiro256StarStar rng,
+            bool preferStrong)
+        {
+            uint roll = (uint)(rng.NextUInt64() & 0xFF);
+            int threshold = 40 + (level * 20);
+            if (threshold > 230)
+            {
+                threshold = 230;
+            }
+
+            if (roll >= (uint)threshold)
+            {
+                return;
+            }
+
+            if (preferStrong || (level >= 6 && (roll & 0x7) == 0))
+            {
+                frame.Strong = true;
+            }
+            else
+            {
+                frame.Attack = true;
+            }
         }
 
         private static int FindNearestOpponent(ref MatchState state, int slot)

@@ -35,6 +35,7 @@ namespace JewelBlitzArena.Data
                 WalkSpeed = "3",
                 RunSpeed = "5",
                 FullSpeed = "7",
+                KitBehavior = "None",
                 Moves = new List<AuthoredMove>
                 {
                     new AuthoredMove { Name = "Jab", Class = "Attack", Damage = 35, StartupFrames = 4, ActiveFrames = 2, RecoveryFrames = 8 },

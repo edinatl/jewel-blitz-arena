@@ -65,6 +65,7 @@ namespace JewelBlitzArena.Data
             bw.Write(f.WalkSpeedRaw);
             bw.Write(f.RunSpeedRaw);
             bw.Write(f.FullSpeedRaw);
+            bw.Write(f.KitBehavior);
             bw.Write(f.Moves.Length);
             foreach (MoveRecord m in f.Moves)
             {

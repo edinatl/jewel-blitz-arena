@@ -28,6 +28,12 @@ namespace JewelBlitzArena.Data
         public string RunSpeed { get; set; } = "5";
         public string FullSpeed { get; set; } = "7";
 
+        /// <summary>
+        /// Named kit exception (architecture §2.5): None, VanishStrong, CommandGrabCarry,
+        /// RiposteStrong, ExtendedDodge, TripleJumpGlide, DoubleHold, SwapPartners, InvoiceRepeatable.
+        /// </summary>
+        public string KitBehavior { get; set; } = "None";
+
         public List<AuthoredMove> Moves { get; set; } = new List<AuthoredMove>();
     }
 
