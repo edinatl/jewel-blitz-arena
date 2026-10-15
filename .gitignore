@@ -1,4 +1,4 @@
-# Unity generated
+# Unity generated (prototype / future Unity host under unity/)
 [Ll]ibrary/
 [Tt]emp/
 [Oo]bj/
@@ -6,16 +6,36 @@
 [Bb]uilds/
 [Ll]ogs/
 [Uu]ser[Ss]ettings/
-*.csproj
-*.sln
-*.user
-*.pidb
-*.booproj
-*.svd
-*.pdb
-*.mdb
-*.opendb
-*.VC.db
+unity/**/*.csproj
+unity/**/*.sln
+unity/**/*.user
+unity/**/*.pidb
+unity/**/*.booproj
+unity/**/*.svd
+unity/**/*.pdb
+unity/**/*.mdb
+unity/**/*.opendb
+unity/**/*.VC.db
 crashlytics-build.properties
 .DS_Store
 Thumbs.db
+
+# .NET build output (intentional solution lives at repo root / src / tests)
+**/bin/
+**/obj/
+*.user
+*.DotSettings.user
+.vs/
+
+# ---------------------------------------------------------------------------
+# Power Arena feel-lab quarantine (@benrapsis parallel track)
+# Keep separate from PLAN.md / JewelBlitzArena.* orchestration work.
+# Do not unzip the zip into the tree; do not merge with PowerArenaPrototype.
+# Tracked feel-lab paths stay in git for history but are listed in .cursorignore
+# so agents default to PLAN + Sim work. Local extract / scratch dirs stay ignored.
+# ---------------------------------------------------------------------------
+/power-arena-unzipped/
+/PowerArenaUnityPrototype/
+/PowerArenaExtract/
+**/Power\ Arena\ Unity\ Prototype/
+*.feel-lab.tmp

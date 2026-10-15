@@ -1,0 +1,16 @@
+# Power Arena feel-lab quarantine — parallel @benrapsis track.
+# Agents and indexing should prefer PLAN.md, docs/design/*, docs/tech/*,
+# and JewelBlitzArena.* sim work. Touch these paths only with an explicit
+# feel-lab request; do not merge with the shipping Sim/Presentation host.
+
+Power Arena Unity Prototype.zip
+unity/PowerArenaPrototype/
+
+# Browser feel demos (float / non-deterministic). Reference only.
+docs/index.html
+docs/sprite-arena.html
+
+# Local unzip / scratch (also in .gitignore)
+power-arena-unzipped/
+PowerArenaUnityPrototype/
+PowerArenaExtract/
