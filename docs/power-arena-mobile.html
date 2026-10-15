@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Power Arena — Mobile Demo v0.2</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body { width:100%; height:100%; background:#14161f; overflow:hidden; font-family:system-ui, sans-serif; touch-action:none; user-select:none; -webkit-user-select:none; }
+  #wrap { position:fixed; inset:0; display:flex; flex-direction:column; }
+  #game { flex:1; width:100%; display:block; background:#23273a; }
+  #hud { position:absolute; top:0; left:0; right:0; padding:8px 10px; color:#fff; pointer-events:none; }
+  .bar-row { display:flex; justify-content:space-between; gap:10px; }
+  .pbox { width:42%; }
+  .pname { font-size:13px; font-weight:700; text-shadow:0 1px 2px #000; }
+  .bar { height:14px; background:#0009; border:1px solid #fff6; border-radius:4px; overflow:hidden; margin:2px 0; }
+  .fill { height:100%; transition:width .12s; }
+  .meta { font-size:12px; text-shadow:0 1px 2px #000; white-space:nowrap; overflow:hidden; }
+  #timer { text-align:center; font-size:20px; font-weight:800; width:16%; text-shadow:0 1px 3px #000; }
+  #banner { position:absolute; top:38%; left:0; right:0; text-align:center; color:#ffd94d; font-size:34px; font-weight:900; text-shadow:0 2px 8px #000; display:none; pointer-events:none; }
+  #sub { position:absolute; top:47%; left:0; right:0; text-align:center; color:#fff; font-size:16px; display:none; pointer-events:none; text-shadow:0 1px 4px #000; }
+  #flash { position:absolute; top:20%; left:0; right:0; text-align:center; color:#7df9ff; font-size:22px; font-weight:800; text-shadow:0 2px 6px #000; opacity:0; pointer-events:none; }
+  #controls { position:absolute; left:0; right:0; bottom:0; height:170px; pointer-events:none; }
+  #joy { position:absolute; left:18px; bottom:24px; width:128px; height:128px; border-radius:50%; background:#ffffff14; border:2px solid #ffffff33; pointer-events:auto; }
+  #stick { position:absolute; left:44px; top:44px; width:40px; height:40px; border-radius:50%; background:#ffffff55; }
+  .btn { position:absolute; width:74px; height:74px; border-radius:50%; border:2px solid #ffffff44; color:#fff; font-weight:800; font-size:13px; pointer-events:auto; display:flex; align-items:center; justify-content:center; text-align:center; }
+  .btn:active { filter:brightness(1.5); }
+  #btnLight { right:104px; bottom:30px; background:#2e7d32cc; }
+  #btnHeavy { right:20px; bottom:88px; background:#b71c1ccc; }
+  #help { position:absolute; bottom:2px; left:0; right:0; text-align:center; color:#ffffff88; font-size:11px; pointer-events:none; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="game"></canvas>
+  <div id="hud">
+    <div class="bar-row">
+      <div class="pbox">
+        <div class="pname" style="color:#7db4ff">BLUE — YOU</div>
+        <div class="bar"><div class="fill" id="hp0" style="background:#42d35a;width:100%"></div></div>
+        <div class="meta" id="meta0">Gems: ☆☆☆</div>
+        <div class="meta" id="item0">Item: —</div>
+      </div>
+      <div id="timer">2:00</div>
+      <div class="pbox" style="text-align:right">
+        <div class="pname" style="color:#ff9a8a">RED — BOT</div>
+        <div class="bar"><div class="fill" id="hp1" style="background:#42d35a;width:100%"></div></div>
+        <div class="meta" id="meta1">Gems: ☆☆☆</div>
+        <div class="meta" id="item1">Item: —</div>
+      </div>
+    </div>
+  </div>
+  <div id="flash"></div>
+  <div id="banner"></div>
+  <div id="sub">Tap anywhere to fight again</div>
+  <div id="controls">
+    <div id="joy"><div id="stick"></div></div>
+    <div class="btn" id="btnLight">HIT /<br>CATCH</div>
+    <div class="btn" id="btnHeavy">THROW /<br>HEAVY</div>
+  </div>
+  <div id="help">Joystick to move · Walk over items to grab · HIT uses / catches · THROW throws it · Any hit knocks a gem loose · 3 gems = TRANSFORM</div>
+</div>
+
+<script>
+"use strict";
+// ============ ITEM CATALOG (same 110 items as the Unity build) ============
+function mkCat(names, arch, dmg, uses, tDmg, tSpd, heal, cd, kb, scale, hueBase, sat) {
+  return names.map((n, i) => ({
+    name: n, arch, damage: dmg + (i % 5), uses: uses + (arch === 'melee' || arch === 'special' ? (i % 3) : 0),
+    throwDamage: tDmg, throwSpeed: tSpd, heal, cooldown: cd, knockback: kb, scale,
+    color: `hsl(${Math.floor(((hueBase + i * (0.5 / Math.max(1, names.length))) % 1) * 360)},${sat}%,60%)`
+  }));
+}
+const CATALOG = [].concat(
+  mkCat(["Baseball Bat","Cricket Bat","Wooden Club","Steel Pipe","Wrench","Hammer","Mallet","Frying Pan","Katana","Broadsword","Rapier","Battle Axe","War Mace","Spear","Halberd","Chainsaw","Laser Sword","Spiked Club","Golf Club","Tennis Racket","Broom","Shovel","Torch","Umbrella"], 'melee', 12, 3, 7, 520, 0, .45, 170, .9, .08, 60),
+  mkCat(["Blaster Pistol","Revolver","Shotgun","Machine Gun","Laser Gun","Plasma Rifle","Flame Thrower","Freeze Ray","Rocket Launcher","Grenade Launcher","Crossbow","Bow","Slingshot","Water Cannon","Bubble Gun","Lightning Gun","Sonic Blaster","Railgun"], 'gun', 9, 4, 8, 560, 0, .38, 100, .55, .55, 60),
+  mkCat(["Chair","Stool","Crate","Wooden Barrel","Metal Barrel","Rock","Brick","Book","Vase","Plant Pot","Table Lamp","Bench","Small Table","Tire","Bowling Ball","Dumbbell","Kettle","Bucket","Toolbox","Backpack","Globe","Television","Microwave","Safe","Anvil","Treasure Chest","Ale Barrel","Statue Head"], 'throw', 6, 99, 11, 600, 0, .45, 140, .6, .35, 60),
+  mkCat(["Bomb","Big Bomb","Dynamite Bundle","Grenade","Fire Bomb","Ice Bomb","Shock Bomb","Powder Keg","Oil Drum","Gas Can","Firework Crate","Land Mine","Sticky Bomb","Holy Bomb","Poison Bomb","Cluster Bomb"], 'boom', 19, 1, 12, 480, 0, .55, 170, .55, 0, 35),
+  mkCat(["Cake","Roast Chicken","Pizza","Burger","Sushi Platter","Apple","Banana","Watermelon","Cheese Wheel","Honey Jar","Energy Drink","Magic Potion"], 'food', 4, 1, 5, 560, 24, .45, 60, .45, .22, 60),
+  mkCat(["Fire Wand","Ice Wand","Lightning Rod","Wind Fan","Poison Dagger","Vampire Fang","Golden Hammer","Giant Glove","Shock Glove","Magnet Coil","Gravity Orb","Mirror Shield"], 'special', 14, 4, 9, 520, 0, .42, 220, .65, .78, 60)
+);
+// Heavy props fly slower, hit harder
+CATALOG.forEach(d => { if (d.arch === 'throw') { const idx = CATALOG.indexOf(d); if (idx >= 46 + 20) { d.throwDamage = 16; d.throwSpeed = 400; d.knockback = 200; d.scale = .9; } } });
+const findItem = n => CATALOG.find(d => d.name === n);
+const randItem = () => CATALOG[Math.floor(Math.random() * CATALOG.length)];
+
+// ============ GAME STATE ============
+const cv = document.getElementById('game'), ctx = cv.getContext('2d');
+let W = 0, H = 0, ARENA = null;
+function resize() {
+  W = cv.width = window.innerWidth; H = cv.height = window.innerHeight;
+  const m = 26, top = 96, bot = 196;
+  ARENA = { x: m, y: top, w: W - m * 2, h: Math.max(220, H - top - bot) };
+}
+window.addEventListener('resize', resize); resize();
+
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+const TAU = Math.PI * 2;
+
+let fighters, gems, groundItems, thrown, shots, hazard, timeLeft, over, winner, flashTxt, flashT;
+let gemTimer, itemTimer;
+
+function newFighter(x, y, color, name, isBot) {
+  return { x, y, r: 17, color, name, isBot, hp: 100, maxHp: 100, vx: 0, vy: 0,
+           face: { x: isBot ? -1 : 1, y: 0 }, gems: 0, item: null, uses: 0,
+           transformed: 0, atkCd: 0, catchUntil: 0, lastCatch: -9, hurtT: 0,
+           aiAtk: 0, aiJump: 0, aiCatchCd: 0, speed: 240 };
+}
+function reset() {
+  const cx = ARENA.x + ARENA.w / 2, cy = ARENA.y + ARENA.h / 2;
+  fighters = [ newFighter(ARENA.x + ARENA.w * .25, cy, '#3f7dff', 'BLUE', false),
+               newFighter(ARENA.x + ARENA.w * .75, cy, '#ff5347', 'RED', true) ];
+  gems = []; groundItems = []; thrown = []; shots = [];
+  hazard = { x: cx, y: ARENA.y + 40, vx: 150, vy: 115, r: 15, cd: [0, 0] };
+  timeLeft = 120; over = false; winner = ''; flashTxt = ''; flashT = 0;
+  gemTimer = 1.2; itemTimer = 2.5;
+  // Stage furniture — ammunition lying around, like the Unity build
+  const props = ['Chair','Crate','Wooden Barrel','Small Table','Plant Pot','Bench','Rock','Toolbox'];
+  props.forEach((n, i) => {
+    const a = (i / props.length) * TAU;
+    groundItems.push({ def: findItem(n), x: cx + Math.cos(a) * ARENA.w * .33, y: cy + Math.sin(a) * ARENA.h * .33, ph: Math.random() * TAU });
+  });
+  document.getElementById('banner').style.display = 'none';
+  document.getElementById('sub').style.display = 'none';
+}
+
+// ============ COMBAT ============
+function dropGem(f) { // ANY hit knocks a gem loose
+  if (f.gems > 0 && f.transformed <= 0) {
+    f.gems--;
+    const a = Math.random() * TAU;
+    gems.push({ x: clamp(f.x + Math.cos(a) * 55, ARENA.x + 14, ARENA.x + ARENA.w - 14),
+                y: clamp(f.y + Math.sin(a) * 55, ARENA.y + 14, ARENA.y + ARENA.h - 14),
+                born: performance.now() / 1000, ph: Math.random() * TAU });
+  }
+}
+function hurt(f, dmg, dirx, diry, kb) {
+  if (over || f.hp <= 0) return;
+  f.hp -= dmg; f.hurtT = .18;
+  f.vx += dirx * kb; f.vy += diry * kb;
+  dropGem(f);
+  if (f.hp <= 0) { f.hp = 0; endMatch(fighters[1 - fighters.indexOf(f)]); }
+}
+function melee(f, dmg, range, kb) {
+  const o = fighters[1 - fighters.indexOf(f)];
+  if (dist(f, o) <= range + o.r && (o.x - f.x) * f.face.x + (o.y - f.y) * f.face.y > -6) {
+    const d = Math.max(1, dist(f, o));
+    hurt(o, dmg, (o.x - f.x) / d, (o.y - f.y) / d, kb);
+  }
+}
+function equip(f, def) {
+  f.item = def; f.uses = def.uses;
+}
+function clearItem(f) { f.item = null; f.uses = 0; }
+function throwHeld(f) {
+  if (!f.item) return;
+  const def = f.item; clearItem(f);
+  thrown.push({ def, owner: f, x: f.x + f.face.x * 22, y: f.y + f.face.y * 22,
+                vx: f.face.x * def.throwSpeed, vy: f.face.y * def.throwSpeed, age: 0, spin: 0 });
+}
+function useItem(f) {
+  const def = f.item; if (!def) return;
+  if (def.arch === 'melee' || def.arch === 'special') {
+    f.atkCd = def.cooldown; melee(f, f.transformed > 0 ? def.damage * 1.6 : def.damage, 52, def.knockback);
+    if (--f.uses <= 0) clearItem(f);
+  } else if (def.arch === 'gun') {
+    f.atkCd = def.cooldown;
+    const boom = def.name === 'Rocket Launcher' || def.name === 'Grenade Launcher';
+    shots.push({ owner: f, x: f.x + f.face.x * 20, y: f.y + f.face.y * 20, vx: f.face.x * 640, vy: f.face.y * 640, dmg: def.damage, boom, color: def.color });
+    if (--f.uses <= 0) clearItem(f);
+  } else if (def.arch === 'food') {
+    f.atkCd = def.cooldown; f.hp = Math.min(f.maxHp, f.hp + def.heal); clearItem(f);
+    showFlash(f.name + ' ATE ' + def.name.toUpperCase() + ' +' + def.heal);
+  } else { // throw / boom: light attack throws too
+    f.atkCd = .45; throwHeld(f);
+  }
+}
+function tryLight(f) {
+  if (over || f.atkCd > 0) return;
+  if (!f.item) { f.catchUntil = performance.now() / 1000 + .28; f.atkCd = .3; melee(f, f.transformed > 0 ? 16 : 8, 46, 120); }
+  else useItem(f);
+}
+function tryHeavy(f) {
+  if (over || f.atkCd > 0) return;
+  if (f.item) { f.atkCd = .45; throwHeld(f); return; }
+  if (f.transformed > 0) {
+    f.atkCd = .6;
+    shots.push({ owner: f, x: f.x + f.face.x * 22, y: f.y + f.face.y * 22, vx: f.face.x * 560, vy: f.face.y * 560, dmg: 20, boom: false, color: '#ffd94d', big: true });
+    return;
+  }
+  f.atkCd = .75; melee(f, 14, 48, 220);
+}
+function explode(x, y, dmg, owner) {
+  fighters.forEach(f => {
+    if (f === owner) return;
+    const d = Math.hypot(f.x - x, f.y - y);
+    if (d <= 74) hurt(f, dmg, (f.x - x) / Math.max(1, d), (f.y - y) / Math.max(1, d), 240);
+  });
+  shots.push({ boomFx: true, x, y, r: 70, t: .16 });
+}
+function showFlash(t) { flashTxt = t; flashT = 1.4; const el = document.getElementById('flash'); el.textContent = t; el.style.opacity = 1; }
+function endMatch(w) {
+  over = true; winner = w.name + ' WINS!';
+  const b = document.getElementById('banner'); b.textContent = winner; b.style.display = 'block';
+  document.getElementById('sub').style.display = 'block';
+}
+
+// ============ AI ============
+function ai(f, dt, now) {
+  const o = fighters[0];
+  f.aiAtk -= dt; f.aiCatchCd -= dt;
+  // Catch incoming throws (75% reflexes)
+  if (!f.item && f.aiCatchCd <= 0) {
+    for (const t of thrown) {
+      if (t.owner === f || t.age < .05) continue;
+      const d = Math.hypot(t.x - f.x, t.y - f.y);
+      if (d < 92 && d > 16) {
+        const closing = (t.vx * (f.x - t.x) + t.vy * (f.y - t.y)) / Math.max(1, d * Math.hypot(t.vx, t.vy) || 1);
+        if (closing > .45) {
+          f.aiCatchCd = 1; f.face = { x: -t.vx, y: -t.vy };
+          const L = Math.hypot(f.face.x, f.face.y) || 1; f.face.x /= L; f.face.y /= L;
+          if (Math.random() < .75) f.catchUntil = now + .28;
+          break;
+        }
+      }
+    }
+  }
+  // Target: nearest gem (if close) > nearest item (if empty-handed) > opponent
+  let tx = o.x, ty = o.y, stop = 40;
+  let best = 175;
+  for (const g of gems) { const d = Math.hypot(g.x - f.x, g.y - f.y); if (d < best) { best = d; tx = g.x; ty = g.y; stop = 8; } }
+  if (stop !== 8 && !f.item) {
+    best = 210;
+    for (const it of groundItems) { const d = Math.hypot(it.x - f.x, it.y - f.y); if (d < best) { best = d; tx = it.x; ty = it.y; stop = 8; } }
+  }
+  const dx = tx - f.x, dy = ty - f.y, d = Math.hypot(dx, dy);
+  if (d > stop) { f.vx += (dx / d) * f.speed * dt * 7; f.vy += (dy / d) * f.speed * dt * 7; f.face = { x: dx / d, y: dy / d }; }
+  // Ranged: throw/shoot from distance
+  const od = Math.hypot(o.x - f.x, o.y - f.y);
+  if (f.item && f.aiAtk <= 0 && od > 70 && od < 320) {
+    f.face = { x: (o.x - f.x) / od, y: (o.y - f.y) / od };
+    if (f.item.arch === 'throw' || f.item.arch === 'boom') { f.aiAtk = 1.1; tryHeavy(f); return; }
+    if (f.item.arch === 'gun') { f.aiAtk = .85; tryLight(f); return; }
+    if (f.item.arch === 'food' && f.hp < 55) { f.aiAtk = 1; tryLight(f); return; }
+  }
+  if (od <= 52 && f.aiAtk <= 0) {
+    f.face = { x: (o.x - f.x) / od, y: (o.y - f.y) / od };
+    f.aiAtk = .55;
+    if (f.item && (f.item.arch === 'throw' || f.item.arch === 'boom') && Math.random() < .4) tryHeavy(f);
+    else if (!f.item && Math.random() < .22) tryHeavy(f);
+    else tryLight(f);
+  }
+}
+
+// ============ INPUT ============
+const joy = { active: false, id: -1, x: 0, y: 0 };
+const joyEl = document.getElementById('joy'), stickEl = document.getElementById('stick');
+function joyPos(e) { const r = joyEl.getBoundingClientRect(); return { cx: r.left + r.width / 2, cy: r.top + r.height / 2, rad: r.width / 2 }; }
+joyEl.addEventListener('touchstart', e => { e.preventDefault(); const t = e.changedTouches[0]; joy.active = true; joy.id = t.identifier; moveJoy(t); }, { passive: false });
+window.addEventListener('touchmove', e => { for (const t of e.changedTouches) if (joy.active && t.identifier === joy.id) moveJoy(t); }, { passive: false });
+window.addEventListener('touchend', e => { for (const t of e.changedTouches) if (t.identifier === joy.id) { joy.active = false; joy.x = joy.y = 0; stickEl.style.left = '44px'; stickEl.style.top = '44px'; } });
+function moveJoy(t) {
+  const { cx, cy, rad } = joyPos(t);
+  let dx = t.clientX - cx, dy = t.clientY - cy; const d = Math.hypot(dx, dy);
+  if (d > rad) { dx = dx / d * rad; dy = dy / d * rad; }
+  joy.x = dx / rad; joy.y = dy / rad;
+  stickEl.style.left = (44 + dx) + 'px'; stickEl.style.top = (44 + dy) + 'px';
+}
+// Mouse fallback for desktop testing
+let mouseDown = false;
+joyEl.addEventListener('mousedown', e => { mouseDown = true; moveJoy(e); });
+window.addEventListener('mousemove', e => { if (mouseDown) moveJoy(e); });
+window.addEventListener('mouseup', () => { mouseDown = false; joy.x = joy.y = 0; stickEl.style.left = '44px'; stickEl.style.top = '44px'; });
+const keys = {};
+window.addEventListener('keydown', e => { keys[e.code] = true; if (e.code === 'KeyF') tryLight(fighters[0]); if (e.code === 'KeyG') tryHeavy(fighters[0]); if (e.code === 'KeyR') reset(); });
+window.addEventListener('keyup', e => { keys[e.code] = false; });
+function bindBtn(id, fn) {
+  const el = document.getElementById(id);
+  el.addEventListener('touchstart', e => { e.preventDefault(); fn(); }, { passive: false });
+  el.addEventListener('mousedown', e => { e.preventDefault(); fn(); });
+}
+bindBtn('btnLight', () => tryLight(fighters[0]));
+bindBtn('btnHeavy', () => tryHeavy(fighters[0]));
+cv.addEventListener('touchstart', e => { if (over) reset(); }, { passive: true });
+cv.addEventListener('mousedown', () => { if (over) reset(); });
+
+// ============ UPDATE ============
+let last = performance.now();
+function loop(ts) {
+  const now = ts / 1000; let dt = Math.min(.033, (ts - last) / 1000); last = ts;
+  if (!over) step(dt, now);
+  draw(now);
+  requestAnimationFrame(loop);
+}
+function step(dt, now) {
+  timeLeft -= dt; if (timeLeft <= 0) { timeLeft = 0; endMatch(fighters[0].hp === fighters[1].hp ? { name: 'DRAW — NOBODY' } : (fighters[0].hp > fighters[1].hp ? fighters[0] : fighters[1])); }
+  const p = fighters[0];
+  // Player movement: joystick or WASD/arrows
+  let mx = joy.x, my = joy.y;
+  if (keys.KeyW || keys.ArrowUp) my -= 1; if (keys.KeyS || keys.ArrowDown) my += 1;
+  if (keys.KeyA || keys.ArrowLeft) mx -= 1; if (keys.KeyD || keys.ArrowRight) mx += 1;
+  const ml = Math.hypot(mx, my); if (ml > 1) { mx /= ml; my /= ml; }
+  if (ml > .12) { p.vx += mx * p.speed * dt * 7; p.vy += my * p.speed * dt * 7; p.face = { x: mx, y: my }; }
+  ai(fighters[1], dt, now);
+
+  for (const f of fighters) {
+    const sp = f.speed * (f.transformed > 0 ? 1.3 : 1);
+    const vl = Math.hypot(f.vx, f.vy); if (vl > sp) { f.vx = f.vx / vl * sp; f.vy = f.vy / vl * sp; }
+    f.x = clamp(f.x + f.vx * dt, ARENA.x + f.r, ARENA.x + ARENA.w - f.r);
+    f.y = clamp(f.y + f.vy * dt, ARENA.y + f.r, ARENA.y + ARENA.h - f.r);
+    f.vx *= Math.pow(.0001, dt); f.vy *= Math.pow(.0001, dt); // friction-ish damp
+    if (Math.abs(f.vx) < 2) f.vx = 0; if (Math.abs(f.vy) < 2) f.vy = 0;
+    f.atkCd -= dt; f.hurtT -= dt;
+    if (f.transformed > 0) { f.transformed -= dt; if (f.transformed <= 0) f.transformed = 0; }
+    // Gem pickup (0.6s delay after spawn)
+    for (let i = gems.length - 1; i >= 0; i--) {
+      if (now - gems[i].born > .6 && f.transformed <= 0 && Math.hypot(gems[i].x - f.x, gems[i].y - f.y) < f.r + 13) {
+        gems.splice(i, 1); f.gems++;
+        if (f.gems >= 3) { f.gems = 0; f.transformed = 12; showFlash(f.name + ' TRANSFORMED!'); }
+      }
+    }
+    // Item pickup
+    if (!f.item) for (let i = groundItems.length - 1; i >= 0; i--) {
+      if (Math.hypot(groundItems[i].x - f.x, groundItems[i].y - f.y) < f.r + 15) { equip(f, groundItems[i].def); groundItems.splice(i, 1); }
+    }
+  }
+  // Spawners
+  gemTimer -= dt; if (gemTimer <= 0) { gemTimer = 6; if (gems.length < 2) gems.push({ x: ARENA.x + 20 + Math.random() * (ARENA.w - 40), y: ARENA.y + 20 + Math.random() * (ARENA.h - 40), born: now, ph: Math.random() * TAU }); }
+  itemTimer -= dt; if (itemTimer <= 0) { itemTimer = 5; if (groundItems.length < 10) groundItems.push({ def: randItem(), x: ARENA.x + 20 + Math.random() * (ARENA.w - 40), y: ARENA.y + 20 + Math.random() * (ARENA.h - 40), ph: Math.random() * TAU }); }
+  // Thrown items
+  for (let i = thrown.length - 1; i >= 0; i--) {
+    const t = thrown[i]; t.age += dt; t.spin += dt * 9;
+    t.x += t.vx * dt; t.y += t.vy * dt;
+    if (t.x < ARENA.x + 12 || t.x > ARENA.x + ARENA.w - 12) { t.vx *= -.6; t.x = clamp(t.x, ARENA.x + 12, ARENA.x + ARENA.w - 12); }
+    if (t.y < ARENA.y + 12 || t.y > ARENA.y + ARENA.h - 12) { t.vy *= -.6; t.y = clamp(t.y, ARENA.y + 12, ARENA.y + ARENA.h - 12); }
+    let done = false;
+    for (const f of fighters) {
+      if (f === t.owner && t.age < .3) continue;
+      if (Math.hypot(f.x - t.x, f.y - t.y) > f.r + 13) continue;
+      // CATCH
+      if (!f.item && now <= f.catchUntil) {
+        const ivx = -t.vx, ivy = -t.vy, il = Math.hypot(ivx, ivy) || 1;
+        if ((f.face.x * ivx / il + f.face.y * ivy / il) > .1) {
+          equip(f, t.def); f.lastCatch = now; showFlash(f.name + ' CAUGHT THE ' + t.def.name.toUpperCase() + '!'); done = true; break;
+        }
+      }
+      // HIT
+      if (t.def.arch === 'boom') explode(t.x, t.y, t.def.damage, t.owner);
+      else { const d = Math.max(1, Math.hypot(t.vx, t.vy)); hurt(f, t.def.throwDamage, t.vx / d, t.vy / d, t.def.knockback); groundItems.push({ def: t.def, x: t.x, y: t.y, ph: 0 }); }
+      done = true; break;
+    }
+    if (!done && (Math.hypot(t.vx, t.vy) < 130 || t.age > 2.2)) { // lands
+      if (t.def.arch === 'boom') explode(t.x, t.y, t.def.damage, t.owner);
+      else groundItems.push({ def: t.def, x: t.x, y: t.y, ph: 0 });
+      done = true;
+    }
+    if (done) thrown.splice(i, 1);
+  }
+  // Shots
+  for (let i = shots.length - 1; i >= 0; i--) {
+    const s = shots[i];
+    if (s.boomFx) { s.t -= dt; if (s.t <= 0) shots.splice(i, 1); continue; }
+    s.x += s.vx * dt; s.y += s.vy * dt;
+    let dead = s.x < ARENA.x || s.x > ARENA.x + ARENA.w || s.y < ARENA.y || s.y > ARENA.y + ARENA.h;
+    if (!dead) for (const f of fighters) {
+      if (f === s.owner) continue;
+      if (Math.hypot(f.x - s.x, f.y - s.y) < f.r + 6) {
+        if (s.boom) explode(s.x, s.y, s.dmg, s.owner); else hurt(f, s.dmg, s.vx / 640, s.vy / 640, 110);
+        dead = true; break;
+      }
+    }
+    if (dead) shots.splice(i, 1);
+  }
+  // Hazard orb — the stage fights back
+  hazard.x += hazard.vx * dt; hazard.y += hazard.vy * dt;
+  if (hazard.x < ARENA.x + hazard.r || hazard.x > ARENA.x + ARENA.w - hazard.r) hazard.vx *= -1;
+  if (hazard.y < ARENA.y + hazard.r || hazard.y > ARENA.y + ARENA.h - hazard.r) hazard.vy *= -1;
+  hazard.x = clamp(hazard.x, ARENA.x + hazard.r, ARENA.x + ARENA.w - hazard.r);
+  hazard.y = clamp(hazard.y, ARENA.y + hazard.r, ARENA.y + ARENA.h - hazard.r);
+  fighters.forEach((f, i) => {
+    hazard.cd[i] -= dt;
+    if (hazard.cd[i] <= 0 && Math.hypot(f.x - hazard.x, f.y - hazard.y) < f.r + hazard.r) {
+      hazard.cd[i] = 1; const d = Math.max(1, Math.hypot(f.x - hazard.x, f.y - hazard.y));
+      hurt(f, 10, (f.x - hazard.x) / d, (f.y - hazard.y) / d, 200);
+    }
+  });
+  if (flashT > 0) { flashT -= dt; if (flashT <= 0) document.getElementById('flash').style.opacity = 0; }
+  updateHud();
+}
+function updateHud() {
+  fighters.forEach((f, i) => {
+    document.getElementById('hp' + i).style.width = Math.max(0, f.hp) + '%';
+    document.getElementById('hp' + i).style.background = f.transformed > 0 ? '#ffd94d' : '#42d35a';
+    document.getElementById('meta' + i).textContent = f.transformed > 0 ? 'TRANSFORMED: ' + Math.ceil(f.transformed) + 's' : 'Gems: ' + '★'.repeat(f.gems) + '☆'.repeat(3 - f.gems);
+    document.getElementById('item' + i).textContent = 'Item: ' + (f.item ? f.item.name : '—') + (performance.now() / 1000 - f.lastCatch < 1.5 ? '  CAUGHT!' : '');
+  });
+  const s = Math.max(0, Math.ceil(timeLeft));
+  document.getElementById('timer').textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+}
+
+// ============ DRAW ============
+function draw(now) {
+  ctx.fillStyle = '#23273a'; ctx.fillRect(0, 0, W, H);
+  // Arena floor + border
+  ctx.fillStyle = '#39405e'; ctx.fillRect(ARENA.x, ARENA.y, ARENA.w, ARENA.h);
+  ctx.strokeStyle = '#8b93b8'; ctx.lineWidth = 4; ctx.strokeRect(ARENA.x, ARENA.y, ARENA.w, ARENA.h);
+  ctx.fillStyle = '#e8c547'; ctx.beginPath(); ctx.arc(ARENA.x + ARENA.w / 2, ARENA.y + ARENA.h / 2, 26, 0, TAU); ctx.fill();
+  // Ground items
+  for (const it of groundItems) {
+    const bob = Math.sin(now * 2 + it.ph) * 3;
+    ctx.save(); ctx.translate(it.x, it.y + bob); ctx.rotate(Math.sin(now + it.ph) * .3);
+    ctx.fillStyle = it.def.color; const s = 13 * it.def.scale + 6;
+    if (it.def.arch === 'boom') { ctx.beginPath(); ctx.arc(0, 0, s * .7, 0, TAU); ctx.fill(); }
+    else if (it.def.arch === 'melee' || it.def.arch === 'special') ctx.fillRect(-3, -s, 6, s * 2);
+    else ctx.fillRect(-s / 1.4, -s / 1.4, s * 1.4, s * 1.4);
+    ctx.restore();
+    ctx.fillStyle = '#fff'; ctx.font = '9px system-ui'; ctx.textAlign = 'center';
+    ctx.fillText(it.def.name, it.x, it.y + bob + 22);
+  }
+  // Gems
+  for (const g of gems) {
+    const bob = Math.sin(now * 2.5 + g.ph) * 3;
+    ctx.save(); ctx.translate(g.x, g.y + bob); ctx.rotate(now * 2);
+    ctx.fillStyle = '#ff3355'; ctx.fillRect(-7, -7, 14, 14); ctx.restore();
+    ctx.fillStyle = '#ff8fa8'; ctx.beginPath(); ctx.arc(g.x, g.y + bob, 3, 0, TAU); ctx.fill();
+  }
+  // Hazard
+  ctx.fillStyle = '#a13fd6'; ctx.beginPath(); ctx.arc(hazard.x, hazard.y, hazard.r, 0, TAU); ctx.fill();
+  ctx.fillStyle = '#d9a5ff'; ctx.beginPath(); ctx.arc(hazard.x - 4, hazard.y - 4, 5, 0, TAU); ctx.fill();
+  // Thrown items (grow slightly = height arc illusion)
+  for (const t of thrown) {
+    const s = 1 + Math.sin(Math.min(1, t.age / 1.1) * Math.PI) * .45;
+    ctx.save(); ctx.translate(t.x, t.y); ctx.rotate(t.spin); ctx.scale(s, s);
+    ctx.fillStyle = t.def.color;
+    if (t.def.arch === 'boom') { ctx.beginPath(); ctx.arc(0, 0, 10, 0, TAU); ctx.fill(); } else ctx.fillRect(-9, -9, 18, 18);
+    ctx.restore();
+    ctx.fillStyle = '#fff'; ctx.font = '9px system-ui'; ctx.textAlign = 'center'; ctx.fillText(t.def.name, t.x, t.y - 16 * s);
+  }
+  // Shots + explosions
+  for (const s of shots) {
+    if (s.boomFx) { ctx.fillStyle = 'rgba(255,140,30,.65)'; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, TAU); ctx.fill(); continue; }
+    ctx.fillStyle = s.color; ctx.beginPath(); ctx.arc(s.x, s.y, s.big ? 9 : 5, 0, TAU); ctx.fill();
+  }
+  // Fighters
+  for (const f of fighters) {
+    const tr = f.transformed > 0;
+    ctx.save(); ctx.translate(f.x, f.y);
+    if (tr) { ctx.fillStyle = 'rgba(255,217,77,.35)'; ctx.beginPath(); ctx.arc(0, 0, f.r + 12 + Math.sin(now * 6) * 3, 0, TAU); ctx.fill(); }
+    ctx.fillStyle = f.hurtT > 0 ? '#ffffff' : (tr ? '#ffd94d' : f.color);
+    ctx.beginPath(); ctx.arc(0, 0, f.r * (tr ? 1.3 : 1), 0, TAU); ctx.fill();
+    // facing nose
+    ctx.fillStyle = '#10121c'; ctx.beginPath(); ctx.arc(f.face.x * 10, f.face.y * 10, 4.5, 0, TAU); ctx.fill();
+    // catch window ring
+    if (performance.now() / 1000 <= f.catchUntil) { ctx.strokeStyle = '#7df9ff'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(0, 0, f.r + 7, 0, TAU); ctx.stroke(); }
+    ctx.restore();
+    // held item
+    if (f.item) {
+      ctx.fillStyle = f.item.color; ctx.fillRect(f.x + 12, f.y - 24, 11, 11);
+      ctx.fillStyle = '#fff'; ctx.font = '9px system-ui'; ctx.textAlign = 'center'; ctx.fillText(f.item.name, f.x, f.y - 28);
+    }
+  }
+}
+reset();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
