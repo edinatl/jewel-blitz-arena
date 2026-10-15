@@ -1,7 +1,12 @@
-# Power Arena — Prototype v0.8
+# Power Arena — Prototype v0.9
 
 An original arena brawler inspired by Power Stone 2's formula.
 2 fighters, 1 arena, local play + a solo bot. No Capcom assets, names, or characters.
+
+## What changed in v0.9 (pickup fix + Ben's concept-art fighters)
+- **Pickup is forgiving now:** the ○ pickup radius grew (1.6 → 2.2 m) — you no longer have to stand pixel-perfect on an item.
+- **○ drops non-throwables:** with a throwable/explosive in hand, Heavy/○ still throws it in your facing direction; with anything else (bat, gun, food…), ○ now **drops it at your feet** instead of hurling it. □ still uses items and throws throwables aimed at the closest foe.
+- **Two new 3D fighters from Ben's concept art** (`CharacterVisual.cs`): **Ignis** — spiky auburn hair, goggles, furnace backpack, oversized metal gauntlets (one with a glowing furnace core); **Kira** — long purple ponytail with a gold tie, orange sash, chain-sickle on her back. Both animate with the standard procedural rig (run cycle, swings, catch pose, flinch, KO fall). They're in the roster for stage/bot use; the duel still fields Soldier vs Samurai sprites.
 
 ## What changed in v0.8 (Ben's test-mode pass)
 - **The bot doesn't attack** (`PlayerController.BotAttacksEnabled = false`): it roams and collects, but never swings, throws, grabs, or fusions — a test dummy while you learn the systems. Flip the flag to re-arm it.
