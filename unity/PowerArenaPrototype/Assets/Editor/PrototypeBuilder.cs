@@ -83,7 +83,7 @@ public static class PrototypeBuilder
         EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene("Assets/Scenes/Arena.unity", true) };
         AssetDatabase.SaveAssets();
         EditorUtility.DisplayDialog("Prototype",
-            "Arena scene built and saved.\n\nPress Play to fight!\n\nP1: WASD + Space/F/G\nP2 starts as AI — press any P2 key to take over.", "Play!");
+            "Arena scene built and saved.\n\nPress Play to fight!\n\nP1: WASD move - Space jump/roll - F attack - G throw - H fusion\nP2 starts as AI — press any P2 key to take over.", "Play!");
     }
 
     static void MakeWall(string name, Vector3 pos, Vector3 scale)
@@ -135,6 +135,7 @@ public static class PrototypeBuilder
         ctrl.jumpKey = KeyCode.Space;
         ctrl.attackKey = KeyCode.F;
         ctrl.heavyKey = KeyCode.G;
+        ctrl.fusionKey = KeyCode.H;
         ctrl.aiEnabled = false;
     }
 
@@ -148,6 +149,7 @@ public static class PrototypeBuilder
         ctrl.jumpKey = KeyCode.RightShift;
         ctrl.attackKey = KeyCode.Period;
         ctrl.heavyKey = KeyCode.Slash;
+        ctrl.fusionKey = KeyCode.Comma;
         ctrl.aiEnabled = true; // solo play vs bot until a human presses a P2 key
     }
 
