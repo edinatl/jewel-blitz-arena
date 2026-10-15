@@ -41,6 +41,8 @@ public class CharacterVisual : MonoBehaviour
             case "Pyra":      return new Palette(new Color(0.72f, 0.16f, 0.30f), new Color(0.45f, 0.10f, 0.35f), skin, new Color(1f, 0.55f, 0.15f), new Color(0.25f, 0.08f, 0.12f));
             case "Gusto":     return new Palette(new Color(0.92f, 0.92f, 0.90f), new Color(0.35f, 0.35f, 0.38f), skin, new Color(0.85f, 0.20f, 0.18f), new Color(0.30f, 0.25f, 0.22f));
             case "Dusty":     return new Palette(new Color(0.45f, 0.32f, 0.20f), new Color(0.30f, 0.22f, 0.14f), skin, new Color(0.85f, 0.65f, 0.25f), new Color(0.15f, 0.12f, 0.10f));
+            case "Ignis":     return new Palette(new Color(0.60f, 0.48f, 0.29f), new Color(0.54f, 0.48f, 0.35f), skin, new Color(0.42f, 0.44f, 0.46f), new Color(0.29f, 0.22f, 0.15f));
+            case "Kira":      return new Palette(new Color(0.17f, 0.21f, 0.31f), new Color(0.72f, 0.69f, 0.75f), skin, new Color(0.85f, 0.70f, 0.29f), new Color(0.14f, 0.13f, 0.18f));
             default: // Soldier
                 return new Palette(new Color(0.33f, 0.43f, 0.26f), new Color(0.24f, 0.32f, 0.19f), skin, new Color(0.20f, 0.22f, 0.16f), new Color(0.16f, 0.15f, 0.12f));
         }
@@ -198,6 +200,37 @@ public class CharacterVisual : MonoBehaviour
     {
         switch (character)
         {
+            case "Ignis": {
+                // From Ben's concept art: spiky auburn hair, goggles,
+                // red shirt, furnace backpack, oversized metal gauntlets.
+                var s1 = PartCone(Head, new Vector3(-0.16f, 0.30f, -0.02f), new Vector3(0.13f, 0.34f, 0.13f), new Color(0.66f, 0.35f, 0.16f), "SpikeL");
+                s1.transform.localRotation = Quaternion.Euler(0f, 0f, 18f);
+                PartCone(Head, new Vector3(0.02f, 0.34f, -0.02f), new Vector3(0.15f, 0.42f, 0.15f), new Color(0.66f, 0.35f, 0.16f), "SpikeC");
+                var s3 = PartCone(Head, new Vector3(0.18f, 0.30f, -0.02f), new Vector3(0.13f, 0.34f, 0.13f), new Color(0.66f, 0.35f, 0.16f), "SpikeR");
+                s3.transform.localRotation = Quaternion.Euler(0f, 0f, -18f);
+                Part(PrimitiveType.Cube, Head, new Vector3(0f, 0.16f, 0.20f), new Vector3(0.34f, 0.07f, 0.07f), pal.Dark, "GoggleStrap");
+                Part(PrimitiveType.Sphere, Head, new Vector3(-0.09f, 0.16f, 0.24f), new Vector3(0.11f, 0.11f, 0.06f), new Color(0.49f, 0.84f, 0.94f), "LensL");
+                Part(PrimitiveType.Sphere, Head, new Vector3(0.09f, 0.16f, 0.24f), new Vector3(0.11f, 0.11f, 0.06f), new Color(0.49f, 0.84f, 0.94f), "LensR");
+                Part(PrimitiveType.Cube, Torso, new Vector3(0f, 0f, 0.20f), new Vector3(0.42f, 0.50f, 0.05f), new Color(0.69f, 0.19f, 0.16f), "Shirt");
+                Part(PrimitiveType.Cube, Body, new Vector3(0f, 1.55f, -0.30f), new Vector3(0.40f, 0.50f, 0.16f), pal.Accent, "FurnacePack");
+                Part(PrimitiveType.Cube, Body, new Vector3(0.14f, 1.95f, -0.30f), new Vector3(0.09f, 0.30f, 0.09f), pal.Dark, "Chimney");
+                Part(PrimitiveType.Cube, ArmL, new Vector3(0f, -0.66f, 0f), new Vector3(0.30f, 0.32f, 0.30f), pal.Accent, "GauntletL");
+                Part(PrimitiveType.Cube, ArmR, new Vector3(0f, -0.68f, 0f), new Vector3(0.38f, 0.40f, 0.38f), pal.Accent, "GauntletR");
+                Part(PrimitiveType.Cube, ArmR, new Vector3(0f, -0.68f, 0.20f), new Vector3(0.20f, 0.12f, 0.04f), new Color(1f, 0.48f, 0.16f), "FurnaceGlow");
+                break; }
+            case "Kira": {
+                // From Ben's concept art: long purple ponytail, gold
+                // hair tie, orange sash, chain-sickle across the back.
+                Part(PrimitiveType.Sphere, Head, new Vector3(0f, 0.12f, -0.02f), new Vector3(0.55f, 0.38f, 0.55f), new Color(0.42f, 0.23f, 0.60f), "HairCap");
+                var tail = PartCone(Head, new Vector3(0.05f, 0.52f, -0.18f), new Vector3(0.20f, 0.85f, 0.20f), new Color(0.42f, 0.23f, 0.60f), "Ponytail");
+                tail.transform.localRotation = Quaternion.Euler(28f, 0f, 0f);
+                Part(PrimitiveType.Sphere, Head, new Vector3(0.05f, 0.34f, -0.06f), new Vector3(0.12f, 0.12f, 0.12f), pal.Accent, "HairTie");
+                Part(PrimitiveType.Cube, Body, new Vector3(0f, 1.14f, 0f), new Vector3(0.56f, 0.14f, 0.40f), new Color(0.85f, 0.44f, 0.16f), "Sash");
+                Part(PrimitiveType.Cube, Body, new Vector3(0.10f, 0.92f, 0.18f), new Vector3(0.16f, 0.40f, 0.05f), new Color(0.85f, 0.44f, 0.16f), "SashFlap");
+                var sickle = Part(PrimitiveType.Cube, Body, new Vector3(-0.20f, 1.55f, -0.34f), new Vector3(0.05f, 0.50f, 0.05f), pal.Dark, "SickleHandle");
+                sickle.transform.localRotation = Quaternion.Euler(0f, 0f, -30f);
+                Part(PrimitiveType.Cube, Body, new Vector3(-0.38f, 1.78f, -0.36f), new Vector3(0.34f, 0.09f, 0.04f), new Color(0.82f, 0.83f, 0.85f), "SickleBlade");
+                break; }
             case "Soldier": {
                 Part(PrimitiveType.Sphere, Head, new Vector3(0f, 0.10f, 0f), new Vector3(0.54f, 0.34f, 0.54f), pal.Main, "Helmet");
                 Part(PrimitiveType.Cube, Body, new Vector3(0f, 1.48f, -0.30f), new Vector3(0.46f, 0.55f, 0.18f), pal.Secondary, "Backpack");
