@@ -93,6 +93,7 @@ namespace JewelBlitzArena.Sim
                     actor = default;
                     actor.FighterId = config.FighterIds[i];
                     actor.HeldItemSlot = ActorSlot.NoHeldItem;
+                    actor.HeldItemSlotLeft = ActorSlot.NoHeldItem;
 
                     KitRuntime kit;
                     if (catalog != null && catalog.TryGetFighter(actor.FighterId, out FighterKitRecord record))

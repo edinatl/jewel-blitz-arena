@@ -111,7 +111,7 @@ namespace JewelBlitzArena.Data
                 Move("Throw", "Throw", 100, 5, 2, 20),
                 Move("Blink Strike", "Flare", 40, 4, 2, 8),
                 Move("Curtain Call", "Surge", 320, 10, 8, 22),
-                Move("Smoke Vault", "Surge", 0, 12, 4, 24, effect: "Utility"),
+                Move("Smoke Vault", "Surge", 0, 12, 4, 24, effect: "Dizzy"),
             };
             return f;
         }
@@ -252,7 +252,7 @@ namespace JewelBlitzArena.Data
                 Move("Toolbox Mortar", "Surge", 280, 14, 4, 24),
                 Move("Toolbox Ram", "Surge", 280, 10, 6, 22),
                 Move("Toolbox Drop Weight", "Surge", 320, 18, 4, 28),
-                Move("Toolbox Mine Field", "Surge", 70, 12, 8, 20),
+                Move("Toolbox Mine Field", "Surge", 70, 12, 8, 20, effect: "Slow"),
                 Move("Spare Magnet", "Surge", 0, 10, 6, 18, effect: "Magnet"),
                 Move("Spare Flame", "Surge", 200, 12, 8, 24),
                 Move("Spare Chaff", "Surge", 40, 8, 4, 16, effect: "Blind"),
@@ -367,6 +367,8 @@ namespace JewelBlitzArena.Data
                 surgeA: ("Grapple Line", 310),
                 surgeB: ("Holdfast", 60),
                 flare: ("Prism Volley", 44));
+            // Surge B Holdfast — Pin 75 f in 3 m (cast.md §5).
+            f.Moves[f.Moves.Count - 1].Effect = "Pin";
             return f;
         }
 

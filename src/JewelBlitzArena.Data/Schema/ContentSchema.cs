@@ -8,8 +8,9 @@ namespace JewelBlitzArena.Data
         /// v4: fighter <c>kitBehavior</c> named exception enum (architecture §2.5).
         /// v5: move <c>effect</c> (Heal / Magnet / Utility) for Surge semantics.
         /// v6: move effects Stun / Blind (Bateria, Spare Chaff).
+        /// v7: move effects Dizzy / Slow / Pin (Smoke Vault, Mine Field, Holdfast).
         /// </summary>
-        public const uint Version = 6;
+        public const uint Version = 7;
         public const string BlobExtension = ".jba";
         public static readonly byte[] Magic = { (byte)'J', (byte)'B', (byte)'A', (byte)'D' };
 
@@ -95,5 +96,11 @@ namespace JewelBlitzArena.Data
         Stun = 4,
         /// <summary>Area Blind (Spare Chaff); keeps <see cref="MoveRecord.Damage"/> as hit damage.</summary>
         Blind = 5,
+        /// <summary>Area Dizzy (Smoke Vault); no offensive hit by default.</summary>
+        Dizzy = 6,
+        /// <summary>Area Slow (Toolbox Mine Field); keeps hit damage.</summary>
+        Slow = 7,
+        /// <summary>Area Pin (Holdfast); keeps hit damage; rooted but can attack.</summary>
+        Pin = 8,
     }
 }

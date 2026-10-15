@@ -59,10 +59,12 @@ public sealed class CameraStallHostTests
         var state = new MatchState { ActorCount = 2 };
         state.Actor0.IsAlive = true;
         state.Actor0.HeldItemSlot = ActorSlot.NoHeldItem;
+        state.Actor0.HeldItemSlotLeft = ActorSlot.NoHeldItem;
         state.Actor0.PosX = Fix.FromInt(-20);
         state.Actor0.PosZ = Fix.FromInt(0);
         state.Actor1.IsAlive = true;
         state.Actor1.HeldItemSlot = ActorSlot.NoHeldItem;
+        state.Actor1.HeldItemSlotLeft = ActorSlot.NoHeldItem;
         state.Actor1.PosX = Fix.FromInt(20);
         state.Actor1.PosZ = Fix.FromInt(0);
 

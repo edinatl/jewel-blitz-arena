@@ -46,10 +46,30 @@ namespace JewelBlitzArena.Sim
         public byte ReachRating;
         public byte HitApplied;
         public byte Facing; // 0 = +X, 1 = -X
-        public byte HeldItemSlot; // 255 = empty (S2)
 
-        /// <summary>Blinded timer (balance.md §4); was Reserved1 — same layout stride.</summary>
+        /// <summary>Right hand (Attack throws). 255 = empty.</summary>
+        public byte HeldItemSlot;
+
+        /// <summary>Left hand (Clank Strong throws). 255 = empty; unused unless DoubleHold.</summary>
+        public byte HeldItemSlotLeft;
+
+        /// <summary>Blinded timer (balance.md §4).</summary>
         public ushort BlindFrames;
+
+        /// <summary>Dizzy timer — can't act; mash shortens (balance.md §4).</summary>
+        public ushort DizzyFrames;
+
+        /// <summary>Slow timer — −40% move speed.</summary>
+        public ushort SlowFrames;
+
+        /// <summary>Pin timer — rooted; can still attack.</summary>
+        public ushort PinFrames;
+
+        /// <summary>Post-Dizzy immunity (300 f).</summary>
+        public ushort DizzyImmuneFrames;
+
+        /// <summary>Post-Pin immunity (240 f).</summary>
+        public ushort PinImmuneFrames;
 
         public const byte FlagAlive = 1 << 0;
         public const byte FlagBlitzed = 1 << 1;
@@ -85,12 +105,23 @@ namespace JewelBlitzArena.Sim
             set => SetFlag(FlagEliminated, value);
         }
 
-        public bool HasEmptyHands => HeldItemSlot == NoHeldItem;
+        // Ordinal matches KitBehavior.DoubleHold (field name shadows the enum type).
+        public bool IsDualHold => KitBehavior == 6;
+
+        /// <summary>True when neither hand holds an item.</summary>
+        public bool HasEmptyHands =>
+            HeldItemSlot == NoHeldItem && HeldItemSlotLeft == NoHeldItem;
+
+        /// <summary>True when at least one free hand remains (Clank can fill left).</summary>
+        public bool HasFreeHand =>
+            HeldItemSlot == NoHeldItem
+            || (IsDualHold && HeldItemSlotLeft == NoHeldItem);
 
         public bool CanAct =>
             IsAlive
             && !IsEliminated
             && StunFrames <= 0
+            && DizzyFrames == 0
             && KnockdownFrames <= 0
             && TransformFrames <= 0
             && RevertFrames <= 0

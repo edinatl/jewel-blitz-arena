@@ -2,6 +2,8 @@ namespace JewelBlitzArena.Sim
 {
     /// <summary>
     /// Loose-item pickup / throw / catch-window stubs. Damage from hits is S1.
+    /// Clank (<see cref="KitBehavior.DoubleHold"/>) uses right + left hands;
+    /// Attack throws right, Strong throws left.
     /// </summary>
     public static class ItemRuntime
     {
@@ -15,7 +17,7 @@ namespace JewelBlitzArena.Sim
         }
 
         /// <summary>
-        /// Process Action (pickup/catch) and Attack (throw held) for one actor.
+        /// Process Action (pickup/catch), Attack (throw right), Strong (throw left for dual-hold).
         /// Call after movement velocities are set, before physics integrate of items.
         /// </summary>
         public static void ProcessActorButtons(
@@ -35,7 +37,7 @@ namespace JewelBlitzArena.Sim
                 // Blinded: can't pick up or catch (balance.md §4).
                 if (actor.BlindFrames == 0)
                 {
-                    if (actor.HasEmptyHands)
+                    if (actor.HasFreeHand)
                     {
                         TryPickupNearest(ref state, actorIndex, ref contacts);
                     }
@@ -44,9 +46,14 @@ namespace JewelBlitzArena.Sim
                 }
             }
 
-            if (input.Attack && !actor.HasEmptyHands)
+            if (input.Attack && actor.HeldItemSlot != ActorSlot.NoHeldItem)
             {
-                TryThrowHeld(ref state, actorIndex, input, ref contacts);
+                TryThrowHeld(ref state, actorIndex, input, leftHand: false, ref contacts);
+            }
+
+            if (input.Strong && actor.HeldItemSlotLeft != ActorSlot.NoHeldItem)
+            {
+                TryThrowHeld(ref state, actorIndex, input, leftHand: true, ref contacts);
             }
         }
 
@@ -136,15 +143,26 @@ namespace JewelBlitzArena.Sim
             chosen.VelZ = Fix.Zero;
             chosen.InFlight = false;
             MatchStateAccess.SetLooseItem(ref state, best, chosen);
-            actor.HeldItemSlot = (byte)best;
+            if (!AssignToFreeHand(ref actor, (byte)best))
+            {
+                // No free hand (race); put item back on field.
+                chosen.HolderSlot = LooseItemSlot.NoHolder;
+                MatchStateAccess.SetLooseItem(ref state, best, chosen);
+                return;
+            }
+
             contacts.Add(SimEventKind.ActorItemPickup, (byte)actorIndex, (byte)best);
         }
 
         private static void TryThrowHeld(
-            ref MatchState state, int actorIndex, in InputFrame input, ref SimContactBuffer contacts)
+            ref MatchState state,
+            int actorIndex,
+            in InputFrame input,
+            bool leftHand,
+            ref SimContactBuffer contacts)
         {
             ref ActorSlot actor = ref MatchStateAccess.Actor(ref state, actorIndex);
-            int slot = actor.HeldItemSlot;
+            int slot = leftHand ? actor.HeldItemSlotLeft : actor.HeldItemSlot;
             if (slot == ActorSlot.NoHeldItem || slot >= PoolCaps.LooseItems)
             {
                 return;
@@ -153,7 +171,7 @@ namespace JewelBlitzArena.Sim
             LooseItemSlot item = MatchStateAccess.GetLooseItem(ref state, slot);
             if (!item.IsActive || item.HolderSlot != actorIndex)
             {
-                actor.HeldItemSlot = ActorSlot.NoHeldItem;
+                ClearHand(ref actor, leftHand);
                 return;
             }
 
@@ -172,7 +190,7 @@ namespace JewelBlitzArena.Sim
             item.FlightFrames = 0;
             MatchStateAccess.SetLooseItem(ref state, slot, item);
 
-            actor.HeldItemSlot = ActorSlot.NoHeldItem;
+            ClearHand(ref actor, leftHand);
             contacts.Add(SimEventKind.ItemThrown, (byte)actorIndex, (byte)slot);
         }
 
@@ -180,7 +198,7 @@ namespace JewelBlitzArena.Sim
             ref MatchState state, int actorIndex, ref SimContactBuffer contacts)
         {
             ref ActorSlot actor = ref MatchStateAccess.Actor(ref state, actorIndex);
-            if (!actor.HasEmptyHands)
+            if (!actor.HasFreeHand)
             {
                 return;
             }
@@ -213,7 +231,13 @@ namespace JewelBlitzArena.Sim
                 item.VelY = Fix.Zero;
                 item.VelZ = Fix.Zero;
                 MatchStateAccess.SetLooseItem(ref state, i, item);
-                actor.HeldItemSlot = (byte)i;
+                if (!AssignToFreeHand(ref actor, (byte)i))
+                {
+                    item.HolderSlot = LooseItemSlot.NoHolder;
+                    MatchStateAccess.SetLooseItem(ref state, i, item);
+                    return;
+                }
+
                 contacts.Add(SimEventKind.ItemCaught, (byte)actorIndex, (byte)i);
                 return;
             }
@@ -221,7 +245,7 @@ namespace JewelBlitzArena.Sim
 
         /// <summary>
         /// Clank Spare Parts magnet: strip held items from others in range, catch the
-        /// nearest loose item into empty hands, and snap remaining field items to the
+        /// nearest loose item into a free hand, and snap remaining field items to the
         /// caster's pickup ring (cast.md §2). Deterministic slot order.
         /// </summary>
         public static void ApplyMagnetSurge(ref MatchState state, int casterIndex, Fix range)
@@ -255,10 +279,10 @@ namespace JewelBlitzArena.Sim
                 DropHeldToField(ref state, a);
             }
 
-            // Prefer catching the nearest in-range field item into empty hands.
+            // Prefer catching the nearest in-range field item into a free hand.
             int catchSlot = -1;
             long catchDistSq = long.MaxValue;
-            if (caster.HasEmptyHands && caster.BlindFrames == 0)
+            if (caster.HasFreeHand && caster.BlindFrames == 0)
             {
                 for (int i = 0; i < PoolCaps.LooseItems; i++)
                 {
@@ -295,7 +319,12 @@ namespace JewelBlitzArena.Sim
                 caught.PosY = caster.PosY + PhysicsConstants.ItemRadius;
                 caught.PosZ = caster.PosZ;
                 MatchStateAccess.SetLooseItem(ref state, catchSlot, caught);
-                caster.HeldItemSlot = (byte)catchSlot;
+                if (!AssignToFreeHand(ref caster, (byte)catchSlot))
+                {
+                    caught.HolderSlot = LooseItemSlot.NoHolder;
+                    MatchStateAccess.SetLooseItem(ref state, catchSlot, caught);
+                    catchSlot = -1;
+                }
             }
 
             // Snap remaining field items in range to the pickup ring (not half-gap).
@@ -333,20 +362,57 @@ namespace JewelBlitzArena.Sim
             }
         }
 
+        /// <summary>Assign item to right hand first, then left if dual-hold.</summary>
+        private static bool AssignToFreeHand(ref ActorSlot actor, byte itemSlot)
+        {
+            if (actor.HeldItemSlot == ActorSlot.NoHeldItem)
+            {
+                actor.HeldItemSlot = itemSlot;
+                return true;
+            }
+
+            if (actor.IsDualHold && actor.HeldItemSlotLeft == ActorSlot.NoHeldItem)
+            {
+                actor.HeldItemSlotLeft = itemSlot;
+                return true;
+            }
+
+            return false;
+        }
+
+        private static void ClearHand(ref ActorSlot actor, bool leftHand)
+        {
+            if (leftHand)
+            {
+                actor.HeldItemSlotLeft = ActorSlot.NoHeldItem;
+            }
+            else
+            {
+                actor.HeldItemSlot = ActorSlot.NoHeldItem;
+            }
+        }
+
         private static void DropHeldToField(ref MatchState state, int actorIndex)
         {
             ref ActorSlot actor = ref MatchStateAccess.Actor(ref state, actorIndex);
-            int slot = actor.HeldItemSlot;
+            DropOneHandToField(ref state, ref actor, actorIndex, leftHand: false);
+            DropOneHandToField(ref state, ref actor, actorIndex, leftHand: true);
+        }
+
+        private static void DropOneHandToField(
+            ref MatchState state, ref ActorSlot actor, int actorIndex, bool leftHand)
+        {
+            int slot = leftHand ? actor.HeldItemSlotLeft : actor.HeldItemSlot;
             if (slot == ActorSlot.NoHeldItem || slot >= PoolCaps.LooseItems)
             {
-                actor.HeldItemSlot = ActorSlot.NoHeldItem;
+                ClearHand(ref actor, leftHand);
                 return;
             }
 
             LooseItemSlot item = MatchStateAccess.GetLooseItem(ref state, slot);
             if (!item.IsActive || item.HolderSlot != actorIndex)
             {
-                actor.HeldItemSlot = ActorSlot.NoHeldItem;
+                ClearHand(ref actor, leftHand);
                 return;
             }
 
@@ -354,13 +420,19 @@ namespace JewelBlitzArena.Sim
             item.PosX = actor.PosX;
             item.PosY = actor.PosY + PhysicsConstants.ItemRadius;
             item.PosZ = actor.PosZ;
+            // Slight +X offset for left-hand drop so dual strip doesn't stack cells.
+            if (leftHand)
+            {
+                item.PosX += PhysicsConstants.ItemRadius;
+            }
+
             item.VelX = Fix.Zero;
             item.VelY = Fix.Zero;
             item.VelZ = Fix.Zero;
             item.InFlight = false;
             item.FlightFrames = 0;
             MatchStateAccess.SetLooseItem(ref state, slot, item);
-            actor.HeldItemSlot = ActorSlot.NoHeldItem;
+            ClearHand(ref actor, leftHand);
         }
 
         private static long DistSqScaled(Fix ax, Fix az, Fix bx, Fix bz)

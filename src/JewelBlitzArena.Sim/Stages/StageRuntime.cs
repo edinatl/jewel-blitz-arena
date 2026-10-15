@@ -231,6 +231,7 @@ namespace JewelBlitzArena.Sim
                     {
                         ref ActorSlot actor = ref MatchStateAccess.Actor(ref state, a);
                         actor.HeldItemSlot = ActorSlot.NoHeldItem;
+                        actor.HeldItemSlotLeft = ActorSlot.NoHeldItem;
                     }
 
                     DespawnFieldItems(ref state);

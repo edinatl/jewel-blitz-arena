@@ -134,12 +134,12 @@ public sealed class FacingHealSurgeTests
     }
 
     [Test]
-    public void Smoke_Vault_is_utility_with_zero_MoveDamage()
+    public void Smoke_Vault_dizzies_foe_with_zero_MoveDamage()
     {
         ContentCatalog catalog = ContentCompiler.Compile(SampleContentFactory.CreateS5StubPack());
         Assert.That(catalog.TryGetFighter(SampleContentFactory.SableFighterId, out FighterKitRecord rec), Is.True);
         KitRuntime kit = KitRuntime.FromRecord(rec);
-        Assert.That(kit.SurgeB!.Effect, Is.EqualTo(MoveEffect.Utility));
+        Assert.That(kit.SurgeB!.Effect, Is.EqualTo(MoveEffect.Dizzy));
 
         MatchConfig config = MatchConfig.CreateDefault(0x534D4B5631UL, actorCount: 2);
         unsafe
@@ -152,11 +152,20 @@ public sealed class FacingHealSurgeTests
         sim.Reset(config, catalog);
         ForceBlitzReady(sim, 0);
 
+        MatchState snap = sim.Snapshot();
+        snap.Actor0.PosX = Fix.Zero;
+        snap.Actor0.PosZ = Fix.Zero;
+        snap.Actor1.PosX = Fix.FromInt(4);
+        snap.Actor1.PosZ = Fix.Zero;
+        sim.Restore(snap);
+
         var surgeB = InputFrame.Neutral;
         surgeB.SurgeB = true;
         sim.Step(surgeB, InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral);
-        Assert.That(sim.Snapshot().Actor0.MoveDamage, Is.EqualTo(0));
-        Assert.That(sim.Snapshot().Actor0.Action, Is.EqualTo((byte)ActorAction.SurgeB));
+        MatchState after = sim.Snapshot();
+        Assert.That(after.Actor0.MoveDamage, Is.EqualTo(0));
+        Assert.That(after.Actor0.Action, Is.EqualTo((byte)ActorAction.SurgeB));
+        Assert.That(after.Actor1.DizzyFrames, Is.EqualTo(MatchRules.DizzyDurationFrames - 1));
     }
 
     private static void ForceBlitzReady(Simulation sim, int slot)

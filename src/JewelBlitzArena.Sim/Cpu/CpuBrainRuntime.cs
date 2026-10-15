@@ -340,11 +340,18 @@ namespace JewelBlitzArena.Sim
             }
 
             uint roll = (uint)(rng.NextUInt64() & 0xFF);
-            if (!self.HasEmptyHands)
+            if (self.HeldItemSlot != ActorSlot.NoHeldItem)
             {
                 if (roll < (uint)(60 + level * 15))
                 {
                     frame.Attack = true;
+                }
+            }
+            else if (self.HeldItemSlotLeft != ActorSlot.NoHeldItem)
+            {
+                if (roll < (uint)(60 + level * 15))
+                {
+                    frame.Strong = true;
                 }
             }
             else if (roll < (uint)(80 + level * 12))
@@ -450,7 +457,7 @@ namespace JewelBlitzArena.Sim
         {
             var frame = InputFrame.FromStick(chaseDir, mag);
             uint roll = (uint)(rng.NextUInt64() & 0xFF);
-            if (self.HasEmptyHands && level >= 2 && roll < (uint)(100 + level * 10))
+            if (self.HasFreeHand && level >= 2 && roll < (uint)(100 + level * 10))
             {
                 frame.Action = true;
                 return frame;
@@ -458,7 +465,16 @@ namespace JewelBlitzArena.Sim
 
             if (distSq <= reachSq && level >= 3)
             {
-                MaybePressAttack(ref frame, level, ref rng, preferStrong: false);
+                // Prefer throwing the filled hand: Strong for left, Attack for right.
+                if (self.HeldItemSlotLeft != ActorSlot.NoHeldItem
+                    && (self.HeldItemSlot == ActorSlot.NoHeldItem || (roll & 1) == 0))
+                {
+                    frame.Strong = true;
+                }
+                else
+                {
+                    MaybePressAttack(ref frame, level, ref rng, preferStrong: false);
+                }
             }
 
             return frame;

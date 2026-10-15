@@ -47,18 +47,33 @@ namespace JewelBlitzArena.Sim
                 return;
             }
 
-            if (actor.StunFrames > 0)
+            if (actor.StunFrames > 0 || actor.DizzyFrames > 0)
             {
                 actor.VelX = Fix.Zero;
                 actor.VelZ = Fix.Zero;
+                // Dizzy mash: shave one extra frame while buttons held, down to ~70% floor.
+                if (actor.DizzyFrames > 0
+                    && (input.Attack || input.Jump || input.Action || input.Strong)
+                    && actor.DizzyFrames > MatchRules.DizzyMashFloorFrames)
+                {
+                    actor.DizzyFrames--;
+                }
+
                 return;
             }
 
             bool canMove = actor.ActionPhase != (byte)ActionPhase.Startup
-                && actor.ActionPhase != (byte)ActionPhase.Active;
+                && actor.ActionPhase != (byte)ActionPhase.Active
+                && actor.PinFrames == 0;
             if (canMove)
             {
                 Fix step = MagnitudeToStep(input.Magnitude, dtWalk, dtRun, dtFull);
+                if (actor.SlowFrames > 0 && step.Raw != 0)
+                {
+                    // −40% move speed (balance.md §4).
+                    step = new Fix((step.Raw * 3) / 5);
+                }
+
                 if (step.Raw == 0)
                 {
                     actor.VelX = Fix.Zero;
@@ -93,8 +108,22 @@ namespace JewelBlitzArena.Sim
                 return;
             }
 
-            // Holding an item: Attack is throw (S2 ItemRuntime). Skip combat Attack/Flare.
-            if (!actor.HasEmptyHands && (input.Attack || input.Strong))
+            // Item throws: Attack → right hand; Strong → left hand (Clank). Single-hold kits
+            // still block Strong while holding the right-hand item.
+            if (input.Attack && actor.HeldItemSlot != ActorSlot.NoHeldItem)
+            {
+                return;
+            }
+
+            if (input.Strong && actor.HeldItemSlotLeft != ActorSlot.NoHeldItem)
+            {
+                return;
+            }
+
+            if (input.Strong
+                && actor.HeldItemSlot != ActorSlot.NoHeldItem
+                && actor.HeldItemSlotLeft == ActorSlot.NoHeldItem
+                && !actor.IsDualHold)
             {
                 return;
             }
@@ -229,6 +258,37 @@ namespace JewelBlitzArena.Sim
             if (actor.BlindFrames > 0)
             {
                 actor.BlindFrames--;
+            }
+
+            if (actor.DizzyFrames > 0)
+            {
+                actor.DizzyFrames--;
+                if (actor.DizzyFrames == 0)
+                {
+                    actor.DizzyImmuneFrames = MatchRules.DizzyImmuneFrames;
+                }
+            }
+            else if (actor.DizzyImmuneFrames > 0)
+            {
+                actor.DizzyImmuneFrames--;
+            }
+
+            if (actor.SlowFrames > 0)
+            {
+                actor.SlowFrames--;
+            }
+
+            if (actor.PinFrames > 0)
+            {
+                actor.PinFrames--;
+                if (actor.PinFrames == 0)
+                {
+                    actor.PinImmuneFrames = MatchRules.PinImmuneFrames;
+                }
+            }
+            else if (actor.PinImmuneFrames > 0)
+            {
+                actor.PinImmuneFrames--;
             }
 
             if (actor.ComboResetTimer > 0)
@@ -583,6 +643,30 @@ namespace JewelBlitzArena.Sim
                         actorIndex,
                         MatchRules.ChaffBlindRange,
                         MatchRules.BlindDurationFrames);
+                    break;
+                case MoveEffect.Dizzy:
+                    actor.MoveDamage = 0;
+                    StatusRuntime.ApplyAreaDizzy(
+                        ref state,
+                        actorIndex,
+                        MatchRules.SmokeVaultDizzyRange,
+                        MatchRules.DizzyDurationFrames);
+                    break;
+                case MoveEffect.Slow:
+                    actor.MoveDamage = move.Damage;
+                    StatusRuntime.ApplyAreaSlow(
+                        ref state,
+                        actorIndex,
+                        MatchRules.MineFieldSlowRange,
+                        MatchRules.SlowDurationFrames);
+                    break;
+                case MoveEffect.Pin:
+                    actor.MoveDamage = move.Damage;
+                    StatusRuntime.ApplyAreaPin(
+                        ref state,
+                        actorIndex,
+                        MatchRules.HoldfastPinRange,
+                        MatchRules.PinDurationFrames);
                     break;
                 default:
                     actor.MoveDamage = move.Damage;

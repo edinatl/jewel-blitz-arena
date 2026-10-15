@@ -434,11 +434,14 @@ namespace JewelBlitzArena.PresentationBridge
                 float inv = d > 0.0001f ? 1f / d : 0f;
                 float edgeU = ox * inv;
                 float edgeV = oz * inv;
-                bool hasItem = actor.HeldItemSlot != ActorSlot.NoHeldItem;
+                int heldSlot = actor.HeldItemSlot != ActorSlot.NoHeldItem
+                    ? actor.HeldItemSlot
+                    : actor.HeldItemSlotLeft;
+                bool hasItem = heldSlot != ActorSlot.NoHeldItem;
                 int itemId = -1;
                 if (hasItem)
                 {
-                    LooseItemSlot loose = MatchStateAccess.GetLooseItem(ref state, actor.HeldItemSlot);
+                    LooseItemSlot loose = MatchStateAccess.GetLooseItem(ref state, heldSlot);
                     itemId = loose.ItemId;
                 }
 

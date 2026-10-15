@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 6,
+  "schemaVersion": 7,
   "fighters": [
     {
       "fighterId": 1,
@@ -167,7 +167,7 @@
           "activeFrames": 4,
           "recoveryFrames": 24,
           "utilityExempt": false,
-          "effect": "Utility"
+          "effect": "Dizzy"
         }
       ]
     },
@@ -697,7 +697,7 @@
           "activeFrames": 8,
           "recoveryFrames": 20,
           "utilityExempt": false,
-          "effect": "None"
+          "effect": "Slow"
         },
         {
           "name": "Spare Magnet",
@@ -1162,7 +1162,7 @@
           "activeFrames": 8,
           "recoveryFrames": 28,
           "utilityExempt": false,
-          "effect": "None"
+          "effect": "Pin"
         }
       ]
     },

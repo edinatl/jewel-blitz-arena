@@ -68,6 +68,25 @@ namespace JewelBlitzArena.Sim
         public static readonly Fix ChaffBlindRange = Fix.FromInt(6);
         public const int BlindDurationFrames = 120;
 
+        /// <summary>Sable Smoke Vault area Dizzy (balance.md §4 max 90 f).</summary>
+        public static readonly Fix SmokeVaultDizzyRange = Fix.FromInt(8);
+        public const int DizzyDurationFrames = 90;
+        public const int DizzyImmuneFrames = 300;
+        /// <summary>Floor after mash shortening (~70% of max).</summary>
+        public const int DizzyMashFloorFrames = 63;
+
+        /// <summary>Clank Toolbox Mine Field Slow (balance.md §4 max 240 f).</summary>
+        public static readonly Fix MineFieldSlowRange = Fix.FromInt(6);
+        public const int SlowDurationFrames = 240;
+
+        /// <summary>Captain Holdfast Pin (cast.md §5 / balance.md §4 max 75 f).</summary>
+        public static readonly Fix HoldfastPinRange = Fix.FromInt(3);
+        public const int PinDurationFrames = 75;
+        public const int PinImmuneFrames = 240;
+
+        /// <summary>Hard-control cap for stun/dizzy/pin/grab sources (balance.md §4).</summary>
+        public const int HardControlCapFrames = 120;
+
         /// <summary>
         /// Clank Toolbox / Spare Parts direction index: 0 neutral, 1 forward, 2 up, 3 down
         /// (names.md / cast.md §2). Magnitude 0 → neutral; stick near +Z → up, −Z → down;
