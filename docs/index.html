@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Jewel Blitz Arena — 3D Demo v0.9</title>
+<title>Jewel Blitz Arena — 3D Demo v1.0</title>
 <style>
   html, body { margin:0; padding:0; overflow:hidden; background:#1a140d; font-family:system-ui, sans-serif; -webkit-user-select:none; user-select:none; touch-action:none; }
   #c { position:fixed; inset:0; }
@@ -77,7 +77,7 @@
 <div class="btn pbtn" id="btnAttack"><span class="sym">□</span><span class="lab">ATTACK</span></div>
 <div class="btn pbtn" id="btnAction"><span class="sym">○</span><span class="lab">ACTION</span></div>
 <div class="btn pbtn" id="btnJump"><span class="sym">✕</span><span class="lab">JUMP</span></div>
-<div id="help">4P FREE-FOR-ALL · SPRITES × 3D · □ ATTACK · ○ ACTION = throw / catch / GRAB / board turret · ✕ JUMP (move + ✕ = dodge roll) · △ FUSION / drop · 3 gems = TRANSFORM</div>
+<div id="help">4P FREE-FOR-ALL · SPRITES × 3D · □ ATTACK (throwables aim at the closest foe) · ○ PICK UP / THROW in facing direction / CATCH / GRAB · ✕ JUMP (move + ✕ = dodge roll) · △ FUSION / drop · 3 gems = TRANSFORM</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
@@ -353,7 +353,7 @@ function buildItemMesh(def) {
     else if (F('Gravity Orb')) { glow(pSph(g, 0, .55, 0, .24, 0x6a2a9a, 0x3a105a, 1.6)); pTor(g, 0, .55, 0, .36, .03, 0xb08ad8, 0x6a2a9a, 1).rotation.x = Math.PI / 2 + .4; glowMats.push(g.children[g.children.length - 1].material); }
     else if (F('Mirror Shield')) { const s = pCyl(g, 0, .55, 0, .3, .3, .05, 0xd8dee8, 0x88aacc, .8); s.rotation.x = Math.PI / 2; pTor(g, 0, .55, 0, .3, .04, 0x8a6a20); pBox(g, 0, .55, -.32, .08, .12, .08, 0x8a6a20); glowMats.push(g.children[0].material); }
     anim = 'glow';
-  } else { pBox(g, 0, .45, 0, .5, .5, .5, ac); }
+  } else { pBox(g, 0, .42, 0, .55, .55, .55, 0xa0762e); pBox(g, 0, .42, .29, .6, .6, .05, 0x7a5a1e); pBox(g, 0, .42, -.29, .6, .6, .05, 0x7a5a1e); pBox(g, 0, .72, 0, .58, .1, .58, ac); }
   g.userData = { anim, glowMats, sparkColor, fuseH, baseScale: def.scale + .35 };
   g.scale.setScalar(def.scale + .35);
   return g;
@@ -746,6 +746,20 @@ function tryAction(f) { // CIRCLE: throw / catch / board turret
   if (state.over || f.dead || f.atkCd > 0 || f.downT > 0) return;
   if (f.boarded) { unboard(f); return; }
   if (f.grabbing) { throwFoe(f); return; }
+  if (!f.item) {
+    // CIRCLE = PICK UP: grab the nearest ground item at your feet.
+    let bi = -1, bd = 1.25;
+    groundItems.forEach((g, i) => { const dd = Math.hypot(g.x - f.x, g.z - f.z); if (dd < bd) { bd = dd; bi = i; } });
+    if (bi >= 0) {
+      const g = groundItems[bi];
+      f.item = g.def; f.itemUses = g.def.uses; refreshHeld(f);
+      burst(g.x, .8, g.z, 0xffffff, 5, 1.6, .35);
+      scene.remove(g.mesh); groundItems.splice(bi, 1);
+      if (f === player) flashMsg('Picked up ' + g.def.name);
+      f.atkCd = .25;
+      return;
+    }
+  }
   if (!f.item && f.grabCd <= 0) {
     const gfoe = nearestFoe(f);
     if (gfoe && !gfoe.grabbedBy && gfoe.downT <= 0 && gfoe.throwFoeT <= 0 && gfoe.transformed <= 0 && dist(f, gfoe) < 1.65) { startGrab(f, gfoe); return; }
@@ -830,8 +844,7 @@ function aimFace(f, foe) {
 function throwItem(f) {
   const now = perfNow();
   if (state.over || f.dead || f.atkCd > 0 || !f.item) return;
-  const def = f.item, foe = nearestFoe(f); if (!foe) return;
-  f.face = aimFace(f, foe);
+  const def = f.item;
   f.atkCd = .45; f.atkT = now; f.atkMax = .45; f.atkKind = 'throw';
   const mesh = buildItemMesh(def);
   scene.add(mesh);
@@ -882,10 +895,11 @@ function botThink(f, dt) {
   f.vx += (mx * sp - f.vx) * Math.min(1, dt * 7);
   f.vz += (mz * sp - f.vz) * Math.min(1, dt * 7);
   if (md > .3) f.face = { x: mx, z: mz }; else f.face = aimFace(f, foe);
+  if (!f.item && groundItems.some(g => Math.hypot(g.x - f.x, g.z - f.z) < 1.15)) { tryAction(f); }
   if (f.aiT > 0) return;
   f.aiT = .22;
   if (f.item && (f.item.arch === 'gun')) { if (d < 11) { f.face = aimFace(f, foe); tryAttack(f); return; } }
-  if (f.item && (f.item.arch === 'throw' || f.item.arch === 'boom')) { if (d > 3 && d < 10) { tryAction(f); return; } }
+  if (f.item && (f.item.arch === 'throw' || f.item.arch === 'boom')) { if (d > 3 && d < 10) { f.face = aimFace(f, foe); tryAction(f); return; } }
   if (d < 1.95) {
     if (!f.item && Math.random() < .2) { tryAction(f); return; }
     if (f.transformed > 0 && f.gauge >= 50 && Math.random() < .3) { tryFusionDrop(f); return; }
@@ -960,15 +974,6 @@ function step(dt) {
     if (!f.isBot || state.over) { f.vx *= Math.pow(.0001, dt); f.vz *= Math.pow(.0001, dt); }
     // Pickups
     if (!state.over && !f.dead && f.downT <= 0 && !f.boarded && !f.grabbedBy) {
-      for (let i = groundItems.length - 1; i >= 0; i--) {
-        const g = groundItems[i];
-        if (!f.item && Math.hypot(g.x - f.x, g.z - f.z) < 1.05) {
-          f.item = g.def; f.itemUses = g.def.uses; refreshHeld(f);
-          burst(g.x, .8, g.z, 0xffffff, 5, 1.6, .35);
-          scene.remove(g.mesh); groundItems.splice(i, 1);
-          if (f === player) flashMsg('Picked up ' + g.def.name);
-        }
-      }
       for (let i = gems.length - 1; i >= 0; i--) {
         const g = gems[i];
         const dd = Math.hypot(g.x - f.x, g.z - f.z);
