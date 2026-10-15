@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Jewel Blitz Arena — Sprite Demo v0.8</title>
+<title>Jewel Blitz Arena — Sprite Demo v0.9</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html,body { width:100%; height:100%; background:#14161f; overflow:hidden; font-family:system-ui, sans-serif; touch-action:none; user-select:none; -webkit-user-select:none; }
@@ -100,12 +100,12 @@ function mkCat(names, arch, dmg, uses, tDmg, tSpd, heal, cd, kb, scale, hueBase,
   }));
 }
 const CATALOG = [].concat(
-  mkCat(["Baseball Bat","Cricket Bat","Wooden Club","Steel Pipe","Wrench","Hammer","Mallet","Frying Pan","Katana","Broadsword","Rapier","Battle Axe","War Mace","Spear","Halberd","Chainsaw","Laser Sword","Spiked Club","Golf Club","Tennis Racket","Broom","Shovel","Torch","Umbrella"], 'melee', 12, 3, 7, 520, 0, .45, 170, .9, .08, 60),
-  mkCat(["Blaster Pistol","Revolver","Shotgun","Machine Gun","Laser Gun","Plasma Rifle","Flame Thrower","Freeze Ray","Rocket Launcher","Grenade Launcher","Crossbow","Bow","Slingshot","Water Cannon","Bubble Gun","Lightning Gun","Sonic Blaster","Railgun"], 'gun', 9, 4, 8, 560, 0, .38, 100, .55, .55, 60),
+  mkCat(["Baseball Bat","Cricket Bat","Wooden Club","Steel Pipe","Wrench","Hammer","Mallet","Frying Pan","Katana","Broadsword","Rapier","Battle Axe","War Mace","Spear","Halberd","Chainsaw","Laser Sword","Spiked Club","Golf Club","Tennis Racket","Broom","Shovel","Torch","Umbrella","Golden Club"], 'melee', 12, 3, 7, 520, 0, .45, 170, .9, .08, 60),
+  mkCat(["Blaster Pistol","Revolver","Shotgun","Machine Gun","Laser Gun","Plasma Rifle","Flame Thrower","Freeze Ray","Rocket Launcher","Grenade Launcher","Crossbow","Bow","Slingshot","Water Cannon","Bubble Gun","Lightning Gun","Sonic Blaster","Railgun","Mega Buster"], 'gun', 9, 4, 8, 560, 0, .38, 100, .55, .55, 60),
   mkCat(["Chair","Stool","Crate","Wooden Barrel","Metal Barrel","Rock","Brick","Book","Vase","Plant Pot","Cactus","Table Lamp","Bench","Small Table","Tire","Bowling Ball","Dumbbell","Kettle","Bucket","Toolbox","Backpack","Globe","Television","Microwave","Safe","Anvil","Treasure Chest","Ale Barrel","Statue Head"], 'throw', 6, 99, 11, 600, 0, .45, 140, .6, .35, 60),
   mkCat(["Bomb","Big Bomb","Dynamite Bundle","Grenade","Fire Bomb","Ice Bomb","Shock Bomb","Powder Keg","Oil Drum","Gas Can","Firework Crate","Land Mine","Sticky Bomb","Holy Bomb","Poison Bomb","Cluster Bomb"], 'boom', 19, 1, 12, 480, 0, .55, 170, .55, 0, 35),
   mkCat(["Cake","Roast Chicken","Pizza","Burger","Sushi Platter","Apple","Banana","Watermelon","Cheese Wheel","Honey Jar","Energy Drink","Magic Potion"], 'food', 4, 1, 5, 560, 24, .45, 60, .45, .22, 60),
-  mkCat(["Fire Wand","Ice Wand","Lightning Rod","Wind Fan","Poison Dagger","Vampire Fang","Golden Hammer","Giant Glove","Shock Glove","Magnet Coil","Gravity Orb","Mirror Shield"], 'special', 14, 4, 9, 520, 0, .42, 220, .65, .78, 60)
+  mkCat(["Fire Wand","Ice Wand","Lightning Rod","Wind Fan","Poison Dagger","Vampire Fang","Golden Hammer","Giant Glove","Shock Glove","Magnet Coil","Gravity Orb","Mirror Shield","Spring Punch Glove"], 'special', 14, 4, 9, 520, 0, .42, 220, .65, .78, 60)
 );
 // Heavy props fly slower, hit harder
 CATALOG.forEach(d => { if (d.arch === 'throw') { const idx = CATALOG.indexOf(d); if (idx >= 46 + 20) { d.throwDamage = 16; d.throwSpeed = 400; d.knockback = 200; d.scale = .9; } } });
@@ -130,6 +130,8 @@ let fighters, gems, groundItems, thrown, shots, hazard, timeLeft, over, winner, 
 let gemTimer, itemTimer, boxTimer = 7;
 let boxes = [], coins = [], pendingBooms = [];
 let debris = [], debrisTimer = 8;
+let pads = [];
+const BOT_ATTACKS = false; // Ben (2026-10-15): bot is a test dummy for now
 let particles = [], floaters = [], rings = [], shake = 0;
 
 function newFighter(x, y, color, name, isBot) {
@@ -138,14 +140,13 @@ function newFighter(x, y, color, name, isBot) {
            transformed: 0, atkCd: 0, catchUntil: 0, lastCatch: -9, hurtT: 0,
            aiAtk: 0, aiJump: 0, aiCatchCd: 0, atkT: 0, atkMax: .22, runPh: Math.random() * 6.28, speed: 240,
            jumpT: 0, catchCd: 0, atkKind: '', combo: 0, comboT: 0, downT: 0, rollT: 0, gold: 0, gauge: 0, wallJumped: false,
-           grabbing: null, grabbedBy: null, grabT: 0, grabCd: 0, rollStartT: -9, throwFoeT: 0, mash: 0, thrownHitDone: false };
+           grabbing: null, grabbedBy: null, grabT: 0, grabCd: 0, rollStartT: -9, throwFoeT: 0, mash: 0, thrownHitDone: false, slowT: 0, busterN: 0 };
 }
 function reset() {
   const cx = ARENA.x + ARENA.w / 2, cy = ARENA.y + ARENA.h / 2;
   fighters = [ newFighter(ARENA.x + ARENA.w * .25, cy, '#3f7dff', 'SOLDIER', false),
                newFighter(ARENA.x + ARENA.w * .75, cy, '#ff5347', 'SAMURAI', true) ];
   gems = []; groundItems = []; thrown = []; shots = []; particles = []; floaters = []; rings = []; shake = 0; boxes = []; coins = []; pendingBooms = []; boxTimer = 7;
-  hazard = { x: cx, y: ARENA.y + 40, vx: 150, vy: 115, r: 15, cd: [0, 0] };
   debris = []; debrisTimer = 8;
   timeLeft = 120; over = false; winner = ''; flashTxt = ''; flashT = 0;
   gemTimer = 1.2; itemTimer = 2.5;
@@ -155,6 +156,8 @@ function reset() {
     const a = (i / props.length) * TAU;
     groundItems.push({ def: findItem(n), x: cx + Math.cos(a) * ARENA.w * .33, y: cy + Math.sin(a) * ARENA.h * .33, ph: Math.random() * TAU, born: -9 });
   });
+  pads = [];
+  [[-.26, -.26], [.26, -.26], [-.26, .26], [.26, .26]].forEach(([fx, fy]) => pads.push({ x: cx + fx * ARENA.w, y: cy + fy * ARENA.h, entry: null, timer: Math.random() * .5 }));
   boxes.push({ x: cx - ARENA.w * .16, y: cy - ARENA.h * .18, hp: 2, ph: 1 });
   boxes.push({ x: cx + ARENA.w * .16, y: cy + ARENA.h * .18, hp: 2, ph: 3 });
   document.getElementById('banner').style.display = 'none';
@@ -232,12 +235,31 @@ function useItem(f) {
   const def = f.item; if (!def) return;
   f.atkKind = def.arch === 'gun' ? 'shoot' : (def.arch === 'food' ? 'punch' : 'swing');
   if (def.arch === 'melee' || def.arch === 'special') {
-    f.atkCd = def.cooldown; melee(f, f.transformed > 0 ? def.damage * 1.6 : def.damage, 52, def.knockback);
+    f.atkCd = def.cooldown;
+    const spring2 = def.name === 'Spring Punch Glove';
+    melee(f, f.transformed > 0 ? def.damage * 1.6 : def.damage + (spring2 ? 2 : 0), 52, spring2 ? def.knockback * 3 : def.knockback);
+    const o2 = fighters[1 - fighters.indexOf(f)];
+    if (o2 && Math.hypot(o2.x - f.x, o2.y - f.y) < 74) {
+      if (spring2) { o2.vx += f.face.x * 430; o2.vy += f.face.y * 430; floater(o2.x, o2.y - 40, 'BOING!', '#ff9a3a'); ringFx(o2.x, o2.y, 44, '#ff9a3a'); }
+      if (def.name === 'Golden Club') { coins.push({ x: o2.x, y: o2.y, vx: (Math.random() - .5) * 90, vy: (Math.random() - .5) * 90, ph: Math.random() * TAU }); floater(o2.x, o2.y - 30, 'COIN!', '#ffd94d'); }
+    }
     if (--f.uses <= 0) clearItem(f);
   } else if (def.arch === 'gun') {
     f.atkCd = def.cooldown;
-    const boom = def.name === 'Rocket Launcher' || def.name === 'Grenade Launcher';
-    shots.push({ owner: f, x: f.x + f.face.x * 20, y: f.y + f.face.y * 20, vx: f.face.x * 640, vy: f.face.y * 640, dmg: def.damage, boom, color: def.color });
+    const n = def.name, ba = Math.atan2(f.face.y, f.face.x);
+    if (n === 'Flame Thrower') {
+      // UNIQUE: cone of three short-lived flame jets.
+      for (let k = 0; k < 3; k++) { const a = ba + (k - 1) * .16;
+        shots.push({ owner: f, x: f.x + Math.cos(a) * 20, y: f.y + Math.sin(a) * 20, vx: Math.cos(a) * 430, vy: Math.sin(a) * 430, dmg: 5, boom: false, color: '#ff7a2a', life: .42, age: 0, big: true }); }
+    } else if (n === 'Mega Buster') {
+      // UNIQUE: rapid pellets; every 4th shot is a charged blast.
+      f.busterN = (f.busterN || 0) + 1;
+      const charged = f.busterN % 4 === 0;
+      shots.push({ owner: f, x: f.x + f.face.x * 20, y: f.y + f.face.y * 20, vx: f.face.x * 720, vy: f.face.y * 720, dmg: charged ? 18 : 6, boom: charged, color: charged ? '#9fe8ff' : '#ffe14d', big: charged });
+    } else {
+      const boom = n === 'Rocket Launcher' || n === 'Grenade Launcher';
+      shots.push({ owner: f, x: f.x + f.face.x * 20, y: f.y + f.face.y * 20, vx: f.face.x * 640, vy: f.face.y * 640, dmg: def.damage, boom, color: def.color, freeze: n === 'Freeze Ray', chain: n === 'Lightning Gun' });
+    }
     f.atkT = .15; f.atkMax = .15; spawnParticles(f.x + f.face.x * 26, f.y + f.face.y * 26, 4, ['#ffe9a8', '#ffffff'], 120, .18, 2.5);
     if (--f.uses <= 0) clearItem(f);
   } else if (def.arch === 'food') {
@@ -304,10 +326,12 @@ function tryAction(f) { // ○ ACTION: throw held item, or catch with empty hand
   const now = performance.now() / 1000;
   if (f.grabbing) { throwFoe2D(f); return; }
   if (!f.item) {
+    const incoming = thrown.some(t => t.owner !== f && Math.hypot(t.x - f.x, t.y - f.y) < 90);
+    if (incoming) { if (f.catchCd <= 0) { f.catchCd = .9; f.catchUntil = now + .28; f.atkCd = .3; f.atkKind = 'catch'; } return; }
     // CIRCLE = PICK UP: take the nearest ground item at your feet.
     let bi = -1, bd = f.r + 17;
     groundItems.forEach((g, i) => { const dd = Math.hypot(g.x - f.x, g.y - f.y); if (dd < bd) { bd = dd; bi = i; } });
-    if (bi >= 0) { const g = groundItems[bi]; equip(f, g.def); groundItems.splice(bi, 1); f.atkCd = .25; floater(f.x, f.y - 30, g.def.name.toUpperCase(), '#bfe3ff'); return; }
+    if (bi >= 0) { const g = groundItems[bi]; equip(f, g.def); groundItems.splice(bi, 1); if (g.pad) { g.pad.entry = null; g.pad.timer = 1; } f.atkCd = .25; floater(f.x, f.y - 30, g.def.name.toUpperCase(), '#bfe3ff'); return; }
   }
   if (!f.item && f.grabCd <= 0) { const o = fighters[1 - fighters.indexOf(f)]; if (o && !o.grabbedBy && o.downT <= 0 && o.throwFoeT <= 0 && o.transformed <= 0 && Math.hypot(o.x - f.x, o.y - f.y) < 48) { startGrab2D(f, o); return; } }
   if (f.item) { f.atkCd = .45; f.atkKind = 'throw'; throwHeld(f); return; }
@@ -414,6 +438,7 @@ function ai(f, dt, now) {
   }
   const dx = tx - f.x, dy = ty - f.y, d = Math.hypot(dx, dy);
   if (d > stop) { f.vx += (dx / d) * f.speed * dt * 7; f.vy += (dy / d) * f.speed * dt * 7; f.face = { x: dx / d, y: dy / d }; }
+  if (!BOT_ATTACKS) return; // passive mode: roam + collect only
   // Ranged: throw/shoot from distance
   const od = Math.hypot(o.x - f.x, o.y - f.y);
   if (f.item && f.aiAtk <= 0 && od > 70 && od < 320) {
@@ -485,11 +510,12 @@ function step(dt, now) {
   if (keys.KeyA || keys.ArrowLeft) mx -= 1; if (keys.KeyD || keys.ArrowRight) mx += 1;
   const ml = Math.hypot(mx, my); if (ml > 1) { mx /= ml; my /= ml; }
   if (p.downT > 0 || p.grabbedBy) { mx = 0; my = 0; }
-  if (ml > .12) { p.vx += mx * p.speed * dt * 7; p.vy += my * p.speed * dt * 7; p.face = { x: mx, y: my }; }
+  const pSpd = p.speed * (p.slowT > 0 ? .55 : 1);
+  if (ml > .12) { p.vx += mx * pSpd * dt * 7; p.vy += my * pSpd * dt * 7; p.face = { x: mx, y: my }; }
   ai(fighters[1], dt, now);
 
   for (const f of fighters) {
-    const sp = f.speed * (f.transformed > 0 ? 1.3 : 1);
+    const sp = f.speed * (f.transformed > 0 ? 1.3 : 1) * (f.slowT > 0 ? .55 : 1);
     const vl = Math.hypot(f.vx, f.vy); if (vl > sp && f.throwFoeT <= 0) { f.vx = f.vx / vl * sp; f.vy = f.vy / vl * sp; }
     f.x = clamp(f.x + f.vx * dt, ARENA.x + f.r, ARENA.x + ARENA.w - f.r);
     f.y = clamp(f.y + f.vy * dt, ARENA.y + f.r, ARENA.y + ARENA.h - f.r);
@@ -497,7 +523,7 @@ function step(dt, now) {
     f.vx *= Math.pow(.0001, dt); f.vy *= Math.pow(.0001, dt); // friction-ish damp
     if (Math.abs(f.vx) < 2) f.vx = 0; if (Math.abs(f.vy) < 2) f.vy = 0;
     f.atkCd -= dt; f.hurtT -= dt; f.atkT = Math.max(0, f.atkT - dt);
-    f.jumpT = Math.max(0, f.jumpT - dt); f.catchCd -= dt; f.rollT = Math.max(0, f.rollT - dt); f.downT = Math.max(0, f.downT - dt); f.comboT -= dt; if (f.comboT <= 0) f.combo = 0;
+    f.jumpT = Math.max(0, f.jumpT - dt); f.catchCd -= dt; f.rollT = Math.max(0, f.rollT - dt); f.downT = Math.max(0, f.downT - dt); f.comboT -= dt; if (f.comboT <= 0) f.combo = 0; f.slowT = Math.max(0, (f.slowT || 0) - dt);
     f.grabCd = Math.max(0, f.grabCd - dt);
     if (f.grabbing) { f.grabT -= dt; if (f.grabT <= 0) throwFoe2D(f); }
     if (f.throwFoeT > 0) {
@@ -558,32 +584,27 @@ function step(dt, now) {
   for (let i = shots.length - 1; i >= 0; i--) {
     const s = shots[i];
     if (s.boomFx) { s.t -= dt; if (s.t <= 0) shots.splice(i, 1); continue; }
-    s.x += s.vx * dt; s.y += s.vy * dt;
-    let dead = s.x < ARENA.x || s.x > ARENA.x + ARENA.w || s.y < ARENA.y || s.y > ARENA.y + ARENA.h;
+    s.x += s.vx * dt; s.y += s.vy * dt; s.age = (s.age || 0) + dt;
+    let dead = (s.life && s.age > s.life) || s.x < ARENA.x || s.x > ARENA.x + ARENA.w || s.y < ARENA.y || s.y > ARENA.y + ARENA.h;
     if (!dead) for (const f of fighters) {
       if (f === s.owner) continue;
       if (Math.hypot(f.x - s.x, f.y - s.y) < f.r + 6) {
-        if (s.boom) explode(s.x, s.y, s.dmg, s.owner); else hurt(f, s.dmg, s.vx / 640, s.vy / 640, 110, 'shot');
+        if (s.boom) explode(s.x, s.y, s.dmg, s.owner);
+        else {
+          hurt(f, s.dmg, s.vx / 640, s.vy / 640, 110, 'shot');
+          if (s.freeze) { f.slowT = 1.2; floater(f.x, f.y - 36, 'FROZEN!', '#9fe8ff'); }
+          if (s.chain) { const o3 = fighters[1 - fighters.indexOf(f)]; if (o3 && o3 !== s.owner && Math.hypot(o3.x - f.x, o3.y - f.y) < 120) { const dd = Math.max(1, Math.hypot(o3.x - f.x, o3.y - f.y)); hurt(o3, 6, (o3.x - f.x) / dd, (o3.y - f.y) / dd, 90, 'shot'); floater(o3.x, o3.y - 36, 'ZAP!', '#a8e6ff'); } }
+        }
         dead = true; break;
       }
     }
     if (dead) shots.splice(i, 1);
   }
-  // Hazard orb — the stage fights back
-  hazard.x += hazard.vx * dt; hazard.y += hazard.vy * dt;
-  if (hazard.x < ARENA.x + hazard.r || hazard.x > ARENA.x + ARENA.w - hazard.r) hazard.vx *= -1;
-  if (hazard.y < ARENA.y + hazard.r || hazard.y > ARENA.y + ARENA.h - hazard.r) hazard.vy *= -1;
-  hazard.x = clamp(hazard.x, ARENA.x + hazard.r, ARENA.x + ARENA.w - hazard.r);
-  hazard.y = clamp(hazard.y, ARENA.y + hazard.r, ARENA.y + ARENA.h - hazard.r);
-  fighters.forEach((f, i) => {
-    hazard.cd[i] -= dt;
-    if (f.jumpT > 0) return;
-    if (hazard.cd[i] <= 0 && Math.hypot(f.x - hazard.x, f.y - hazard.y) < f.r + hazard.r) {
-      hazard.cd[i] = 1; const d = Math.max(1, Math.hypot(f.x - hazard.x, f.y - hazard.y));
-      hurt(f, 10, (f.x - hazard.x) / d, (f.y - hazard.y) / d, 200, 'hazard');
-    }
-  });
   if (flashT > 0) { flashT -= dt; if (flashT <= 0) document.getElementById('flash').style.opacity = 0; }
+  // Item pads: respawn a new random item 1s after one is taken
+  for (const pd of pads) {
+    if (!pd.entry) { pd.timer -= dt; if (pd.timer <= 0) { const def = randItem(); const e = { def, x: pd.x, y: pd.y, ph: Math.random() * TAU, born: -9, pad: pd }; groundItems.push(e); pd.entry = e; spawnParticles(pd.x, pd.y, 8, ['#ffc740', '#fff6b0'], 120, .35, 3); } }
+  }
   // Falling debris — telegraphed stage hazard
   debrisTimer -= dt;
   if (debrisTimer <= 0) { debrisTimer = 7 + Math.random() * 4; const tgt = fighters[Math.floor(Math.random() * 2)]; debris.push({ x: tgt.x, y: tgt.y, t: 1.15 }); if (Math.random() < .6) debris.push({ x: ARENA.x + 30 + Math.random() * (ARENA.w - 60), y: ARENA.y + 30 + Math.random() * (ARENA.h - 60), t: 1.15 }); }
@@ -658,9 +679,12 @@ function draw(now) {
   }
   // Hazard
   const hpulse = 1 + Math.sin(now * 6) * .13;
-  ctx.fillStyle = 'rgba(161,63,214,.30)'; ctx.beginPath(); ctx.arc(hazard.x, hazard.y, hazard.r * hpulse + 9, 0, TAU); ctx.fill();
-  ctx.fillStyle = '#a13fd6'; ctx.beginPath(); ctx.arc(hazard.x, hazard.y, hazard.r * hpulse, 0, TAU); ctx.fill();
-  ctx.fillStyle = '#d9a5ff'; ctx.beginPath(); ctx.arc(hazard.x - 4, hazard.y - 4, 5, 0, TAU); ctx.fill();
+  // Item pads: gold circles that pop up random items (1s respawn)
+  for (const pd of pads) {
+    ctx.strokeStyle = 'rgba(255,199,64,' + (.65 + Math.sin(now * 3 + pd.x) * .25) + ')'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(pd.x, pd.y, 24, 0, TAU); ctx.stroke();
+    ctx.fillStyle = 'rgba(255,199,64,.13)'; ctx.beginPath(); ctx.arc(pd.x, pd.y, 24, 0, TAU); ctx.fill();
+  }
   // Debris warnings + falling rocks
   for (const d of debris) {
     ctx.strokeStyle = 'rgba(255,60,50,' + (.5 + Math.sin(now * 14) * .3) + ')'; ctx.lineWidth = 2.5;
