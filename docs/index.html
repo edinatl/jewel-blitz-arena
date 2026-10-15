@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Jewel Blitz Arena — 3D Demo v1.6</title>
+<title>Jewel Blitz Arena — 3D Demo v1.7</title>
 <style>
   html, body { margin:0; padding:0; overflow:hidden; background:#1a140d; font-family:system-ui, sans-serif; -webkit-user-select:none; user-select:none; touch-action:none; }
   #c { position:fixed; inset:0; }
@@ -20,11 +20,20 @@
   #sub { position:fixed; top:47%; left:0; right:0; text-align:center; color:#fff; font-size:16px; text-shadow:0 1px 4px #000; display:none; pointer-events:none; z-index:6; }
   #hud2 { position:fixed; top:102px; left:0; right:0; display:flex; justify-content:space-between; padding:0 10px; pointer-events:none; z-index:5; }
   #hud2 .panel { width:31%; }
-  #select { position:fixed; inset:0; background:rgba(8,6,14,.74); z-index:20; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; color:#fff; }
+  #select { position:fixed; inset:0; background:rgba(8,6,14,.74); z-index:20; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; color:#fff; overflow-y:auto; padding:14px 0; box-sizing:border-box; }
   #select h1 { font-size:27px; margin:0; color:#ffd94d; text-shadow:0 2px 8px #000; }
-  #select .row { display:flex; gap:14px; }
-  .selBtn { pointer-events:auto; cursor:pointer; border:2px solid rgba(255,255,255,.5); background:rgba(20,20,34,.92); color:#fff; border-radius:14px; padding:16px 18px; font-size:17px; font-weight:900; text-align:center; min-width:132px; }
+  #select .row { display:flex; gap:14px; flex-wrap:wrap; justify-content:center; max-width:880px; padding:0 10px; box-sizing:border-box; }
+  .selBtn { pointer-events:auto; cursor:pointer; border:2px solid rgba(255,255,255,.5); background:rgba(20,20,34,.92); color:#fff; border-radius:14px; padding:16px 18px; font-size:17px; font-weight:900; text-align:center; flex:1 1 156px; max-width:200px; min-width:0; box-sizing:border-box; }
   .selBtn small { display:block; font-weight:600; font-size:12px; color:#bfe3ff; margin-top:4px; }
+  /* Phone screens: fighter cards go 2x2 so all four choices fit (Ben, 2026-10-15) */
+  @media (max-width:700px) {
+    #select { gap:10px; }
+    #select h1 { font-size:21px; }
+    #select .row { gap:10px; max-width:440px; }
+    .selBtn { flex:1 1 42%; padding:12px 8px; font-size:15px; }
+    .selBtn small { font-size:11px; }
+  }
+  @media (max-height:500px) { #select { justify-content:flex-start; } }
   #flash { position:fixed; top:16%; left:0; right:0; text-align:center; color:#7df9ff; font-size:19px; font-weight:800; text-shadow:0 1px 5px #000; opacity:0; transition:opacity .25s; pointer-events:none; z-index:6; }
   #joy { position:fixed; left:22px; bottom:26px; width:124px; height:124px; border-radius:50%; background:rgba(255,255,255,.10); border:2px solid rgba(255,255,255,.35); z-index:7; }
   #stick { position:absolute; left:38px; top:38px; width:48px; height:48px; border-radius:50%; background:rgba(255,255,255,.45); }
