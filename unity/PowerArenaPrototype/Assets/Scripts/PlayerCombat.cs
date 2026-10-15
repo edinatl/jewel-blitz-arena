@@ -373,7 +373,9 @@ public class PlayerCombat : MonoBehaviour
             return;
         }
 
-        // Empty hands + heavy next to a foe = GRAB (the PS2 Action move).
+        // Empty hands + heavy: PICK UP an item at your feet first,
+        // otherwise GRAB a foe next to you (the PS2 Action moves).
+        if (TryPickupNearest()) { nextAttackTime = Time.time + 0.25f; return; }
         if (TryGrab()) return;
 
         if (IsTransformed)
@@ -547,10 +549,11 @@ public class PlayerCombat : MonoBehaviour
 
             case ItemArchetype.Throwable:
             case ItemArchetype.Explosive:
-                // A throw-focused item in hand: light attack lobs it too
-                // (heavy throws everything — same result here).
+                // SQUARE with a throwable: the throw AIMS at the closest
+                // opponent. (HEAVY throws manually, in the direction the
+                // character is facing.)
                 nextAttackTime = Time.time + 0.45f;
-                ThrowHeldItem();
+                ThrowHeldItem(AimedThrowDirection());
                 return; // ThrowHeldItem already cleared the item
         }
 
@@ -561,12 +564,47 @@ public class PlayerCombat : MonoBehaviour
         }
     }
 
+    // Manual pickup (v0.7): the Action button picks up the nearest item
+    // within reach. Returns false when there's nothing to grab.
+    public bool TryPickupNearest()
+    {
+        if (HasItem) return false;
+        var pickups = FindObjectsOfType<ItemPickup>();
+        ItemPickup best = null;
+        float bd = 1.6f;
+        for (int i = 0; i < pickups.Length; i++)
+        {
+            Vector3 to = pickups[i].transform.position - transform.position;
+            to.y = 0f;
+            if (to.magnitude < bd) { bd = to.magnitude; best = pickups[i]; }
+        }
+        if (best == null) return false;
+        best.PickupBy(this);
+        return true;
+    }
+
+    Vector3 AimedThrowDirection()
+    {
+        GameObject opp = FindOpponent();
+        if (opp == null) return transform.forward;
+        Vector3 dir = opp.transform.position - transform.position;
+        dir.y = 0f;
+        return dir.sqrMagnitude > 0.01f ? dir.normalized : transform.forward;
+    }
+
     public void ThrowHeldItem()
+    {
+        ThrowHeldItem(transform.forward);
+    }
+
+    public void ThrowHeldItem(Vector3 direction)
     {
         if (!HasItem) return;
         ItemDefinition def = HeldItem;
         Vector3 origin = transform.position + Vector3.up * 1.3f + transform.forward * 0.7f;
         ClearItem();
-        ThrownItem.Throw(gameObject, def, origin, transform.forward);
+        direction.y = 0f;
+        if (direction.sqrMagnitude < 0.01f) direction = transform.forward;
+        ThrownItem.Throw(gameObject, def, origin, direction.normalized);
     }
 }
