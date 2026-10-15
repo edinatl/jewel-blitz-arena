@@ -102,6 +102,15 @@ public class Projectile : MonoBehaviour
         var rend = go.GetComponent<Renderer>();
         if (rend != null) rend.material.color = color;
 
+        // v0.4: motion trail so shots read as fast, animated streaks.
+        var trail = go.AddComponent<TrailRenderer>();
+        trail.time = 0.22f;
+        trail.startWidth = scale * 0.75f;
+        trail.endWidth = 0f;
+        trail.material = new Material(Shader.Find("Sprites/Default"));
+        trail.startColor = color;
+        trail.endColor = new Color(color.r, color.g, color.b, 0f);
+
         var rb = go.AddComponent<Rigidbody>();
         rb.useGravity = gravityScale > 0f;
         rb.collisionDetectionMode = CollisionDetectionMode.Continuous;

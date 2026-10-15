@@ -25,6 +25,8 @@ public class PlayerCombat : MonoBehaviour
     public bool HasItem { get { return HeldItem != null; } }
     public string HeldItemName { get { return HeldItem != null ? HeldItem.Name : ""; } }
     public float LastCatchTime { get; private set; }
+    public float LastAttackTime { get; private set; }  // FighterAnimator reads these
+    public float LastHitTime { get; private set; }
 
     public float transformDuration = 12f;
     public int gemsToTransform = 3;
@@ -51,6 +53,8 @@ public class PlayerCombat : MonoBehaviour
         if (bodyRenderer != null) baseColor = bodyRenderer.material.color;
         baseScale = transform.localScale;
         LastCatchTime = -10f;
+        LastAttackTime = -10f;
+        LastHitTime = -10f;
     }
 
     void Update()
@@ -79,6 +83,7 @@ public class PlayerCombat : MonoBehaviour
     public void TryLightAttack()
     {
         if (health.IsKO || Time.time < nextAttackTime) return;
+        LastAttackTime = Time.time;
         if (HasItem) { UseItem(); return; }
         nextAttackTime = Time.time + lightCooldown;
         MeleeHit(IsTransformed ? lightDamage * 2f : lightDamage,
@@ -88,6 +93,7 @@ public class PlayerCombat : MonoBehaviour
     public void TryHeavyAttack()
     {
         if (health.IsKO || Time.time < nextAttackTime) return;
+        LastAttackTime = Time.time;
 
         // Holding anything? Heavy = THROW it. This is the heart of the game.
         if (HasItem)
@@ -146,6 +152,7 @@ public class PlayerCombat : MonoBehaviour
     // instantly re-grab it, and gems have a pickup delay (see PowerGem).
     public void RegisterHitTaken(float damage)
     {
+        LastHitTime = Time.time;
         if (gems > 0 && !IsTransformed)
         {
             gems--;

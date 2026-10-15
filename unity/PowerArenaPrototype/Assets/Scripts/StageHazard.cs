@@ -29,6 +29,9 @@ public class StageHazard : MonoBehaviour
         if (p.z > arenaHalfSize || p.z < -arenaHalfSize) { dir.z = -dir.z; p.z = Mathf.Clamp(p.z, -arenaHalfSize, arenaHalfSize); }
         p.y = 1.0f + Mathf.Sin(Time.time * 3f) * 0.15f;
         transform.position = p;
+        // Menacing pulse so the orb feels alive.
+        float pulse = 1.1f * (1f + Mathf.Sin(Time.time * 6f) * 0.09f);
+        transform.localScale = new Vector3(pulse, pulse, pulse);
         transform.Rotate(Vector3.forward, 180f * Time.deltaTime);
 
         var gm = GameManager.Instance;
