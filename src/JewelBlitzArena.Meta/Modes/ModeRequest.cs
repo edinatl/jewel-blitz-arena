@@ -1,0 +1,25 @@
+namespace JewelBlitzArena.Meta
+{
+    /// <summary>Lobby inputs used to build a <see cref="Sim.MatchConfig"/>.</summary>
+    public sealed class ModeRequest
+    {
+        public ModeId Mode { get; set; } = ModeId.Custom;
+
+        public ulong Seed { get; set; } = 0x53365F4D455441UL; // S6_META
+
+        public int ActorCount { get; set; } = 2;
+
+        public int StageId { get; set; }
+
+        /// <summary>Fighter ids per slot; null → sequential defaults.</summary>
+        public int[]? FighterIds { get; set; }
+
+        public HouseRulesSettings HouseRules { get; set; } = HouseRulesSettings.CreateDefaults();
+
+        /// <summary>Sparring: jewel_mode respawn (Meta flag only until Sim training lands).</summary>
+        public bool SparringJewelRespawn { get; set; }
+
+        /// <summary>Sparring: item spawner pause insert enabled (Meta flag only).</summary>
+        public bool SparringItemSpawner { get; set; }
+    }
+}

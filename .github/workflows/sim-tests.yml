@@ -1,0 +1,28 @@
+name: Sim tests
+
+on:
+  push:
+    branches: ["main", "cursor/**"]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.x"
+      - name: Restore
+        run: dotnet restore JewelBlitzArena.sln
+      - name: Build
+        run: dotnet build JewelBlitzArena.sln --configuration Release --no-restore
+      - name: Test
+        run: dotnet test JewelBlitzArena.sln --configuration Release --no-build --verbosity normal
+      - name: Validate content blob
+        run: |
+          dotnet run --project tools/JewelBlitzArena.ContentExport -c Release --no-build -- validate content/export/s5_stub.jba
+          # Rebuild stub and ensure golden hash matches committed blob
+          dotnet run --project tools/JewelBlitzArena.ContentExport -c Release --no-build -- stub /tmp/s5_stub_check.jba
+          cmp content/export/s5_stub.jba /tmp/s5_stub_check.jba

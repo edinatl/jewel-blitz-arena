@@ -1,0 +1,483 @@
+{
+  "schemaVersion": 2,
+  "fighters": [
+    {
+      "fighterId": 1,
+      "name": "Rook Citrine",
+      "speedRating": 3,
+      "lifeRating": 3,
+      "reachRating": 3,
+      "airRating": 3,
+      "powerRating": 3,
+      "walkSpeed": "3",
+      "runSpeed": "5",
+      "fullSpeed": "7",
+      "moves": [
+        {
+          "name": "Jab",
+          "class": "Attack",
+          "damage": 35,
+          "startupFrames": 4,
+          "activeFrames": 2,
+          "recoveryFrames": 8,
+          "utilityExempt": false
+        },
+        {
+          "name": "Strong",
+          "class": "Strong",
+          "damage": 90,
+          "startupFrames": 10,
+          "activeFrames": 3,
+          "recoveryFrames": 18,
+          "utilityExempt": false
+        },
+        {
+          "name": "Air Attack",
+          "class": "AirAttack",
+          "damage": 45,
+          "startupFrames": 6,
+          "activeFrames": 3,
+          "recoveryFrames": 12,
+          "utilityExempt": false
+        },
+        {
+          "name": "Throw",
+          "class": "Throw",
+          "damage": 100,
+          "startupFrames": 5,
+          "activeFrames": 2,
+          "recoveryFrames": 20,
+          "utilityExempt": false
+        },
+        {
+          "name": "Thermal Dive",
+          "class": "Surge",
+          "damage": 300,
+          "startupFrames": 12,
+          "activeFrames": 6,
+          "recoveryFrames": 24,
+          "utilityExempt": false
+        },
+        {
+          "name": "Windlass",
+          "class": "Surge",
+          "damage": 170,
+          "startupFrames": 14,
+          "activeFrames": 8,
+          "recoveryFrames": 28,
+          "utilityExempt": false
+        }
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "stageId": 1,
+      "name": "Citrine Bazaar",
+      "jewelCrateChancePercent": 8,
+      "fallIsKo": false,
+      "jewelCapOverride": 0,
+      "phases": [
+        {
+          "name": "Bazaar",
+          "durationSeconds": "25",
+          "geometrySetId": 0,
+          "blitzSuppressed": false,
+          "transitionSeconds": "0",
+          "carryItems": "all",
+          "carryJewels": "all",
+          "carryJewelsDropChance": "0",
+          "cameraCenterX": "0",
+          "cameraCenterY": "8",
+          "cameraCenterZ": "0",
+          "cameraRadius": "12",
+          "hazards": [
+            {
+              "hazardId": 1,
+              "name": "CandiedDropZone",
+              "trigger": "timer",
+              "periodSeconds": "10",
+              "telegraphFrames": 30,
+              "damage": 0,
+              "centerX": "0",
+              "centerY": "0",
+              "centerZ": "2",
+              "radius": "1.5"
+            }
+          ],
+          "kinematics": []
+        },
+        {
+          "name": "Breakaway",
+          "durationSeconds": "25",
+          "geometrySetId": 1,
+          "blitzSuppressed": false,
+          "transitionSeconds": "2",
+          "carryItems": "all",
+          "carryJewels": "drop_chance",
+          "carryJewelsDropChance": "0.5",
+          "cameraCenterX": "0",
+          "cameraCenterY": "8",
+          "cameraCenterZ": "0",
+          "cameraRadius": "14",
+          "hazards": [
+            {
+              "hazardId": 2,
+              "name": "StallCollision",
+              "trigger": "timer",
+              "periodSeconds": "8",
+              "telegraphFrames": 40,
+              "damage": 80,
+              "centerX": "0",
+              "centerY": "0",
+              "centerZ": "0",
+              "radius": "2"
+            }
+          ],
+          "kinematics": [
+            {
+              "trackId": 1,
+              "name": "StallDrift",
+              "periodSeconds": "8",
+              "amplitude": "2",
+              "originX": "0",
+              "originY": "0",
+              "originZ": "0"
+            }
+          ]
+        },
+        {
+          "name": "Geode shelf",
+          "durationSeconds": "0",
+          "geometrySetId": 2,
+          "blitzSuppressed": false,
+          "transitionSeconds": "1",
+          "carryItems": "all",
+          "carryJewels": "all",
+          "carryJewelsDropChance": "0",
+          "cameraCenterX": "0",
+          "cameraCenterY": "8",
+          "cameraCenterZ": "0",
+          "cameraRadius": "16",
+          "hazards": [
+            {
+              "hazardId": 3,
+              "name": "SpikeTurretZone",
+              "trigger": "phase_enter",
+              "periodSeconds": "8",
+              "telegraphFrames": 40,
+              "damage": 90,
+              "centerX": "3",
+              "centerY": "0",
+              "centerZ": "-2",
+              "radius": "1.2"
+            }
+          ],
+          "kinematics": []
+        }
+      ]
+    }
+  ],
+  "items": [
+    {
+      "itemId": 1,
+      "name": "Pistol",
+      "category": "Firearm",
+      "rarity": 1,
+      "crateEligibility": "Always",
+      "pocketable": true,
+      "buyPrice": 100,
+      "sellPrice": 40,
+      "damagePerUse": 25,
+      "healPerUse": 0
+    },
+    {
+      "itemId": 2,
+      "name": "Flare Pistol",
+      "category": "Firearm",
+      "rarity": 2,
+      "crateEligibility": "Always",
+      "pocketable": true,
+      "buyPrice": 180,
+      "sellPrice": 70,
+      "damagePerUse": 30,
+      "healPerUse": 0
+    },
+    {
+      "itemId": 3,
+      "name": "Iron Pipe",
+      "category": "Melee",
+      "rarity": 1,
+      "crateEligibility": "Always",
+      "pocketable": true,
+      "buyPrice": 80,
+      "sellPrice": 30,
+      "damagePerUse": 30,
+      "healPerUse": 0
+    },
+    {
+      "itemId": 4,
+      "name": "Bat",
+      "category": "Melee",
+      "rarity": 1,
+      "crateEligibility": "Always",
+      "pocketable": true,
+      "buyPrice": 70,
+      "sellPrice": 25,
+      "damagePerUse": 28,
+      "healPerUse": 0
+    },
+    {
+      "itemId": 5,
+      "name": "Pry Bar",
+      "category": "Melee",
+      "rarity": 2,
+      "crateEligibility": "Always",
+      "pocketable": true,
+      "buyPrice": 120,
+      "sellPrice": 45,
+      "damagePerUse": 35,
+      "healPerUse": 0
+    },
+    {
+      "itemId": 6,
+      "name": "Mallet",
+      "category": "Melee",
+      "rarity": 2,
+      "crateEligibility": "Always",
+      "pocketable": true,
+      "buyPrice": 140,
+      "sellPrice": 50,
+      "damagePerUse": 40,
+      "healPerUse": 0
+    },
+    {
+      "itemId": 7,
+      "name": "Paper Fan",
+      "category": "Melee",
+      "rarity": 1,
+      "crateEligibility": "Always",
+      "pocketable": true,
+      "buyPrice": 60,
+      "sellPrice": 20,
+      "damagePerUse": 15,
+      "healPerUse": 0
+    },
+    {
+      "itemId": 8,
+      "name": "Cutlass",
+      "category": "Melee",
+      "rarity": 3,
+      "crateEligibility": "Always",
+      "pocketable": true,
+      "buyPrice": 220,
+      "sellPrice": 80,
+      "damagePerUse": 50,
+      "healPerUse": 0
+    },
+    {
+      "itemId": 9,
+      "name": "Oil Bottle",
+      "category": "Explosive",
+      "rarity": 1,
+      "crateEligibility": "Always",
+      "pocketable": true,
+      "buyPrice": 90,
+      "sellPrice": 35,
+      "damagePerUse": 35,
+      "healPerUse": 0
+    },
+    {
+      "itemId": 10,
+      "name": "Small Bomb",
+      "category": "Explosive",
+      "rarity": 2,
+      "crateEligibility": "Always",
+      "pocketable": true,
+      "buyPrice": 150,
+      "sellPrice": 55,
+      "damagePerUse": 45,
+      "healPerUse": 0
+    },
+    {
+      "itemId": 11,
+      "name": "Medium Bomb",
+      "category": "Explosive",
+      "rarity": 3,
+      "crateEligibility": "Always",
+      "pocketable": true,
+      "buyPrice": 240,
+      "sellPrice": 90,
+      "damagePerUse": 60,
+      "healPerUse": 0
+    },
+    {
+      "itemId": 12,
+      "name": "Barrel",
+      "category": "Explosive",
+      "rarity": 3,
+      "crateEligibility": "Always",
+      "pocketable": true,
+      "buyPrice": 260,
+      "sellPrice": 100,
+      "damagePerUse": 70,
+      "healPerUse": 0
+    },
+    {
+      "itemId": 13,
+      "name": "Apple",
+      "category": "Healing",
+      "rarity": 1,
+      "crateEligibility": "Always",
+      "pocketable": true,
+      "buyPrice": 40,
+      "sellPrice": 15,
+      "damagePerUse": 0,
+      "healPerUse": 80
+    },
+    {
+      "itemId": 14,
+      "name": "Pear",
+      "category": "Healing",
+      "rarity": 1,
+      "crateEligibility": "Always",
+      "pocketable": true,
+      "buyPrice": 45,
+      "sellPrice": 18,
+      "damagePerUse": 0,
+      "healPerUse": 90
+    },
+    {
+      "itemId": 15,
+      "name": "Skewer",
+      "category": "Healing",
+      "rarity": 2,
+      "crateEligibility": "Always",
+      "pocketable": true,
+      "buyPrice": 80,
+      "sellPrice": 30,
+      "damagePerUse": 0,
+      "healPerUse": 120
+    },
+    {
+      "itemId": 16,
+      "name": "Shortcake",
+      "category": "Healing",
+      "rarity": 2,
+      "crateEligibility": "Always",
+      "pocketable": true,
+      "buyPrice": 100,
+      "sellPrice": 40,
+      "damagePerUse": 0,
+      "healPerUse": 150
+    },
+    {
+      "itemId": 17,
+      "name": "Steak",
+      "category": "Healing",
+      "rarity": 3,
+      "crateEligibility": "Always",
+      "pocketable": true,
+      "buyPrice": 160,
+      "sellPrice": 60,
+      "damagePerUse": 0,
+      "healPerUse": 200
+    },
+    {
+      "itemId": 18,
+      "name": "Adhesive Spray",
+      "category": "Status",
+      "rarity": 2,
+      "crateEligibility": "Always",
+      "pocketable": true,
+      "buyPrice": 110,
+      "sellPrice": 40,
+      "damagePerUse": 0,
+      "healPerUse": 0
+    },
+    {
+      "itemId": 19,
+      "name": "Small Shield",
+      "category": "Status",
+      "rarity": 2,
+      "crateEligibility": "Always",
+      "pocketable": true,
+      "buyPrice": 130,
+      "sellPrice": 50,
+      "damagePerUse": 0,
+      "healPerUse": 0
+    },
+    {
+      "itemId": 20,
+      "name": "Smoke Jar",
+      "category": "Status",
+      "rarity": 1,
+      "crateEligibility": "Always",
+      "pocketable": true,
+      "buyPrice": 70,
+      "sellPrice": 25,
+      "damagePerUse": 0,
+      "healPerUse": 0
+    },
+    {
+      "itemId": 21,
+      "name": "Leg Irons",
+      "category": "Status",
+      "rarity": 3,
+      "crateEligibility": "Always",
+      "pocketable": true,
+      "buyPrice": 200,
+      "sellPrice": 75,
+      "damagePerUse": 0,
+      "healPerUse": 0
+    },
+    {
+      "itemId": 22,
+      "name": "Rollerskates",
+      "category": "Mobility",
+      "rarity": 2,
+      "crateEligibility": "Always",
+      "pocketable": true,
+      "buyPrice": 150,
+      "sellPrice": 55,
+      "damagePerUse": 0,
+      "healPerUse": 0
+    },
+    {
+      "itemId": 23,
+      "name": "Spring Boots",
+      "category": "Mobility",
+      "rarity": 3,
+      "crateEligibility": "Always",
+      "pocketable": true,
+      "buyPrice": 220,
+      "sellPrice": 80,
+      "damagePerUse": 0,
+      "healPerUse": 0
+    },
+    {
+      "itemId": 24,
+      "name": "Kitten",
+      "category": "Summon",
+      "rarity": 3,
+      "crateEligibility": "Always",
+      "pocketable": false,
+      "buyPrice": 300,
+      "sellPrice": 100,
+      "damagePerUse": 20,
+      "healPerUse": 0
+    },
+    {
+      "itemId": 25,
+      "name": "Trumpet",
+      "category": "Toy",
+      "rarity": 1,
+      "crateEligibility": "Always",
+      "pocketable": true,
+      "buyPrice": 50,
+      "sellPrice": 20,
+      "damagePerUse": 10,
+      "healPerUse": 0
+    }
+  ]
+}
