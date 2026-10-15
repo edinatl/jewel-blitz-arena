@@ -123,25 +123,25 @@ namespace JewelBlitzArena.Sim
             return kit;
         }
 
-        public MoveRecord? ResolveSurgeA(in InputFrame input)
+        public MoveRecord? ResolveSurgeA(in InputFrame input, byte facing = 0)
         {
             if (!HasSurgeVariants)
             {
                 return SurgeA;
             }
 
-            int idx = MatchRules.SurgeVariantIndex(in input);
+            int idx = MatchRules.SurgeVariantIndex(in input, facing);
             return SurgeAVariants[idx] ?? SurgeA;
         }
 
-        public MoveRecord? ResolveSurgeB(in InputFrame input)
+        public MoveRecord? ResolveSurgeB(in InputFrame input, byte facing = 0)
         {
             if (!HasSurgeVariants)
             {
                 return SurgeB;
             }
 
-            int idx = MatchRules.SurgeVariantIndex(in input);
+            int idx = MatchRules.SurgeVariantIndex(in input, facing);
             return SurgeBVariants[idx] ?? SurgeB;
         }
 

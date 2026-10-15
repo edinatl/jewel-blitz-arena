@@ -6,8 +6,9 @@ namespace JewelBlitzArena.Data
         /// v2: stage graph phase transitions, hazards, kinematics, camera volumes.
         /// v3: optional authored <c>scripted_camera</c> path keys per phase enter-transition.
         /// v4: fighter <c>kitBehavior</c> named exception enum (architecture §2.5).
+        /// v5: move <c>effect</c> (Heal / Magnet / Utility) for Surge semantics.
         /// </summary>
-        public const uint Version = 4;
+        public const uint Version = 5;
         public const string BlobExtension = ".jba";
         public static readonly byte[] Magic = { (byte)'J', (byte)'B', (byte)'A', (byte)'D' };
 
@@ -77,5 +78,17 @@ namespace JewelBlitzArena.Data
         Flare = 7,
         Surge = 8,
         UtilityStrong = 9,
+    }
+
+    /// <summary>Optional move side-effect beyond hit damage (cast.md Surge utilities / heals).</summary>
+    public enum MoveEffect : byte
+    {
+        None = 0,
+        /// <summary>Restore Life equal to <see cref="MoveRecord.Damage"/>; no offensive hit.</summary>
+        Heal = 1,
+        /// <summary>No offensive hit; strip held items and pull loose items in range.</summary>
+        Magnet = 2,
+        /// <summary>No offensive hit (control / blackout stubs).</summary>
+        Utility = 3,
     }
 }

@@ -105,6 +105,7 @@ namespace JewelBlitzArena.Data
                     ActiveFrames = br.ReadInt32(),
                     RecoveryFrames = br.ReadInt32(),
                     UtilityExempt = br.ReadBoolean(),
+                    Effect = (MoveEffect)br.ReadByte(),
                 };
             }
 

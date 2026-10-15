@@ -73,6 +73,21 @@ namespace JewelBlitzArena.Data
                         continue;
                     }
 
+                    if (!TryParseMoveEffect(move.Effect, out MoveEffect effect))
+                    {
+                        result.Errors.Add(new ValidationIssue(
+                            "move_effect",
+                            $"Fighter '{fighter.Name}' move '{move.Name}' has unknown effect '{move.Effect}'."));
+                        continue;
+                    }
+
+                    if (effect == MoveEffect.Heal && move.Damage <= 0)
+                    {
+                        result.Errors.Add(new ValidationIssue(
+                            "move_effect",
+                            $"Fighter '{fighter.Name}' heal move '{move.Name}' must have positive heal amount."));
+                    }
+
                     if (moveClass == MoveClass.UtilityStrong || move.UtilityExempt)
                     {
                         if (move.Damage != 0 && moveClass == MoveClass.UtilityStrong)
@@ -273,6 +288,17 @@ namespace JewelBlitzArena.Data
         public static bool TryParseMoveClass(string text, out MoveClass value)
         {
             return Enum.TryParse(text, ignoreCase: true, out value);
+        }
+
+        public static bool TryParseMoveEffect(string? text, out MoveEffect value)
+        {
+            value = MoveEffect.None;
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return true;
+            }
+
+            return Enum.TryParse(text.Trim(), ignoreCase: true, out value);
         }
 
         /// <summary>

@@ -111,7 +111,7 @@ namespace JewelBlitzArena.Data
                 Move("Throw", "Throw", 100, 5, 2, 20),
                 Move("Blink Strike", "Flare", 40, 4, 2, 8),
                 Move("Curtain Call", "Surge", 320, 10, 8, 22),
-                Move("Smoke Vault", "Surge", 0, 12, 4, 24),
+                Move("Smoke Vault", "Surge", 0, 12, 4, 24, effect: "Utility"),
             };
             return f;
         }
@@ -251,10 +251,10 @@ namespace JewelBlitzArena.Data
                 Move("Toolbox Ram", "Surge", 280, 10, 6, 22),
                 Move("Toolbox Drop Weight", "Surge", 320, 18, 4, 28),
                 Move("Toolbox Mine Field", "Surge", 70, 12, 8, 20),
-                Move("Spare Magnet", "Surge", 0, 10, 6, 18),
+                Move("Spare Magnet", "Surge", 0, 10, 6, 18, effect: "Magnet"),
                 Move("Spare Flame", "Surge", 200, 12, 8, 24),
                 Move("Spare Chaff", "Surge", 40, 8, 4, 16),
-                Move("Spare Repair", "Surge", 280, 14, 2, 22),
+                Move("Spare Repair", "Surge", 280, 14, 2, 22, effect: "Heal"),
             };
             return f;
         }
@@ -612,7 +612,8 @@ namespace JewelBlitzArena.Data
             int startup,
             int active,
             int recovery,
-            bool utilityExempt = false)
+            bool utilityExempt = false,
+            string effect = "None")
         {
             return new AuthoredMove
             {
@@ -623,6 +624,7 @@ namespace JewelBlitzArena.Data
                 ActiveFrames = active,
                 RecoveryFrames = recovery,
                 UtilityExempt = utilityExempt,
+                Effect = effect,
             };
         }
     }

@@ -239,7 +239,7 @@ namespace JewelBlitzArena.Sim
 
                 if (behavior == KitBehavior.DoubleHold)
                 {
-                    ApplyClankSurgeStick(ref frame, roll);
+                    ApplyClankSurgeStick(ref frame, self.Facing, roll);
                 }
 
                 return;
@@ -254,8 +254,8 @@ namespace JewelBlitzArena.Sim
             }
         }
 
-        /// <summary>Set stick to a Clank Surge variant cardinal (N/F/U/D) from RNG nibble.</summary>
-        private static void ApplyClankSurgeStick(ref InputFrame frame, uint roll)
+        /// <summary>Set stick to a Clank Surge variant cardinal (N/F/U/D); forward uses facing.</summary>
+        private static void ApplyClankSurgeStick(ref InputFrame frame, byte facing, uint roll)
         {
             int variant = (int)(roll >> 6) & 0x3; // 0..3
             switch (variant)
@@ -263,8 +263,8 @@ namespace JewelBlitzArena.Sim
                 case 0: // neutral
                     frame.Magnitude = 0;
                     break;
-                case 1: // forward +X
-                    frame.Direction = 0;
+                case 1: // facing-relative forward
+                    frame.Direction = facing == 0 ? 0 : 16;
                     frame.Magnitude = 2;
                     break;
                 case 2: // up +Z

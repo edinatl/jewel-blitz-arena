@@ -101,8 +101,9 @@ namespace JewelBlitzArena.Sim
                 if (input.SurgeA)
                 {
                     TryStartMove(
-                        ref actor,
-                        kit.ResolveSurgeA(in input),
+                        ref state,
+                        index,
+                        kit.ResolveSurgeA(in input, actor.Facing),
                         ActorAction.SurgeA,
                         MatchRules.SurgeLusterCostFor(behavior, surgeA: true));
                     return;
@@ -111,8 +112,9 @@ namespace JewelBlitzArena.Sim
                 if (input.SurgeB)
                 {
                     TryStartMove(
-                        ref actor,
-                        kit.ResolveSurgeB(in input),
+                        ref state,
+                        index,
+                        kit.ResolveSurgeB(in input, actor.Facing),
                         ActorAction.SurgeB,
                         MatchRules.SurgeLusterCostFor(behavior, surgeA: false));
                     return;
@@ -120,13 +122,13 @@ namespace JewelBlitzArena.Sim
 
                 if (input.Attack)
                 {
-                    TryStartMove(ref actor, kit.Flare, ActorAction.Flare, lusterCost: 0);
+                    TryStartMove(ref state, index, kit.Flare, ActorAction.Flare, lusterCost: 0);
                     return;
                 }
 
                 if (input.Strong)
                 {
-                    TryStartMove(ref actor, kit.Strong, ActorAction.Strong, lusterCost: 0);
+                    TryStartMove(ref state, index, kit.Strong, ActorAction.Strong, lusterCost: 0);
                 }
 
                 return;
@@ -134,19 +136,19 @@ namespace JewelBlitzArena.Sim
 
             if (input.Attack && input.Strong)
             {
-                TryStartMove(ref actor, kit.Throw, ActorAction.Throw, lusterCost: 0);
+                TryStartMove(ref state, index, kit.Throw, ActorAction.Throw, lusterCost: 0);
                 return;
             }
 
             if (input.Strong)
             {
-                TryStartMove(ref actor, kit.Strong, ActorAction.Strong, lusterCost: 0);
+                TryStartMove(ref state, index, kit.Strong, ActorAction.Strong, lusterCost: 0);
                 return;
             }
 
             if (input.Attack)
             {
-                TryStartMove(ref actor, kit.Attack, ActorAction.Attack, lusterCost: 0);
+                TryStartMove(ref state, index, kit.Attack, ActorAction.Attack, lusterCost: 0);
             }
         }
 
@@ -504,13 +506,19 @@ namespace JewelBlitzArena.Sim
             actor.HitApplied = 0;
         }
 
-        private static void TryStartMove(ref ActorSlot actor, MoveRecord? move, ActorAction action, int lusterCost)
+        private static void TryStartMove(
+            ref MatchState state,
+            int actorIndex,
+            MoveRecord? move,
+            ActorAction action,
+            int lusterCost)
         {
             if (move == null)
             {
                 return;
             }
 
+            ref ActorSlot actor = ref MatchStateAccess.Actor(ref state, actorIndex);
             if (lusterCost > 0)
             {
                 if (actor.Luster < lusterCost)
@@ -530,13 +538,46 @@ namespace JewelBlitzArena.Sim
             actor.Action = (byte)action;
             actor.ActionPhase = (byte)ActionPhase.Startup;
             actor.ActionTimer = total;
-            actor.MoveDamage = move.Damage;
             actor.HitApplied = 0;
             actor.AttackStringTimer = MatchRules.AttackStringWindowFrames;
             if (action == ActorAction.Attack)
             {
                 actor.AttackStringStep++;
             }
+
+            switch (move.Effect)
+            {
+                case MoveEffect.Heal:
+                    ApplySelfHeal(ref actor, move.Damage);
+                    actor.MoveDamage = 0;
+                    break;
+                case MoveEffect.Magnet:
+                    actor.MoveDamage = 0;
+                    ItemRuntime.ApplyMagnetSurge(ref state, actorIndex, MatchRules.MagnetSurgeRange);
+                    break;
+                case MoveEffect.Utility:
+                    actor.MoveDamage = 0;
+                    break;
+                default:
+                    actor.MoveDamage = move.Damage;
+                    break;
+            }
+        }
+
+        private static void ApplySelfHeal(ref ActorSlot actor, int amount)
+        {
+            if (amount <= 0 || !actor.IsAlive || actor.IsEliminated)
+            {
+                return;
+            }
+
+            int next = actor.Life + amount;
+            if (next > actor.MaxLife)
+            {
+                next = actor.MaxLife;
+            }
+
+            actor.Life = next;
         }
 
         private static MoveRecord? MoveForAction(KitRuntime kit, ActorAction action)

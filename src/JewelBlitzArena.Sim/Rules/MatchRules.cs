@@ -57,12 +57,15 @@ namespace JewelBlitzArena.Sim
             return SurgeLusterCost;
         }
 
+        /// <summary>Magnet Surge pull / strip radius (cast.md Clank Spare Parts).</summary>
+        public static readonly Fix MagnetSurgeRange = Fix.FromInt(6);
+
         /// <summary>
         /// Clank Toolbox / Spare Parts direction index: 0 neutral, 1 forward, 2 up, 3 down
         /// (names.md / cast.md §2). Magnitude 0 → neutral; stick near +Z → up, −Z → down;
-        /// otherwise forward.
+        /// otherwise forward. Forward is facing-relative (<paramref name="facing"/> 0 = +X, 1 = −X).
         /// </summary>
-        public static int SurgeVariantIndex(in InputFrame input)
+        public static int SurgeVariantIndex(in InputFrame input, byte facing = 0)
         {
             if (input.Magnitude == 0)
             {
@@ -70,19 +73,23 @@ namespace JewelBlitzArena.Sim
             }
 
             int d = input.Direction & 31;
+            int forwardDir = facing == 0 ? 0 : 16;
             int distUp = DirDistance(d, 8);
             int distDown = DirDistance(d, 24);
-            if (distUp <= 4 && distUp <= distDown)
+            int distFwd = DirDistance(d, forwardDir);
+
+            // Prefer vertical when clearly closer to up/down than to facing-forward.
+            if (distUp <= 4 && distUp < distFwd && distUp <= distDown)
             {
                 return 2;
             }
 
-            if (distDown <= 4)
+            if (distDown <= 4 && distDown < distFwd)
             {
                 return 3;
             }
 
-            return 1;
+            return 1; // facing-relative forward (back stick also maps here — no back variant)
         }
 
         private static int DirDistance(int a, int b)

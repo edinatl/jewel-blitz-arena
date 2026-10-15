@@ -46,6 +46,9 @@ namespace JewelBlitzArena.Data
         public int ActiveFrames { get; set; }
         public int RecoveryFrames { get; set; }
         public bool UtilityExempt { get; set; }
+
+        /// <summary>None, Heal, Magnet, or Utility (schema v5 Surge semantics).</summary>
+        public string Effect { get; set; } = "None";
     }
 
     public sealed class AuthoredStage

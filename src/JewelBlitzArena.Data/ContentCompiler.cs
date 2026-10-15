@@ -25,6 +25,7 @@ namespace JewelBlitzArena.Data
                 foreach (AuthoredMove m in src.Moves)
                 {
                     ContentValidator.TryParseMoveClass(m.Class, out MoveClass moveClass);
+                    ContentValidator.TryParseMoveEffect(m.Effect, out MoveEffect effect);
                     moves.Add(new MoveRecord
                     {
                         Name = m.Name,
@@ -34,6 +35,7 @@ namespace JewelBlitzArena.Data
                         ActiveFrames = m.ActiveFrames,
                         RecoveryFrames = m.RecoveryFrames,
                         UtilityExempt = m.UtilityExempt || moveClass == MoveClass.UtilityStrong,
+                        Effect = effect,
                     });
                 }
 

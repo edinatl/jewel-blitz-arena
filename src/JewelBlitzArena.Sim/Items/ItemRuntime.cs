@@ -214,5 +214,104 @@ namespace JewelBlitzArena.Sim
                 return;
             }
         }
+
+        /// <summary>
+        /// Clank Spare Parts magnet: strip held items from others in range and pull loose
+        /// on-field items toward the caster (cast.md §2). Deterministic slot order.
+        /// </summary>
+        public static void ApplyMagnetSurge(ref MatchState state, int casterIndex, Fix range)
+        {
+            if (casterIndex < 0 || casterIndex >= state.ActorCount)
+            {
+                return;
+            }
+
+            ref ActorSlot caster = ref MatchStateAccess.Actor(ref state, casterIndex);
+            long rangeSq = (range.Raw >> 8) * (range.Raw >> 8);
+
+            for (int a = 0; a < state.ActorCount; a++)
+            {
+                if (a == casterIndex)
+                {
+                    continue;
+                }
+
+                ref ActorSlot other = ref MatchStateAccess.Actor(ref state, a);
+                if (!other.IsAlive || other.IsEliminated || other.HasEmptyHands)
+                {
+                    continue;
+                }
+
+                if (DistSqScaled(caster.PosX, caster.PosZ, other.PosX, other.PosZ) > rangeSq)
+                {
+                    continue;
+                }
+
+                DropHeldToField(ref state, a);
+            }
+
+            for (int i = 0; i < PoolCaps.LooseItems; i++)
+            {
+                LooseItemSlot item = MatchStateAccess.GetLooseItem(ref state, i);
+                if (!item.IsActive || item.HolderSlot != LooseItemSlot.NoHolder)
+                {
+                    continue;
+                }
+
+                if (DistSqScaled(caster.PosX, caster.PosZ, item.PosX, item.PosZ) > rangeSq)
+                {
+                    continue;
+                }
+
+                // Pull to just outside the caster capsule — half the remaining gap.
+                Fix dx = caster.PosX - item.PosX;
+                Fix dz = caster.PosZ - item.PosZ;
+                item.PosX += dx / 2;
+                item.PosZ += dz / 2;
+                item.VelX = Fix.Zero;
+                item.VelY = Fix.Zero;
+                item.VelZ = Fix.Zero;
+                item.InFlight = false;
+                item.FlightFrames = 0;
+                MatchStateAccess.SetLooseItem(ref state, i, item);
+            }
+        }
+
+        private static void DropHeldToField(ref MatchState state, int actorIndex)
+        {
+            ref ActorSlot actor = ref MatchStateAccess.Actor(ref state, actorIndex);
+            int slot = actor.HeldItemSlot;
+            if (slot == ActorSlot.NoHeldItem || slot >= PoolCaps.LooseItems)
+            {
+                actor.HeldItemSlot = ActorSlot.NoHeldItem;
+                return;
+            }
+
+            LooseItemSlot item = MatchStateAccess.GetLooseItem(ref state, slot);
+            if (!item.IsActive || item.HolderSlot != actorIndex)
+            {
+                actor.HeldItemSlot = ActorSlot.NoHeldItem;
+                return;
+            }
+
+            item.HolderSlot = LooseItemSlot.NoHolder;
+            item.PosX = actor.PosX;
+            item.PosY = actor.PosY + PhysicsConstants.ItemRadius;
+            item.PosZ = actor.PosZ;
+            item.VelX = Fix.Zero;
+            item.VelY = Fix.Zero;
+            item.VelZ = Fix.Zero;
+            item.InFlight = false;
+            item.FlightFrames = 0;
+            MatchStateAccess.SetLooseItem(ref state, slot, item);
+            actor.HeldItemSlot = ActorSlot.NoHeldItem;
+        }
+
+        private static long DistSqScaled(Fix ax, Fix az, Fix bx, Fix bz)
+        {
+            long dx = (bx.Raw - ax.Raw) >> 8;
+            long dz = (bz.Raw - az.Raw) >> 8;
+            return (dx * dx) + (dz * dz);
+        }
     }
 }

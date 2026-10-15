@@ -25,12 +25,12 @@ public sealed class InvoiceClankSurgeTests
     [Test]
     public void Surge_variant_index_maps_stick_cardinals()
     {
-        Assert.That(MatchRules.SurgeVariantIndex(InputFrame.Neutral), Is.EqualTo(0));
-        Assert.That(MatchRules.SurgeVariantIndex(InputFrame.FromStick(0, 2)), Is.EqualTo(1));
-        Assert.That(MatchRules.SurgeVariantIndex(InputFrame.FromStick(8, 2)), Is.EqualTo(2));
-        Assert.That(MatchRules.SurgeVariantIndex(InputFrame.FromStick(24, 2)), Is.EqualTo(3));
-        Assert.That(MatchRules.SurgeVariantIndex(InputFrame.FromStick(7, 2)), Is.EqualTo(2));
-        Assert.That(MatchRules.SurgeVariantIndex(InputFrame.FromStick(25, 2)), Is.EqualTo(3));
+        Assert.That(MatchRules.SurgeVariantIndex(InputFrame.Neutral, facing: 0), Is.EqualTo(0));
+        Assert.That(MatchRules.SurgeVariantIndex(InputFrame.FromStick(0, 2), facing: 0), Is.EqualTo(1));
+        Assert.That(MatchRules.SurgeVariantIndex(InputFrame.FromStick(8, 2), facing: 0), Is.EqualTo(2));
+        Assert.That(MatchRules.SurgeVariantIndex(InputFrame.FromStick(24, 2), facing: 0), Is.EqualTo(3));
+        Assert.That(MatchRules.SurgeVariantIndex(InputFrame.FromStick(7, 2), facing: 0), Is.EqualTo(2));
+        Assert.That(MatchRules.SurgeVariantIndex(InputFrame.FromStick(25, 2), facing: 0), Is.EqualTo(3));
     }
 
     [Test]
@@ -100,13 +100,15 @@ public sealed class InvoiceClankSurgeTests
         Assert.That(kit.SurgeAVariants[2]!.Damage, Is.EqualTo(320));
         Assert.That(kit.SurgeAVariants[3]!.Damage, Is.EqualTo(70));
         Assert.That(kit.SurgeBVariants[0]!.Damage, Is.EqualTo(0));
+        Assert.That(kit.SurgeBVariants[0]!.Effect, Is.EqualTo(MoveEffect.Magnet));
         Assert.That(kit.SurgeBVariants[1]!.Name, Is.EqualTo("Spare Flame"));
         Assert.That(kit.SurgeBVariants[3]!.Damage, Is.EqualTo(280));
+        Assert.That(kit.SurgeBVariants[3]!.Effect, Is.EqualTo(MoveEffect.Heal));
 
-        Assert.That(kit.ResolveSurgeA(InputFrame.Neutral)!.Name, Is.EqualTo("Toolbox Mortar"));
-        Assert.That(kit.ResolveSurgeA(InputFrame.FromStick(0, 2))!.Name, Is.EqualTo("Toolbox Ram"));
-        Assert.That(kit.ResolveSurgeA(InputFrame.FromStick(8, 2))!.Name, Is.EqualTo("Toolbox Drop Weight"));
-        Assert.That(kit.ResolveSurgeB(InputFrame.FromStick(24, 2))!.Name, Is.EqualTo("Spare Repair"));
+        Assert.That(kit.ResolveSurgeA(InputFrame.Neutral, facing: 0)!.Name, Is.EqualTo("Toolbox Mortar"));
+        Assert.That(kit.ResolveSurgeA(InputFrame.FromStick(0, 2), facing: 0)!.Name, Is.EqualTo("Toolbox Ram"));
+        Assert.That(kit.ResolveSurgeA(InputFrame.FromStick(8, 2), facing: 0)!.Name, Is.EqualTo("Toolbox Drop Weight"));
+        Assert.That(kit.ResolveSurgeB(InputFrame.FromStick(24, 2), facing: 0)!.Name, Is.EqualTo("Spare Repair"));
     }
 
     [Test]

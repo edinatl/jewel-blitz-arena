@@ -32,6 +32,7 @@ namespace JewelBlitzArena.Data
         public int ActiveFrames { get; set; }
         public int RecoveryFrames { get; set; }
         public bool UtilityExempt { get; set; }
+        public MoveEffect Effect { get; set; }
     }
 
     public sealed class StageRecord

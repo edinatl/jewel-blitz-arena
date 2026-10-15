@@ -76,6 +76,7 @@ namespace JewelBlitzArena.Data
                 bw.Write(m.ActiveFrames);
                 bw.Write(m.RecoveryFrames);
                 bw.Write(m.UtilityExempt);
+                bw.Write((byte)m.Effect);
             }
         }
 
