@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Jewel Blitz Arena — Sprite Demo v0.9</title>
+<title>Jewel Blitz Arena — Sprite Demo v1.0</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html,body { width:100%; height:100%; background:#14161f; overflow:hidden; font-family:system-ui, sans-serif; touch-action:none; user-select:none; -webkit-user-select:none; }
@@ -66,7 +66,7 @@
     <div class="btn pbtn" id="btnAction"><span class="sym">○</span><span class="lab">ACTION</span></div>
     <div class="btn pbtn" id="btnJump"><span class="sym">✕</span><span class="lab">JUMP</span></div>
   </div>
-  <div id="help">PS-STYLE PAD · □ ATTACK (throwables aim at the closest foe) · ○ PICK UP / THROW in facing direction / CATCH / GRAB · ✕ JUMP (move + ✕ = dodge roll) · △ FUSION / drop · Any hit knocks a gem loose · 3 gems = TRANSFORM</div>
+  <div id="help">PS-STYLE PAD · □ ATTACK (throwables aim at the closest foe) · ○ PICK UP / THROW throwables (facing) / DROP other items / CATCH / GRAB · ✕ JUMP (move + ✕ = dodge roll) · △ FUSION / drop · Any hit knocks a gem loose · 3 gems = TRANSFORM</div>
 </div>
 
 <script>
@@ -329,12 +329,19 @@ function tryAction(f) { // ○ ACTION: throw held item, or catch with empty hand
     const incoming = thrown.some(t => t.owner !== f && Math.hypot(t.x - f.x, t.y - f.y) < 90);
     if (incoming) { if (f.catchCd <= 0) { f.catchCd = .9; f.catchUntil = now + .28; f.atkCd = .3; f.atkKind = 'catch'; } return; }
     // CIRCLE = PICK UP: take the nearest ground item at your feet.
-    let bi = -1, bd = f.r + 17;
+    let bi = -1, bd = f.r + 34;
     groundItems.forEach((g, i) => { const dd = Math.hypot(g.x - f.x, g.y - f.y); if (dd < bd) { bd = dd; bi = i; } });
     if (bi >= 0) { const g = groundItems[bi]; equip(f, g.def); groundItems.splice(bi, 1); if (g.pad) { g.pad.entry = null; g.pad.timer = 1; } f.atkCd = .25; floater(f.x, f.y - 30, g.def.name.toUpperCase(), '#bfe3ff'); return; }
   }
   if (!f.item && f.grabCd <= 0) { const o = fighters[1 - fighters.indexOf(f)]; if (o && !o.grabbedBy && o.downT <= 0 && o.throwFoeT <= 0 && o.transformed <= 0 && Math.hypot(o.x - f.x, o.y - f.y) < 48) { startGrab2D(f, o); return; } }
-  if (f.item) { f.atkCd = .45; f.atkKind = 'throw'; throwHeld(f); return; }
+  if (f.item) {
+    // CIRCLE: throwables THROW in facing direction; anything else
+    // DROPS at your feet (Ben's call).
+    const d = f.item;
+    if (d.arch === 'throw' || d.arch === 'boom') { f.atkCd = .45; f.atkKind = 'throw'; throwHeld(f); if (f === fighters[0]) floater(f.x, f.y - 30, 'THREW ' + d.name.toUpperCase(), '#bfe3ff'); }
+    else { groundItems.push({ def: d, x: f.x + f.face.x * 16, y: f.y + f.face.y * 16, ph: Math.random() * TAU, born: performance.now() / 1000 }); clearItem(f); f.atkCd = .3; floater(f.x, f.y - 30, 'DROPPED', '#bfe3ff'); }
+    return;
+  }
   if (f.catchCd > 0) return;
   f.catchCd = .9; f.catchUntil = now + .28; f.atkCd = .3; f.atkKind = 'catch';
 }
@@ -657,6 +664,11 @@ function draw(now) {
   // Shockwave rings (under everything else in the arena)
   for (const r of rings) { ctx.strokeStyle = r.color; ctx.globalAlpha = Math.max(0, .8 * (1 - r.t / .38)); ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(r.x, r.y, r.r, 0, TAU); ctx.stroke(); }
   ctx.globalAlpha = 1;
+  // Pickup-range highlight: ring the item CIRCLE can grab right now
+  { const p0 = fighters[0];
+    if (p0 && !p0.item && !over) { let best = null, bd2 = p0.r + 34;
+      for (const it of groundItems) { const dd = Math.hypot(it.x - p0.x, it.y - p0.y); if (dd < bd2) { bd2 = dd; best = it; } }
+      if (best) { ctx.strokeStyle = 'rgba(255,255,255,' + (.55 + Math.sin(now * 6) * .3) + ')'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(best.x, best.y, 20 + Math.sin(now * 6) * 2, 0, TAU); ctx.stroke(); } } }
   // Ground items
   for (const it of groundItems) {
     const bob = Math.sin(now * 2 + it.ph) * 3;
