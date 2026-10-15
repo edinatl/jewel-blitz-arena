@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Jewel Blitz Arena — 3D Demo v1.1</title>
+<title>Jewel Blitz Arena — 3D Demo v1.2</title>
 <style>
   html, body { margin:0; padding:0; overflow:hidden; background:#1a140d; font-family:system-ui, sans-serif; -webkit-user-select:none; user-select:none; touch-action:none; }
   #c { position:fixed; inset:0; }
@@ -57,8 +57,8 @@
   </div>
 </div>
 <div id="hud2">
-  <div class="panel"><div class="pname" style="color:#ffcf9f;font-size:12px">BRUNO — BOT</div><div class="bar"><div class="fill" id="hp2"></div></div><div class="meta" id="meta2">Gems: ☆☆☆</div><div class="item" id="item2">Item: —</div></div>
-  <div class="panel" style="text-align:right"><div class="pname" style="color:#ffe9a6;font-size:12px">AEGIS — BOT</div><div class="bar"><div class="fill" id="hp3"></div></div><div class="meta" id="meta3">Gems: ☆☆☆</div><div class="item" id="item3">Item: —</div></div>
+  <div class="panel"><div class="pname" style="color:#ffcf9f;font-size:12px">IGNIS — BOT</div><div class="bar"><div class="fill" id="hp2"></div></div><div class="meta" id="meta2">Gems: ☆☆☆</div><div class="item" id="item2">Item: —</div></div>
+  <div class="panel" style="text-align:right"><div class="pname" style="color:#d9b8ff;font-size:12px">KIRA — BOT</div><div class="bar"><div class="fill" id="hp3"></div></div><div class="meta" id="meta3">Gems: ☆☆☆</div><div class="item" id="item3">Item: —</div></div>
 </div>
 <div id="select">
   <h1>JEWEL BLITZ ARENA</h1>
@@ -67,7 +67,7 @@
     <button class="selBtn" id="selSoldier">🔫 BLAZE<small>Soldier · Rocket Salvo Drive</small></button>
     <button class="selBtn" id="selSamurai">⚔️ RONIN<small>Samurai · Blade Wave Drive</small></button>
   </div>
-  <div style="font-size:12px;color:#ffd94d;text-align:center">□ Attack · ○ Throw / Catch / GRAB · ✕ Jump / Roll · △ Fusion<br>Grab: press ○ next to a foe, then □ to throw them!</div>
+  <div style="font-size:12px;color:#ffd94d;text-align:center">□ Attack · ○ Pick up / Throw / Drop / Catch / GRAB · ✕ Jump / Roll · △ Fusion / Drop<br>Grab: press ○ next to a foe, then □ to throw them!</div>
 </div>
 <div id="flash"></div>
 <div id="banner"></div>
@@ -158,6 +158,8 @@ function buildFighterMesh(kind) {
     Soldier: { main: 0x546e42, sec: 0x3d5230, skin: 0xf5c299, acc: 0x33362a, dark: 0x29261f },
     Samurai: { main: 0x2a4bd7, sec: 0x1a2f80, skin: 0xf5c299, acc: 0xffc740, dark: 0x26221f },
     Warrior: { main: 0x7a4a21, sec: 0x54331a, skin: 0xe8b088, acc: 0xd8d8d8, dark: 0x2e2018 },
+    Ignis: { main: 0x9a7a4a, sec: 0x8a7a58, skin: 0xf5c299, acc: 0x6a7076, dark: 0x4a3826 },
+    Kira: { main: 0x2c3550, sec: 0xb8b0c0, skin: 0xf5c299, acc: 0xd8b34a, dark: 0x23202e },
     Gladiator: { main: 0xb03a2e, sec: 0x8c6a2f, skin: 0xf5c299, acc: 0xffc740, dark: 0x33231a }
   };
   const pal = PALS[kind] || PALS.Soldier;
@@ -186,6 +188,33 @@ function buildFighterMesh(kind) {
     const hR = add(head, new THREE.Mesh(new THREE.ConeGeometry(.05, .32, 8), MAT(pal.acc)), .2, .36, .1); hR.rotation.z = -.42;
     const kat = add(body, box(.05, .95, .05, 0xd0d4da), -.12, 1.5, -.33); kat.rotation.z = -.55;
     add(body, box(.16, .1, .16, pal.dark), -.34, 1.86, -.22);
+  }
+  if (kind === 'Ignis') {
+    // From Ben's art: spiky auburn hair, goggles, red shirt under a tan
+    // vest, furnace backpack, and OVERSIZED metal gauntlets (one glows).
+    for (let i = 0; i < 5; i++) { const sp = add(head, new THREE.Mesh(new THREE.ConeGeometry(.07, .3, 6), MAT(0xa85a28)), -.16 + i * .08, .3, i % 2 ? .06 : -.04); sp.rotation.z = -.3 + i * .15; }
+    add(head, box(.34, .07, .07, pal.dark), 0, .16, .2);
+    add(head, sph(.06, 0x7dd7f0), -.09, .16, .26); add(head, sph(.06, 0x7dd7f0), .09, .16, .26);
+    add(torso, box(.42, .5, .06, 0xb03028), 0, 0, .19);
+    add(body, box(.4, .5, .16, pal.acc), 0, 1.55, -.3);
+    add(body, box(.09, .3, .09, pal.dark), .14, 1.95, -.3);
+    add(body, sph(.05, 0xff7a2a), .14, 2.12, -.3);
+    add(armL, box(.3, .32, .3, pal.acc), 0, -.68, 0);
+    add(armR, box(.38, .4, .38, pal.acc), 0, -.7, 0);
+    add(armR, box(.2, .12, .2, 0xff7a2a), 0, -.7, .2);
+  }
+  if (kind === 'Kira') {
+    // From Ben's art: long purple ponytail, navy outfit with red trim,
+    // orange sash, baggy light pants, chain-sickle on her back.
+    add(head, sph(.29, 0x6a3a9a, 1, .62, 1), 0, .12, -.02);
+    const tail = add(head, new THREE.Mesh(new THREE.ConeGeometry(.11, .85, 8), MAT(0x6a3a9a)), .05, .55, -.18); tail.rotation.x = .5;
+    add(head, sph(.07, pal.acc), .05, .34, -.05);
+    add(torso, box(.5, .1, .06, 0xc03a30), 0, .14, .19);
+    add(body, box(.56, .14, .4, 0xd8702a), 0, 1.14, 0);
+    add(body, box(.16, .4, .05, 0xd8702a), .1, .92, .18);
+    const sick = add(body, box(.05, .5, .05, pal.dark), -.2, 1.55, -.34); sick.rotation.z = -.5;
+    add(body, box(.34, .09, .04, 0xd0d4da), -.38, 1.78, -.36);
+    add(armL, box(.19, .12, .2, 0xc03a30), 0, -.2, 0); add(armR, box(.19, .12, .2, 0xc03a30), 0, -.2, 0);
   }
   if (kind === 'Warrior') {
     add(head, box(.54, .12, .54, pal.dark), 0, .16, 0);
@@ -516,8 +545,8 @@ function makeFighter(kind, name, x, z, isBot) {
 }
 const player = makeFighter('Soldier', 'BLAZE', -4.5, 0, false);
 const bot = makeFighter('Samurai', 'RONIN', 4.5, 0, true);
-const p3 = makeFighter('Warrior', 'BRUNO', -4.5, -4.5, true);
-const p4 = makeFighter('Gladiator', 'AEGIS', 4.5, 4.5, true);
+const p3 = makeFighter('Ignis', 'IGNIS', -4.5, -4.5, true);
+const p4 = makeFighter('Kira', 'KIRA', 4.5, 4.5, true);
 function foesOf(f) { return fighters.filter(x => x !== f && !x.dead); }
 const BOT_ATTACKS = false; // Ben (2026-10-15): bots are test dummies for now
 function nearestFoe(f) { let best = null, bd = 1e9; foesOf(f).forEach(x => { const d = Math.hypot(x.x - f.x, x.z - f.z); if (d < bd) { bd = d; best = x; } }); return best; }
@@ -535,6 +564,8 @@ const pads = [];
   disc.rotation.x = -Math.PI / 2; disc.position.set(px, .03, pz); scene.add(disc);
   pads.push({ x: px, z: pz, ring, entry: null, timer: Math.random() * .6 });
 });
+const pickRing = new THREE.Mesh(new THREE.RingGeometry(.5, .64, 28), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, side: THREE.DoubleSide }));
+pickRing.rotation.x = -Math.PI / 2; pickRing.position.y = .05; scene.add(pickRing);
 function spawnPadItem(pad) {
   const def = randItem();
   const mesh = buildItemMesh(def);
@@ -791,9 +822,14 @@ function tryAction(f) { // CIRCLE: throw / catch / board turret
   if (state.over || f.dead || f.atkCd > 0 || f.downT > 0) return;
   if (f.boarded) { unboard(f); return; }
   if (f.grabbing) { throwFoe(f); return; }
+  if (!f.item && f.catchCd <= 0 && thrown.some(t => t.owner !== f && Math.hypot(t.x - f.x, t.z - f.z) < 2.4)) {
+    // An incoming throw beats picking up — CIRCLE catches it.
+    f.catchCd = .9; f.catchUntil = now + .28; f.atkCd = .3; f.atkT = now; f.atkMax = .3; f.atkKind = 'catch';
+    ringFx(f.x, f.z, 0x7df9ff, 1); return;
+  }
   if (!f.item) {
     // CIRCLE = PICK UP: grab the nearest ground item at your feet.
-    let bi = -1, bd = 1.25;
+    let bi = -1, bd = 2.0;
     groundItems.forEach((g, i) => { const dd = Math.hypot(g.x - f.x, g.z - f.z); if (dd < bd) { bd = dd; bi = i; } });
     if (bi >= 0) {
       const g = groundItems[bi];
@@ -810,7 +846,14 @@ function tryAction(f) { // CIRCLE: throw / catch / board turret
     const gfoe = nearestFoe(f);
     if (gfoe && !gfoe.grabbedBy && gfoe.downT <= 0 && gfoe.throwFoeT <= 0 && gfoe.transformed <= 0 && dist(f, gfoe) < 1.65) { startGrab(f, gfoe); return; }
   }
-  if (f.item) { f.atkCd = .45; f.atkKind = 'throw'; throwItem(f); return; }
+  if (f.item) {
+    // CIRCLE with an item: throwables THROW in facing direction;
+    // anything else DROPS at your feet (Ben's call).
+    const d = f.item;
+    if (d.arch === 'throw' || d.arch === 'boom') { f.atkCd = .45; f.atkKind = 'throw'; throwItem(f); if (f === player) flashMsg('Threw ' + d.name); }
+    else { dropItem3D(f); if (f === player) flashMsg('Dropped ' + d.name); }
+    return;
+  }
   if (Math.hypot(f.x - turret.x, f.z - turret.z) < 1.7 && !turret.user && f === player) {
     f.boarded = turret; turret.user = f; flashMsg('TURRET BOARD — SQUARE fires, CIRCLE exits');
     ringFx(turret.x, turret.z, 0x7df9ff, 2); return;
@@ -818,6 +861,15 @@ function tryAction(f) { // CIRCLE: throw / catch / board turret
   if (f.catchCd > 0) return;
   f.catchCd = .9; f.catchUntil = now + .28; f.atkCd = .3; f.atkT = now; f.atkMax = .3; f.atkKind = 'catch';
   ringFx(f.x, f.z, 0x7df9ff, 1);
+}
+function dropItem3D(f) {
+  const def = f.item; if (!def) return;
+  f.item = null; f.itemUses = 0; refreshHeld(f);
+  const mesh = buildItemMesh(def);
+  const gx = clamp(f.x + f.face.x * .9, -HALF, HALF), gz = clamp(f.z + f.face.z * .9, -HALF, HALF);
+  mesh.position.set(gx, 0, gz); scene.add(mesh);
+  groundItems.push({ def, mesh, x: gx, z: gz, ph: Math.random() * 6 });
+  f.atkCd = .3;
 }
 function unboard(f) {
   if (!f.boarded) return;
@@ -941,7 +993,7 @@ function botThink(f, dt) {
   f.vx += (mx * sp - f.vx) * Math.min(1, dt * 7);
   f.vz += (mz * sp - f.vz) * Math.min(1, dt * 7);
   if (md > .3) f.face = { x: mx, z: mz }; else f.face = aimFace(f, foe);
-  if (!f.item && groundItems.some(g => Math.hypot(g.x - f.x, g.z - f.z) < 1.15)) { tryAction(f); }
+  if (!f.item && groundItems.some(g => Math.hypot(g.x - f.x, g.z - f.z) < 1.9)) { tryAction(f); }
   if (!BOT_ATTACKS) return; // passive mode: roam + collect only, never attack
   if (f.aiT > 0) return;
   f.aiT = .22;
@@ -1132,6 +1184,12 @@ function step(dt) {
     if (coins[i]) c.mesh.position.set(c.x, .5 + Math.sin(now * 3 + c.ph) * .08, c.z); }
   for (let i = pendingBooms.length - 1; i >= 0; i--) { const pb = pendingBooms[i]; pb.t -= dt;
     if (pb.t <= 0) { explode(pb.x, pb.z, 16, pb.owner); pendingBooms.splice(i, 1); } }
+  if (player && !player.item && !player.dead && !state.over) {
+    let bp = null, bpd = 2.0;
+    groundItems.forEach(g => { const dd = Math.hypot(g.x - player.x, g.z - player.z); if (dd < bpd) { bpd = dd; bp = g; } });
+    if (bp) { pickRing.position.set(bp.x, .05, bp.z); pickRing.material.opacity = .55 + Math.sin(now * 6) * .3; }
+    else pickRing.material.opacity = 0;
+  } else pickRing.material.opacity = 0;
   pads.forEach(pad => {
     pad.ring.material.opacity = .6 + Math.sin(now * 3 + pad.x) * .25;
     if (!pad.entry && !state.over) { pad.timer -= dt; if (pad.timer <= 0) spawnPadItem(pad); }
