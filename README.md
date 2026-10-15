@@ -18,5 +18,17 @@ dotnet run --project tools/JewelBlitzArena.ContentExport -c Release -- validate 
 
 S2 adds fixed-point physics, jewel circulation, and item pickup/throw/catch stubs inside `JewelBlitzArena.Sim` (see `Physics/`, `Jewels/`, `Items/`). S1 owns damage/Blitz from contact events.
 
+## Unity host (S3)
+
+New Unity 6 project at `unity/JewelBlitzArena/` (presentation-only). Sync Sim DLLs, then open in Unity 6:
+
+```bash
+./tools/scripts/sync-sim-plugins.sh
+# Open unity/JewelBlitzArena/ — Play Mode boots GreyboxBootstrap
+dotnet run --project tools/JewelBlitzArena.GreyboxCli -c Release -- --frames 180 --ascii
+```
+
+`unity/PowerArenaPrototype` remains quarantined feel-lab — do not grow it into the ship host.
+
 Design index: `PLAN.md`. Architecture: `docs/tech/architecture.md`.
 

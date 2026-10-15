@@ -25,6 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\JewelBlitzArena.Sim\JewelBlitzArena.Sim.csproj" />
+    <ProjectReference Include="..\..\src\JewelBlitzArena.PresentationBridge\JewelBlitzArena.PresentationBridge.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,16 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!129 &1
+PlayerSettings:
+  productGUID: a1b2c3d4e5f60718293a4b5c6d7e8f90
+  companyName: DefaultCompany
+  productName: JewelBlitzArena
+  defaultScreenWidth: 1280
+  defaultScreenHeight: 720
+  runInBackground: 1
+  resizableWindow: 1
+  allowUnsafeCode: 1
+  useDeterministicCompilation: 1
+  scriptingRuntimeVersion: 1
+  applicationIdentifier:
+    Standalone: com.DefaultCompany.JewelBlitzArena
