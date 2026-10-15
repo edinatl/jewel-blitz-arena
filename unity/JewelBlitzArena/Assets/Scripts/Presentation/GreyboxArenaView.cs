@@ -43,17 +43,44 @@ namespace JewelBlitzArena.Presentation
 
         private void LateUpdate()
         {
-            if (driver == null)
+            if (driver == null || driver.InMenu)
             {
+                SetAllInactive();
                 return;
             }
 
             float alpha = interpolate ? driver.Alpha : 1f;
-            MatchState prev = driver.Session.Previous;
-            MatchState curr = driver.Session.Current;
+            driver.GetDisplayStates(out MatchState prev, out MatchState curr);
             SyncActors(ref prev, ref curr, alpha);
             SyncJewels(ref prev, ref curr, alpha);
             SyncItems(ref prev, ref curr, alpha);
+        }
+
+        private void SetAllInactive()
+        {
+            for (int i = 0; i < _actors.Length; i++)
+            {
+                if (_actors[i] != null)
+                {
+                    _actors[i].gameObject.SetActive(false);
+                }
+            }
+
+            for (int i = 0; i < _jewels.Length; i++)
+            {
+                if (_jewels[i] != null)
+                {
+                    _jewels[i].gameObject.SetActive(false);
+                }
+            }
+
+            for (int i = 0; i < _items.Length; i++)
+            {
+                if (_items[i] != null)
+                {
+                    _items[i].gameObject.SetActive(false);
+                }
+            }
         }
 
         private void EnsurePools()

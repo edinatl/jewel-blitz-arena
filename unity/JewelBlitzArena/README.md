@@ -23,7 +23,12 @@ Copies Release `netstandard2.1` assemblies into `Assets/Plugins/Sim/`.
 
 1. Run the sync script (above).
 2. Open `unity/JewelBlitzArena/` in Unity 6.
-3. Enter Play Mode (empty scene is fine — `GreyboxBootstrap` spawns the match).
+3. Enter Play Mode (empty scene is fine — `GreyboxBootstrap` opens the Meta Boot menu).
+
+### Menu
+
+- **Custom** — Meta `BeginCustom` → offline Sim greybox; Esc completes and stamps the Ledger token.
+- **Loopback 2P** — `DualSessionHarness` rollback path with P1/P2 local inputs.
 
 ### Controls
 
@@ -32,7 +37,7 @@ Copies Release `netstandard2.1` assemblies into `Assets/Plugins/Sim/`.
 | P1 | WASD | J / K / L | I / U / O |
 | P2 | Arrows | 1 / 2 / 3 | — |
 
-`R` restarts the match from the same seed.
+`R` restarts; `Esc` returns to menu (Custom completes into Meta profile).
 
 ## Headless greybox (no Unity Editor)
 

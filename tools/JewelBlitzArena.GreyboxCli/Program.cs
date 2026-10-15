@@ -1,4 +1,5 @@
 using JewelBlitzArena.Data;
+using JewelBlitzArena.Meta;
 using JewelBlitzArena.PresentationBridge;
 using JewelBlitzArena.Sim;
 
@@ -17,6 +18,9 @@ internal static class Program
         string? outPath = null;
         string? blobPath = null;
         bool scriptedWalk = true;
+        bool useMeta = false;
+        bool useLoopback = false;
+        int deliveryDelay = 2;
 
         for (int i = 0; i < args.Length; i++)
         {
@@ -49,6 +53,18 @@ internal static class Program
             {
                 scriptedWalk = false;
             }
+            else if (a is "--meta")
+            {
+                useMeta = true;
+            }
+            else if (a is "--loopback")
+            {
+                useLoopback = true;
+            }
+            else if (a is "--delivery-delay" && i + 1 < args.Length)
+            {
+                deliveryDelay = int.Parse(args[++i]);
+            }
             else if (a is "--help" or "-h")
             {
                 PrintHelp();
@@ -56,21 +72,160 @@ internal static class Program
             }
         }
 
-        ContentCatalog? catalog = null;
-        if (blobPath != null)
+        ContentCatalog? catalog = LoadCatalog(blobPath);
+
+        if (useMeta)
         {
-            catalog = ContentBlobReader.Read(File.ReadAllBytes(blobPath));
-        }
-        else
-        {
-            string defaultBlob = Path.GetFullPath(Path.Combine(
-                AppContext.BaseDirectory, "..", "..", "..", "..", "..", "content", "export", "s5_stub.jba"));
-            if (File.Exists(defaultBlob))
-            {
-                catalog = ContentBlobReader.Read(File.ReadAllBytes(defaultBlob));
-            }
+            return RunMeta(frames, seed, actors, scriptedWalk, ascii, outPath, catalog);
         }
 
+        if (useLoopback)
+        {
+            return RunLoopback(frames, seed, scriptedWalk, deliveryDelay, ascii, outPath, catalog);
+        }
+
+        return RunOffline(frames, seed, actors, scriptedWalk, ascii, outPath, catalog);
+    }
+
+    private static ContentCatalog? LoadCatalog(string? blobPath)
+    {
+        if (blobPath != null)
+        {
+            return ContentBlobReader.Read(File.ReadAllBytes(blobPath));
+        }
+
+        string defaultBlob = Path.GetFullPath(Path.Combine(
+            AppContext.BaseDirectory, "..", "..", "..", "..", "..", "content", "export", "s5_stub.jba"));
+        if (File.Exists(defaultBlob))
+        {
+            return ContentBlobReader.Read(File.ReadAllBytes(defaultBlob));
+        }
+
+        return null;
+    }
+
+    private static int RunMeta(
+        int frames,
+        ulong seed,
+        int actors,
+        bool walk,
+        bool ascii,
+        string? outPath,
+        ContentCatalog? catalog)
+    {
+        string profilePath = MetaGreyboxFlow.DefaultTempProfilePath("jba-cli-meta-");
+        try
+        {
+            var flow = new MetaGreyboxFlow(profilePath);
+            flow.SetCatalog(catalog);
+            var request = new ModeRequest
+            {
+                Mode = ModeId.Custom,
+                Seed = seed,
+                ActorCount = actors,
+            };
+            MetaGreyboxRunResult result = flow.RunScripted(frames, request, walk);
+            MatchState board = flow.Session.Current;
+            string render = GreyboxBoard.Render(ref board);
+            Console.WriteLine(
+                $"meta seed=0x{seed:X16} frames={frames} hash=0x{result.Hash:X16} " +
+                $"token={result.OwnsGreyboxToken} flags=0x{result.ProfileFlags:X}");
+            if (ascii || outPath != null)
+            {
+                Console.WriteLine(render);
+            }
+
+            if (outPath != null)
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(outPath))!);
+                File.WriteAllText(
+                    outPath,
+                    $"meta seed=0x{seed:X16} frames={frames} hash=0x{result.Hash:X16} token={result.OwnsGreyboxToken}\n{render}");
+                Console.WriteLine($"wrote {outPath}");
+            }
+
+            return result.OwnsGreyboxToken ? 0 : 2;
+        }
+        finally
+        {
+            string? dir = Path.GetDirectoryName(profilePath);
+            if (dir != null && Directory.Exists(dir))
+            {
+                Directory.Delete(dir, recursive: true);
+            }
+        }
+    }
+
+    private static int RunLoopback(
+        int frames,
+        ulong seed,
+        bool walk,
+        int deliveryDelay,
+        bool ascii,
+        string? outPath,
+        ContentCatalog? catalog)
+    {
+        var runner = new LoopbackGreyboxRunner(inputDelay: 2, deliveryDelayFrames: deliveryDelay);
+        runner.Reset(seed, catalog);
+        for (int f = 0; f < frames; f++)
+        {
+            InputFrame p0 = InputFrame.Neutral;
+            InputFrame p1 = InputFrame.Neutral;
+            if (walk)
+            {
+                int dir = (f / 8) % 2 == 0 ? 1 : -1;
+                p0 = InputQuantizer.FromCardinal(dir, 0);
+                p1 = InputQuantizer.FromCardinal(-dir, 0);
+            }
+
+            runner.Tick(p0, p1);
+        }
+
+        MatchState board = runner.Current;
+        string render = GreyboxBoard.Render(ref board);
+        bool match = runner.StatesMatch();
+        bool hashes = runner.HashesAgree();
+        Console.WriteLine(
+            $"loopback seed=0x{seed:X16} frames={frames} hash=0x{runner.Hash:X16} " +
+            $"rollbacks={runner.RollbackCount} match={match} probeOk={hashes} desync={runner.DesyncFlagged}");
+        if (ascii || outPath != null)
+        {
+            Console.WriteLine(render);
+        }
+
+        if (outPath != null)
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(outPath))!);
+            File.WriteAllText(
+                outPath,
+                $"loopback seed=0x{seed:X16} frames={frames} hash=0x{runner.Hash:X16} rollbacks={runner.RollbackCount}\n{render}");
+            Console.WriteLine($"wrote {outPath}");
+        }
+
+        if (!match || !hashes || runner.DesyncFlagged)
+        {
+            return 2;
+        }
+
+        if (deliveryDelay > 0 && runner.RollbackCount == 0)
+        {
+            Console.Error.WriteLine("expected rollbacks with delivery delay");
+            return 3;
+        }
+
+        Console.WriteLine("restart hash OK");
+        return 0;
+    }
+
+    private static int RunOffline(
+        int frames,
+        ulong seed,
+        int actors,
+        bool scriptedWalk,
+        bool ascii,
+        string? outPath,
+        ContentCatalog? catalog)
+    {
         var session = new MatchSession();
         MatchConfig config = MatchConfig.CreateDefault(seed, actors);
         session.Reset(config, catalog);
@@ -81,7 +236,6 @@ internal static class Program
             InputFrame p1 = InputFrame.Neutral;
             if (scriptedWalk)
             {
-                // Pace toward +X / −X so actors separate on the board.
                 p0 = InputQuantizer.FromCardinal(1, 0);
                 p1 = InputQuantizer.FromCardinal(-1, 0);
                 if ((f / 30) % 2 == 1)
@@ -111,7 +265,6 @@ internal static class Program
             Console.WriteLine($"wrote {outPath}");
         }
 
-        // Restart parity (same seed, same scripted inputs).
         var verify = new MatchSession();
         verify.Reset(config, catalog);
         for (int f = 0; f < frames; f++)
@@ -132,10 +285,9 @@ internal static class Program
             verify.Step(p0, p1, InputFrame.Neutral, InputFrame.Neutral);
         }
 
-        ulong hash2 = verify.Hash();
-        if (hash2 != hash)
+        if (verify.Hash() != hash)
         {
-            Console.Error.WriteLine($"RESTART MISMATCH 0x{hash:X16} vs 0x{hash2:X16}");
+            Console.Error.WriteLine($"RESTART MISMATCH 0x{hash:X16} vs 0x{verify.Hash():X16}");
             return 2;
         }
 
@@ -148,13 +300,16 @@ internal static class Program
         Console.WriteLine("""
             JewelBlitzArena.GreyboxCli — headless presentation bridge smoke
 
-              --frames N     Sim frames to step (default 180)
-              --seed HEX     Match seed (default S3_HOST)
-              --actors N     Actor count 1–4 (default 2)
-              --ascii        Print ASCII board
-              --out PATH     Write board dump
-              --blob PATH    Optional .jba content blob
-              --neutral      All-neutral inputs (no scripted walk)
+              --frames N          Sim frames to step (default 180)
+              --seed HEX          Match seed
+              --actors N          Actor count 1–4 (default 2)
+              --ascii             Print ASCII board
+              --out PATH          Write board dump
+              --blob PATH         Optional .jba content blob
+              --neutral           All-neutral inputs
+              --meta              Boot → Custom → profile stamp path
+              --loopback          DualSessionHarness rollback greybox
+              --delivery-delay N  Loopback one-way delay in frames (default 2)
             """);
     }
 }

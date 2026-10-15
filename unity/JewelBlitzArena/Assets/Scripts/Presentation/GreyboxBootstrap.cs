@@ -4,7 +4,7 @@ using UnityEngine;
 namespace JewelBlitzArena.Presentation
 {
     /// <summary>
-    /// Spawns a playable greybox when opening an empty project (no scene asset required).
+    /// Spawns Boot → Meta menu → greybox host when opening an empty project.
     /// </summary>
     public static class GreyboxBootstrap
     {
@@ -19,7 +19,7 @@ namespace JewelBlitzArena.Presentation
             var root = new GameObject("GreyboxMatch");
             var driver = root.AddComponent<MatchDriver>();
             var view = root.AddComponent<GreyboxArenaView>();
-            var hud = root.AddComponent<MatchHud>();
+            var menu = root.AddComponent<MetaMenuHud>();
 
             Camera cam = Camera.main;
             if (cam == null)
@@ -37,7 +37,7 @@ namespace JewelBlitzArena.Presentation
             }
 
             AssignDriver(view, driver);
-            AssignDriver(hud, driver);
+            AssignDriver(menu, driver);
             AssignDriver(camRig, driver);
         }
 

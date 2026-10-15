@@ -34,11 +34,15 @@ New Unity 6 project at `unity/JewelBlitzArena/` (presentation-only). Sync Sim DL
 
 ```bash
 ./tools/scripts/sync-sim-plugins.sh
-# Open unity/JewelBlitzArena/ — Play Mode boots GreyboxBootstrap
+# Open unity/JewelBlitzArena/ — Play Mode boots Meta menu (Custom / Loopback 2P)
 dotnet run --project tools/JewelBlitzArena.GreyboxCli -c Release -- --frames 180 --ascii
+dotnet run --project tools/JewelBlitzArena.GreyboxCli -c Release -- --meta --frames 60
+dotnet run --project tools/JewelBlitzArena.GreyboxCli -c Release -- --loopback --delivery-delay 2 --frames 120 --ascii
 ```
 
 `unity/PowerArenaPrototype` remains quarantined feel-lab — do not grow it into the ship host.
+
+Long-lived integration tip: `cursor/orchestration-slices-d7b9` (do not target `main` for stack PRs).
 
 ## Stage graph (S4)
 

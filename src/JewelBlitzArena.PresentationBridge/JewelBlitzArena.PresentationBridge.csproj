@@ -13,6 +13,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\JewelBlitzArena.Sim\JewelBlitzArena.Sim.csproj" />
+    <ProjectReference Include="..\JewelBlitzArena.Meta\JewelBlitzArena.Meta.csproj" />
+    <ProjectReference Include="..\JewelBlitzArena.Net\JewelBlitzArena.Net.csproj" />
   </ItemGroup>
 
 </Project>

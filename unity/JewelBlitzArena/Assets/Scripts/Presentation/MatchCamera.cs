@@ -35,12 +35,12 @@ namespace JewelBlitzArena.Presentation
 
         private void LateUpdate()
         {
-            if (driver == null || targetCamera == null)
+            if (driver == null || targetCamera == null || driver.InMenu)
             {
                 return;
             }
 
-            MatchState state = driver.Session.Current;
+            driver.GetDisplayStates(out _, out MatchState state);
             Vector3 center = Vector3.zero;
             int alive = 0;
             float maxDist = 0f;

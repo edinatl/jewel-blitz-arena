@@ -57,6 +57,27 @@ namespace JewelBlitzArena.Meta
             _store.Save(Profile);
         }
 
+        public void CompleteSparring(in MatchResult result, ModeRequest? request = null)
+        {
+            EnsureBooted();
+            ModeRequest req = request ?? new ModeRequest { Mode = ModeId.Sparring };
+            _sparring.ApplyResult(Profile, result, req);
+            _store.Save(Profile);
+        }
+
+        /// <summary>Dispatch result to the active mode orchestrator and save profile.</summary>
+        public void CompleteMode(ModeId mode, in MatchResult result, ModeRequest? request = null)
+        {
+            if (mode == ModeId.Sparring)
+            {
+                CompleteSparring(result, request);
+            }
+            else
+            {
+                CompleteCustom(result, request);
+            }
+        }
+
         /// <summary>
         /// Convenience for tests/CLI: boot, build Custom config, run N neutral sim frames, apply, save.
         /// </summary>
