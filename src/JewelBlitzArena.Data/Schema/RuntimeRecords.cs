@@ -71,8 +71,38 @@ namespace JewelBlitzArena.Data
         public long CameraCenterZRaw { get; set; }
         public long CameraRadiusRaw { get; set; }
 
+        /// <summary>True when an authored scripted_camera path is present for the enter-transition.</summary>
+        public bool HasScriptedCamera { get; set; }
+
+        /// <summary>
+        /// Bit mask of authored scripted-camera fields (Presentation).
+        /// Bits 0–3 start X/Y/Z/R; bits 4–7 end X/Y/Z/R. Unset fields inherit phase volumes.
+        /// </summary>
+        public byte ScriptedCameraMask { get; set; }
+
+        public long ScriptedStartCenterXRaw { get; set; }
+        public long ScriptedStartCenterYRaw { get; set; }
+        public long ScriptedStartCenterZRaw { get; set; }
+        public long ScriptedStartRadiusRaw { get; set; }
+        public long ScriptedEndCenterXRaw { get; set; }
+        public long ScriptedEndCenterYRaw { get; set; }
+        public long ScriptedEndCenterZRaw { get; set; }
+        public long ScriptedEndRadiusRaw { get; set; }
+
         public StageHazardRecord[] Hazards { get; set; } = System.Array.Empty<StageHazardRecord>();
         public StageKinematicRecord[] Kinematics { get; set; } = System.Array.Empty<StageKinematicRecord>();
+    }
+
+    public static class ScriptedCameraMaskBits
+    {
+        public const byte StartX = 1 << 0;
+        public const byte StartY = 1 << 1;
+        public const byte StartZ = 1 << 2;
+        public const byte StartR = 1 << 3;
+        public const byte EndX = 1 << 4;
+        public const byte EndY = 1 << 5;
+        public const byte EndZ = 1 << 6;
+        public const byte EndR = 1 << 7;
     }
 
     public sealed class StageHazardRecord

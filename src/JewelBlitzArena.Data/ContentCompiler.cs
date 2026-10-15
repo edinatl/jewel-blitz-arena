@@ -108,7 +108,7 @@ namespace JewelBlitzArena.Data
                         });
                     }
 
-                    phases.Add(new StagePhaseRecord
+                    StagePhaseRecord phaseRec = new StagePhaseRecord
                     {
                         Name = p.Name,
                         DurationFrames = SecondsRawToFrames(DecimalFixParser.ParseToRaw(p.DurationSeconds)),
@@ -124,7 +124,9 @@ namespace JewelBlitzArena.Data
                         CameraRadiusRaw = DecimalFixParser.ParseToRaw(p.CameraRadius),
                         Hazards = hazards.ToArray(),
                         Kinematics = kinematics.ToArray(),
-                    });
+                    };
+                    ApplyScriptedCamera(p.ScriptedCamera, phaseRec);
+                    phases.Add(phaseRec);
                 }
 
                 stages.Add(new StageRecord
@@ -190,6 +192,68 @@ namespace JewelBlitzArena.Data
         {
             // frames = seconds * 60, Q48.16 → (secondsRaw * 60) >> 16
             return (int)((secondsRaw * TickRateHz) >> DecimalFixParser.FractionBits);
+        }
+
+        private static void ApplyScriptedCamera(AuthoredScriptedCamera? authored, StagePhaseRecord phase)
+        {
+            if (authored == null || !authored.Enabled)
+            {
+                phase.HasScriptedCamera = false;
+                phase.ScriptedCameraMask = 0;
+                return;
+            }
+
+            byte mask = 0;
+            if (!string.IsNullOrWhiteSpace(authored.StartCenterX))
+            {
+                phase.ScriptedStartCenterXRaw = DecimalFixParser.ParseToRaw(authored.StartCenterX);
+                mask |= ScriptedCameraMaskBits.StartX;
+            }
+
+            if (!string.IsNullOrWhiteSpace(authored.StartCenterY))
+            {
+                phase.ScriptedStartCenterYRaw = DecimalFixParser.ParseToRaw(authored.StartCenterY);
+                mask |= ScriptedCameraMaskBits.StartY;
+            }
+
+            if (!string.IsNullOrWhiteSpace(authored.StartCenterZ))
+            {
+                phase.ScriptedStartCenterZRaw = DecimalFixParser.ParseToRaw(authored.StartCenterZ);
+                mask |= ScriptedCameraMaskBits.StartZ;
+            }
+
+            if (!string.IsNullOrWhiteSpace(authored.StartRadius))
+            {
+                phase.ScriptedStartRadiusRaw = DecimalFixParser.ParseToRaw(authored.StartRadius);
+                mask |= ScriptedCameraMaskBits.StartR;
+            }
+
+            if (!string.IsNullOrWhiteSpace(authored.EndCenterX))
+            {
+                phase.ScriptedEndCenterXRaw = DecimalFixParser.ParseToRaw(authored.EndCenterX);
+                mask |= ScriptedCameraMaskBits.EndX;
+            }
+
+            if (!string.IsNullOrWhiteSpace(authored.EndCenterY))
+            {
+                phase.ScriptedEndCenterYRaw = DecimalFixParser.ParseToRaw(authored.EndCenterY);
+                mask |= ScriptedCameraMaskBits.EndY;
+            }
+
+            if (!string.IsNullOrWhiteSpace(authored.EndCenterZ))
+            {
+                phase.ScriptedEndCenterZRaw = DecimalFixParser.ParseToRaw(authored.EndCenterZ);
+                mask |= ScriptedCameraMaskBits.EndZ;
+            }
+
+            if (!string.IsNullOrWhiteSpace(authored.EndRadius))
+            {
+                phase.ScriptedEndRadiusRaw = DecimalFixParser.ParseToRaw(authored.EndRadius);
+                mask |= ScriptedCameraMaskBits.EndR;
+            }
+
+            phase.HasScriptedCamera = true;
+            phase.ScriptedCameraMask = mask;
         }
     }
 }

@@ -212,6 +212,8 @@ namespace JewelBlitzArena.PresentationBridge
             }
 
             CameraVolume previous = ResolvePhaseVolume(catalog, state.StageId, state.PhaseIndex - 1);
+            ResolveScriptedEndpoints(in phase, in previous, in current, out CameraVolume start, out CameraVolume end);
+
             int remaining = state.TransitionRemainingFrames;
             if (remaining < 0)
             {
@@ -224,8 +226,56 @@ namespace JewelBlitzArena.PresentationBridge
             }
 
             pathT = 1f - (remaining / (float)total);
-            volume = CameraVolume.Lerp(in previous, in current, pathT);
+            volume = CameraVolume.Lerp(in start, in end, pathT);
             inScriptedPath = true;
+        }
+
+        /// <summary>
+        /// Authored <c>scripted_camera</c> overrides (schema v3); unset fields inherit phase volumes.
+        /// </summary>
+        public static void ResolveScriptedEndpoints(
+            in StagePhaseRecord phase,
+            in CameraVolume previousPhase,
+            in CameraVolume currentPhase,
+            out CameraVolume start,
+            out CameraVolume end)
+        {
+            start = previousPhase;
+            end = currentPhase;
+            if (!phase.HasScriptedCamera)
+            {
+                return;
+            }
+
+            byte mask = phase.ScriptedCameraMask;
+            float sx = (mask & ScriptedCameraMaskBits.StartX) != 0
+                ? FixDisplay.ToFloat(new Fix(phase.ScriptedStartCenterXRaw))
+                : previousPhase.CenterX;
+            float sy = (mask & ScriptedCameraMaskBits.StartY) != 0
+                ? FixDisplay.ToFloat(new Fix(phase.ScriptedStartCenterYRaw))
+                : previousPhase.CenterY;
+            float sz = (mask & ScriptedCameraMaskBits.StartZ) != 0
+                ? FixDisplay.ToFloat(new Fix(phase.ScriptedStartCenterZRaw))
+                : previousPhase.CenterZ;
+            float sr = (mask & ScriptedCameraMaskBits.StartR) != 0
+                ? FixDisplay.ToFloat(new Fix(phase.ScriptedStartRadiusRaw))
+                : previousPhase.Radius;
+
+            float ex = (mask & ScriptedCameraMaskBits.EndX) != 0
+                ? FixDisplay.ToFloat(new Fix(phase.ScriptedEndCenterXRaw))
+                : currentPhase.CenterX;
+            float ey = (mask & ScriptedCameraMaskBits.EndY) != 0
+                ? FixDisplay.ToFloat(new Fix(phase.ScriptedEndCenterYRaw))
+                : currentPhase.CenterY;
+            float ez = (mask & ScriptedCameraMaskBits.EndZ) != 0
+                ? FixDisplay.ToFloat(new Fix(phase.ScriptedEndCenterZRaw))
+                : currentPhase.CenterZ;
+            float er = (mask & ScriptedCameraMaskBits.EndR) != 0
+                ? FixDisplay.ToFloat(new Fix(phase.ScriptedEndRadiusRaw))
+                : currentPhase.Radius;
+
+            start = new CameraVolume(sx, sy, sz, sr);
+            end = new CameraVolume(ex, ey, ez, er);
         }
 
         /// <summary>

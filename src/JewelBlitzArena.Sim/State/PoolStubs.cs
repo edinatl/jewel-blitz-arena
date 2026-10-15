@@ -127,7 +127,10 @@ namespace JewelBlitzArena.Sim
         /// <summary>Packed <see cref="InputFrame.Bits"/> from the last think.</summary>
         public int LastDecision;
 
-        /// <summary>Bit 0 = active CPU control (<see cref="CpuBrainRuntime.FlagActive"/>).</summary>
+        /// <summary>
+        /// Bit 0 = active (<see cref="CpuBrainRuntime.FlagActive"/>);
+        /// bits 8–15 = CPU level 1–8 (combat §10.1).
+        /// </summary>
         public uint Reserved;
     }
 }

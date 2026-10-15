@@ -29,6 +29,9 @@ namespace JewelBlitzArena.Sim
         public fixed int StartingLife[PoolCaps.Actors];
         public fixed byte Teams[PoolCaps.Actors];
 
+        /// <summary>Per-slot CPU level 1–8 (combat §10.1). Default 4. Used when a slot is CPU-filled.</summary>
+        public fixed byte CpuLevels[PoolCaps.Actors];
+
         public static MatchConfig CreateDefault(ulong seed, int actorCount = 2)
         {
             var config = new MatchConfig
@@ -47,6 +50,7 @@ namespace JewelBlitzArena.Sim
                 config.FighterIds[i] = i;
                 config.StartingLife[i] = 0;
                 config.Teams[i] = (byte)i;
+                config.CpuLevels[i] = (byte)CpuBrainRuntime.DefaultLevel;
             }
 
             return config;
@@ -70,6 +74,27 @@ namespace JewelBlitzArena.Sim
             }
 
             StartingLife[slot] = life;
+        }
+
+        public void SetCpuLevel(int slot, int level)
+        {
+            if ((uint)slot >= PoolCaps.Actors)
+            {
+                throw new System.ArgumentOutOfRangeException(nameof(slot));
+            }
+
+            CpuLevels[slot] = (byte)CpuBrainRuntime.ClampLevel(level);
+        }
+
+        public int GetCpuLevel(int slot)
+        {
+            if ((uint)slot >= PoolCaps.Actors)
+            {
+                return CpuBrainRuntime.DefaultLevel;
+            }
+
+            int level = CpuLevels[slot];
+            return level == 0 ? CpuBrainRuntime.DefaultLevel : CpuBrainRuntime.ClampLevel(level);
         }
     }
 }

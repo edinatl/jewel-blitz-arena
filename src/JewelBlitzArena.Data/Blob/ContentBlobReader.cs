@@ -141,6 +141,20 @@ namespace JewelBlitzArena.Data
                     CameraRadiusRaw = br.ReadInt64(),
                 };
 
+                phase.HasScriptedCamera = br.ReadBoolean();
+                if (phase.HasScriptedCamera)
+                {
+                    phase.ScriptedCameraMask = br.ReadByte();
+                    phase.ScriptedStartCenterXRaw = br.ReadInt64();
+                    phase.ScriptedStartCenterYRaw = br.ReadInt64();
+                    phase.ScriptedStartCenterZRaw = br.ReadInt64();
+                    phase.ScriptedStartRadiusRaw = br.ReadInt64();
+                    phase.ScriptedEndCenterXRaw = br.ReadInt64();
+                    phase.ScriptedEndCenterYRaw = br.ReadInt64();
+                    phase.ScriptedEndCenterZRaw = br.ReadInt64();
+                    phase.ScriptedEndRadiusRaw = br.ReadInt64();
+                }
+
                 int hazardCount = br.ReadInt32();
                 phase.Hazards = new StageHazardRecord[hazardCount];
                 for (int h = 0; h < hazardCount; h++)

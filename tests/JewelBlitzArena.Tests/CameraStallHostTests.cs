@@ -104,13 +104,18 @@ public sealed class CameraStallHostTests
 
         Assert.That(scripted, Is.True);
         Assert.That(pathT, Is.EqualTo(0.5f).Within(0.02f));
-        // Phase 0 r=12, phase 1 r=14 → mid ≈ 13
-        Assert.That(volume.Radius, Is.EqualTo(13f).Within(0.05f));
+        // Breakaway authored scripted_camera endRadius=16; start inherits phase0 r=12 → mid ≈ 14
+        Assert.That(volume.Radius, Is.EqualTo(14f).Within(0.05f));
+        Assert.That(volume.CenterY, Is.EqualTo(9f).Within(0.05f)); // 8 → authored endY 10
 
         CameraFrame frame = StageCameraVolumes.FrameFromCatalog(catalog, ref state);
         Assert.That(frame.InScriptedPath, Is.True);
         Assert.That(frame.PathT, Is.EqualTo(0.5f).Within(0.02f));
-        Assert.That(frame.VolumeRadius, Is.EqualTo(13f).Within(0.05f));
+        Assert.That(frame.VolumeRadius, Is.EqualTo(14f).Within(0.05f));
+
+        Assert.That(catalog.TryGetStage(SampleContentFactory.CitrineBazaarStageId, out StageRecord stage), Is.True);
+        Assert.That(stage.Phases[1].HasScriptedCamera, Is.True);
+        Assert.That((stage.Phases[1].ScriptedCameraMask & ScriptedCameraMaskBits.EndR) != 0, Is.True);
     }
 
     [Test]

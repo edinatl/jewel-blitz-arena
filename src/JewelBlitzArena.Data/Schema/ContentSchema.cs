@@ -2,8 +2,11 @@ namespace JewelBlitzArena.Data
 {
     public static class ContentSchema
     {
-        /// <summary>v2 adds stage graph phase transitions, hazards, kinematics, camera volumes.</summary>
-        public const uint Version = 2;
+        /// <summary>
+        /// v2: stage graph phase transitions, hazards, kinematics, camera volumes.
+        /// v3: optional authored <c>scripted_camera</c> path keys per phase enter-transition.
+        /// </summary>
+        public const uint Version = 3;
         public const string BlobExtension = ".jba";
         public static readonly byte[] Magic = { (byte)'J', (byte)'B', (byte)'A', (byte)'D' };
 

@@ -127,6 +127,7 @@ namespace JewelBlitzArena.Data
                         _ = DecimalFixParser.ParseToRaw(phase.CameraCenterY);
                         _ = DecimalFixParser.ParseToRaw(phase.CameraCenterZ);
                         _ = DecimalFixParser.ParseToRaw(phase.CameraRadius);
+                        ValidateOptionalScriptedCamera(stage.Name, phase, result);
                     }
                     catch (FormatException ex)
                     {
@@ -349,6 +350,51 @@ namespace JewelBlitzArena.Data
                     return true;
                 default:
                     return false;
+            }
+        }
+
+        private static void ValidateOptionalScriptedCamera(
+            string stageName,
+            AuthoredPhase phase,
+            ValidationResult result)
+        {
+            AuthoredScriptedCamera? cam = phase.ScriptedCamera;
+            if (cam == null)
+            {
+                return;
+            }
+
+            TryParseOptionalFix(cam.StartCenterX, stageName, phase.Name, "scripted_camera.startCenterX", result);
+            TryParseOptionalFix(cam.StartCenterY, stageName, phase.Name, "scripted_camera.startCenterY", result);
+            TryParseOptionalFix(cam.StartCenterZ, stageName, phase.Name, "scripted_camera.startCenterZ", result);
+            TryParseOptionalFix(cam.StartRadius, stageName, phase.Name, "scripted_camera.startRadius", result);
+            TryParseOptionalFix(cam.EndCenterX, stageName, phase.Name, "scripted_camera.endCenterX", result);
+            TryParseOptionalFix(cam.EndCenterY, stageName, phase.Name, "scripted_camera.endCenterY", result);
+            TryParseOptionalFix(cam.EndCenterZ, stageName, phase.Name, "scripted_camera.endCenterZ", result);
+            TryParseOptionalFix(cam.EndRadius, stageName, phase.Name, "scripted_camera.endRadius", result);
+        }
+
+        private static void TryParseOptionalFix(
+            string? value,
+            string stageName,
+            string phaseName,
+            string field,
+            ValidationResult result)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return;
+            }
+
+            try
+            {
+                _ = DecimalFixParser.ParseToRaw(value);
+            }
+            catch (FormatException ex)
+            {
+                result.Errors.Add(new ValidationIssue(
+                    field,
+                    $"Stage '{stageName}' phase '{phaseName}' {field}: {ex.Message}"));
             }
         }
     }

@@ -79,8 +79,32 @@ namespace JewelBlitzArena.Data
         public string CameraCenterZ { get; set; } = "0";
         public string CameraRadius { get; set; } = "12";
 
+        /// <summary>
+        /// Optional enter-transition camera path (`stages.md` scripted_camera).
+        /// Null/absent → Presentation lerps previous→current phase volumes.
+        /// Omitted start/end fields inherit previous/current phase camera volume.
+        /// </summary>
+        public AuthoredScriptedCamera? ScriptedCamera { get; set; }
+
         public List<AuthoredHazard> Hazards { get; set; } = new List<AuthoredHazard>();
         public List<AuthoredKinematic> Kinematics { get; set; } = new List<AuthoredKinematic>();
+    }
+
+    /// <summary>Presentation-only scripted camera path for a phase enter-transition.</summary>
+    public sealed class AuthoredScriptedCamera
+    {
+        /// <summary>When true (default if object present), Presentation uses this path during InTransition.</summary>
+        public bool Enabled { get; set; } = true;
+
+        public string? StartCenterX { get; set; }
+        public string? StartCenterY { get; set; }
+        public string? StartCenterZ { get; set; }
+        public string? StartRadius { get; set; }
+
+        public string? EndCenterX { get; set; }
+        public string? EndCenterY { get; set; }
+        public string? EndCenterZ { get; set; }
+        public string? EndRadius { get; set; }
     }
 
     public sealed class AuthoredHazard

@@ -90,6 +90,13 @@ namespace JewelBlitzArena.Data
                         CarryJewelsDropChance = "0.5",
                         CarryItems = "all",
                         CameraRadius = "14",
+                        // Gust pull-back during Breakaway enter (inherits start from phase A volume).
+                        ScriptedCamera = new AuthoredScriptedCamera
+                        {
+                            Enabled = true,
+                            EndCenterY = "10",
+                            EndRadius = "16",
+                        },
                         Hazards = new List<AuthoredHazard>
                         {
                             new AuthoredHazard
@@ -125,6 +132,13 @@ namespace JewelBlitzArena.Data
                         GeometrySetId = 2,
                         TransitionSeconds = "1",
                         CameraRadius = "16",
+                        ScriptedCamera = new AuthoredScriptedCamera
+                        {
+                            Enabled = true,
+                            StartRadius = "14",
+                            EndRadius = "18",
+                            EndCenterY = "9",
+                        },
                         Hazards = new List<AuthoredHazard>
                         {
                             new AuthoredHazard

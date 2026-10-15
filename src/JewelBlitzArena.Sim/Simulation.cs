@@ -27,6 +27,7 @@ namespace JewelBlitzArena.Sim
         private readonly Fix[] _dtRun = new Fix[PoolCaps.Actors];
         private readonly Fix[] _dtFull = new Fix[PoolCaps.Actors];
         private readonly InputFrame[] _lastInputs = new InputFrame[PoolCaps.Actors];
+        private readonly byte[] _cpuLevels = new byte[PoolCaps.Actors];
 
         public int Frame => _state.Frame;
 
@@ -81,6 +82,7 @@ namespace JewelBlitzArena.Sim
                 _dtRun[i] = DefaultSpeedRun / TickRateHz;
                 _dtFull[i] = DefaultSpeedFull / TickRateHz;
                 _lastInputs[i] = InputFrame.Neutral;
+                _cpuLevels[i] = (byte)config.GetCpuLevel(i);
             }
 
             unsafe
@@ -250,12 +252,23 @@ namespace JewelBlitzArena.Sim
 
         public void Restore(in MatchState snapshot) => _state = snapshot;
 
-        /// <summary>Hand a fighter slot to a deterministic CPU brain (online disconnect / fill).</summary>
-        public void SetCpuControlled(int slot, bool controlled)
+        /// <summary>
+        /// Hand a fighter slot to a deterministic CPU brain (online disconnect / fill).
+        /// Level defaults to <see cref="MatchConfig"/> per-slot CPU level from Reset.
+        /// </summary>
+        public void SetCpuControlled(int slot, bool controlled, int? level = null)
         {
             if (controlled)
             {
-                CpuBrainRuntime.Activate(ref _state, slot);
+                int lvl = level ?? (slot >= 0 && slot < PoolCaps.Actors
+                    ? _cpuLevels[slot]
+                    : CpuBrainRuntime.DefaultLevel);
+                if (slot >= 0 && slot < PoolCaps.Actors)
+                {
+                    _cpuLevels[slot] = (byte)CpuBrainRuntime.ClampLevel(lvl);
+                }
+
+                CpuBrainRuntime.Activate(ref _state, slot, lvl);
             }
             else
             {
@@ -264,6 +277,11 @@ namespace JewelBlitzArena.Sim
         }
 
         public bool IsCpuControlled(int slot) => CpuBrainRuntime.IsActive(ref _state, slot);
+
+        public int GetCpuLevel(int slot) =>
+            slot >= 0 && slot < PoolCaps.Actors
+                ? CpuBrainRuntime.ClampLevel(_cpuLevels[slot] == 0 ? CpuBrainRuntime.DefaultLevel : _cpuLevels[slot])
+                : CpuBrainRuntime.DefaultLevel;
 
         public MatchResult BuildResult()
         {

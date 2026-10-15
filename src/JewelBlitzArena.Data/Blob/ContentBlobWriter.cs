@@ -100,6 +100,20 @@ namespace JewelBlitzArena.Data
                 bw.Write(p.CameraCenterYRaw);
                 bw.Write(p.CameraCenterZRaw);
                 bw.Write(p.CameraRadiusRaw);
+                bw.Write(p.HasScriptedCamera);
+                if (p.HasScriptedCamera)
+                {
+                    bw.Write(p.ScriptedCameraMask);
+                    bw.Write(p.ScriptedStartCenterXRaw);
+                    bw.Write(p.ScriptedStartCenterYRaw);
+                    bw.Write(p.ScriptedStartCenterZRaw);
+                    bw.Write(p.ScriptedStartRadiusRaw);
+                    bw.Write(p.ScriptedEndCenterXRaw);
+                    bw.Write(p.ScriptedEndCenterYRaw);
+                    bw.Write(p.ScriptedEndCenterZRaw);
+                    bw.Write(p.ScriptedEndRadiusRaw);
+                }
+
                 bw.Write(p.Hazards.Length);
                 foreach (StageHazardRecord h in p.Hazards)
                 {
