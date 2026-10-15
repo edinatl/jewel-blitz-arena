@@ -53,12 +53,12 @@ public static class PrototypeBuilder
         SetColor(marker, new Color(0.85f, 0.7f, 0.25f));
 
         // --- Fighters ---------------------------------------------------------
-        var p1 = MakePlayer("Player1_Blue", new Vector3(-4f, 1.05f, 0f),
-                            new Color(0.2f, 0.45f, 1f), 0, "BLUE");
+        var p1 = MakePlayer("Player1_Soldier", new Vector3(-4f, 1.05f, 0f),
+                            new Color(0.2f, 0.45f, 1f), 0, "SOLDIER", "Soldier");
         ConfigureP1(p1);
 
-        var p2 = MakePlayer("Player2_Red", new Vector3(4f, 1.05f, 0f),
-                            new Color(1f, 0.3f, 0.25f), 1, "RED");
+        var p2 = MakePlayer("Player2_Samurai", new Vector3(4f, 1.05f, 0f),
+                            new Color(1f, 0.3f, 0.25f), 1, "SAMURAI", "Samurai");
         ConfigureP2(p2);
 
         // --- Camera -------------------------------------------------------------
@@ -95,7 +95,7 @@ public static class PrototypeBuilder
         SetColor(wall, new Color(0.5f, 0.55f, 0.65f));
     }
 
-    static GameObject MakePlayer(string name, Vector3 pos, Color color, int index, string display)
+    static GameObject MakePlayer(string name, Vector3 pos, Color color, int index, string display, string character)
     {
         var go = GameObject.CreatePrimitive(PrimitiveType.Capsule);
         go.name = name;
@@ -103,6 +103,15 @@ public static class PrototypeBuilder
         go.transform.position = pos;
         go.transform.localScale = new Vector3(1f, 1.1f, 1f);
         SetColor(go, color);
+
+        // v0.4: the capsule stays as the invisible physics body; the visible
+        // fighter is a 3D character built from primitives at play time and
+        // animated procedurally (run cycle, punches, catch pose, KO fall).
+        var bodyRend = go.GetComponent<Renderer>();
+        if (bodyRend != null) bodyRend.enabled = false;
+        var visual = go.AddComponent<CharacterVisual>();
+        visual.character = character;
+        go.AddComponent<FighterAnimator>();
 
         var rb = go.AddComponent<Rigidbody>();
         rb.constraints = RigidbodyConstraints.FreezeRotation;
