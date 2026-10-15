@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Jewel Blitz Arena — Sprite Demo v0.6</title>
+<title>Jewel Blitz Arena — Sprite Demo v0.7</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html,body { width:100%; height:100%; background:#14161f; overflow:hidden; font-family:system-ui, sans-serif; touch-action:none; user-select:none; -webkit-user-select:none; }
@@ -129,6 +129,7 @@ const TAU = Math.PI * 2;
 let fighters, gems, groundItems, thrown, shots, hazard, timeLeft, over, winner, flashTxt, flashT;
 let gemTimer, itemTimer, boxTimer = 7;
 let boxes = [], coins = [], pendingBooms = [];
+let debris = [], debrisTimer = 8;
 let particles = [], floaters = [], rings = [], shake = 0;
 
 function newFighter(x, y, color, name, isBot) {
@@ -136,7 +137,8 @@ function newFighter(x, y, color, name, isBot) {
            face: { x: isBot ? -1 : 1, y: 0 }, art: isBot ? 'samurai' : 'soldier', gems: 0, item: null, uses: 0,
            transformed: 0, atkCd: 0, catchUntil: 0, lastCatch: -9, hurtT: 0,
            aiAtk: 0, aiJump: 0, aiCatchCd: 0, atkT: 0, atkMax: .22, runPh: Math.random() * 6.28, speed: 240,
-           jumpT: 0, catchCd: 0, atkKind: '', combo: 0, comboT: 0, downT: 0, rollT: 0, gold: 0, gauge: 0, wallJumped: false };
+           jumpT: 0, catchCd: 0, atkKind: '', combo: 0, comboT: 0, downT: 0, rollT: 0, gold: 0, gauge: 0, wallJumped: false,
+           grabbing: null, grabbedBy: null, grabT: 0, grabCd: 0, rollStartT: -9, throwFoeT: 0, mash: 0, thrownHitDone: false };
 }
 function reset() {
   const cx = ARENA.x + ARENA.w / 2, cy = ARENA.y + ARENA.h / 2;
@@ -144,6 +146,7 @@ function reset() {
                newFighter(ARENA.x + ARENA.w * .75, cy, '#ff5347', 'SAMURAI', true) ];
   gems = []; groundItems = []; thrown = []; shots = []; particles = []; floaters = []; rings = []; shake = 0; boxes = []; coins = []; pendingBooms = []; boxTimer = 7;
   hazard = { x: cx, y: ARENA.y + 40, vx: 150, vy: 115, r: 15, cd: [0, 0] };
+  debris = []; debrisTimer = 8;
   timeLeft = 120; over = false; winner = ''; flashTxt = ''; flashT = 0;
   gemTimer = 1.2; itemTimer = 2.5;
   // Stage furniture — ammunition lying around, like the Unity build
@@ -170,8 +173,13 @@ function dropGem(f) { // ANY hit knocks a gem loose
 }
 function hurt(f, dmg, dirx, diry, kb, cause) {
   if (over || f.hp <= 0) return;
-  if (f.rollT > 0) { floater(f.x, f.y - 34, 'DODGED!', '#7df9ff'); return; }
-  if (f.jumpT > 0 && cause !== 'shot') { floater(f.x, f.y - 34, 'MISS', '#cfd6ff'); return; }
+  const atk = fighters[1 - fighters.indexOf(f)];
+  if (f.rollT > 0) {
+    if (atk && cause !== 'hazard' && performance.now() / 1000 - f.rollStartT < .16) { floater(f.x, f.y - 42, 'PERFECT DODGE!', '#7df9ff'); atk.atkCd = Math.max(atk.atkCd, .35); ringFx(f.x, f.y, 42, '#7df9ff'); }
+    else floater(f.x, f.y - 34, 'DODGED!', '#7df9ff');
+    return;
+  }
+  if (f.jumpT > 0 && cause === 'melee' && !(atk && atk.jumpT > 0)) { floater(f.x, f.y - 34, 'MISS', '#cfd6ff'); return; }
   if (f.downT > 0) return;
   f.hp -= dmg; f.hurtT = .18;
   f.vx += dirx * kb; f.vy += diry * kb;
@@ -179,18 +187,18 @@ function hurt(f, dmg, dirx, diry, kb, cause) {
   floater(f.x, f.y - 28, '-' + Math.round(dmg), '#ffb3ab');
   shake = Math.min(11, shake + dmg * .13);
   dropGem(f);
-  const atk = fighters[1 - fighters.indexOf(f)];
   if (atk && cause !== 'hazard' && f.transformed <= 0) {
     if (atk.comboT > 0) atk.combo++; else atk.combo = 1;
     atk.comboT = 1.2;
     if (atk.combo >= 3) {
       atk.combo = 0; f.downT = .85; f.atkCd = Math.max(f.atkCd, .85);
+      if (f.grabbedBy) { f.grabbedBy.grabbing = null; f.grabbedBy = null; }
       ringFx(f.x, f.y, 54, '#ffffff'); floater(f.x, f.y - 38, 'KNOCKDOWN!', '#ffd94d'); shake = Math.min(13, shake + 4);
       if (f.gems > 0) dropGem(f);
       else for (let ci = 0; ci < 3; ci++) coins.push({ x: f.x + (Math.random() - .5) * 26, y: f.y + (Math.random() - .5) * 26, vx: (Math.random() - .5) * 130, vy: (Math.random() - .5) * 130, ph: Math.random() * TAU });
     }
   }
-  if (f.hp <= 0) { f.hp = 0; spawnParticles(f.x, f.y, 30, ['#ffd94d', '#ff5347', '#ffffff'], 280, .7, 4); ringFx(f.x, f.y, 70, '#ffd94d'); shake = 14; endMatch(fighters[1 - fighters.indexOf(f)]); }
+  if (f.hp <= 0) { f.hp = 0; if (f.grabbedBy) { f.grabbedBy.grabbing = null; f.grabbedBy = null; } if (f.grabbing) { f.grabbing.grabbedBy = null; f.grabbing = null; } spawnParticles(f.x, f.y, 30, ['#ffd94d', '#ff5347', '#ffffff'], 280, .7, 4); ringFx(f.x, f.y, 70, '#ffd94d'); shake = 14; endMatch(fighters[1 - fighters.indexOf(f)]); }
 }
 function melee(f, dmg, range, kb) {
   f.atkT = .22; f.atkMax = .22;
@@ -241,6 +249,7 @@ function useItem(f) {
 }
 function tryAttack(f) { // □ ATTACK (Power Drive while transformed)
   if (over || f.atkCd > 0 || f.downT > 0) return;
+  if (f.grabbing) { throwFoe2D(f); return; }
   if (f.transformed > 0) { powerDrive(f); return; }
   if (f.jumpT > 0) { // air attack: diving strike
     f.atkCd = .35; f.atkKind = 'swing';
@@ -263,15 +272,43 @@ function powerDrive(f) { // unique per fighter, costs 25 gauge
   }
   spawnParticles(f.x, f.y, 10, ['#ffd94d', '#fff6b0'], 140, .35, 3);
 }
+function throwFoe2D(f) {
+  const v = f.grabbing; if (!v) return;
+  f.grabbing = null; v.grabbedBy = null; f.grabCd = .8; f.atkCd = .4; f.atkKind = 'throw'; f.atkT = .25; f.atkMax = .25;
+  v.throwFoeT = .5; v.thrownHitDone = false; v.vx = f.face.x * 560; v.vy = f.face.y * 560; v.jumpT = 0;
+  showFlash(f.name + ' THREW ' + v.name + '!'); ringFx(f.x, f.y, 44, '#ffffff');
+}
+function startGrab2D(f, o) {
+  f.grabbing = o; o.grabbedBy = f; f.grabT = 1.1; f.atkCd = .3; o.vx = o.vy = 0; o.mash = 0;
+  if (f === fighters[0]) showFlash('GRABBED ' + o.name + ' — TAP \u25a1 TO THROW!');
+  else if (o === fighters[0]) showFlash('GRABBED! MASH BUTTONS TO ESCAPE!');
+  else showFlash(f.name + ' GRABBED ' + o.name + '!');
+  ringFx(o.x, o.y, 40, '#ffd94d');
+}
+function escapeGrab2D(v) {
+  const g = v.grabbedBy; if (!g) return;
+  g.grabbing = null; v.grabbedBy = null; g.grabCd = .8; g.atkCd = Math.max(g.atkCd, .3);
+  v.vx = -g.face.x * 200; v.vy = -g.face.y * 200; v.jumpT = .3;
+  floater(v.x, v.y - 34, 'ESCAPED!', '#7df9ff');
+}
+function doRecover2D(f) {
+  f.downT = 0; f.rollT = .32; f.rollStartT = performance.now() / 1000;
+  const d = Math.max(.2, Math.hypot(f.face.x, f.face.y)); f.vx = f.face.x / d * 430; f.vy = f.face.y / d * 430;
+  floater(f.x, f.y - 34, 'RECOVERY ROLL!', '#7df9ff'); ringFx(f.x, f.y, 34, '#7df9ff');
+}
 function tryAction(f) { // ○ ACTION: throw held item, or catch with empty hands
   if (over || f.atkCd > 0 || f.downT > 0) return;
   const now = performance.now() / 1000;
+  if (f.grabbing) { throwFoe2D(f); return; }
+  if (!f.item && f.grabCd <= 0) { const o = fighters[1 - fighters.indexOf(f)]; if (o && !o.grabbedBy && o.downT <= 0 && o.throwFoeT <= 0 && o.transformed <= 0 && Math.hypot(o.x - f.x, o.y - f.y) < 48) { startGrab2D(f, o); return; } }
   if (f.item) { f.atkCd = .45; f.atkKind = 'throw'; throwHeld(f); return; }
   if (f.catchCd > 0) return;
   f.catchCd = .9; f.catchUntil = now + .28; f.atkCd = .3; f.atkKind = 'catch';
 }
-function tryJump(f) { // ✕ JUMP — with a direction held it becomes a dodge roll; at a wall, a wall jump
-  if (over || f.downT > 0 || f.rollT > 0) return;
+function tryJump(f) { // ✕ JUMP — dodge roll / wall jump / recovery roll when knocked down
+  if (over || f.rollT > 0) return;
+  if (f.grabbing) { throwFoe2D(f); return; }
+  if (f.downT > 0) { if (f.downT <= .42) doRecover2D(f); return; }
   if (f.jumpT > 0) {
     const nearWall = f.x < ARENA.x + 48 || f.x > ARENA.x + ARENA.w - 48 || f.y < ARENA.y + 48 || f.y > ARENA.y + ARENA.h - 48;
     if (nearWall && !f.wallJumped) {
@@ -284,7 +321,7 @@ function tryJump(f) { // ✕ JUMP — with a direction held it becomes a dodge r
   }
   const moving = Math.hypot(f.vx, f.vy) > 55 || (f === fighters[0] && Math.hypot(joy.x, joy.y) > .3);
   if (moving) {
-    f.rollT = .38; f.atkCd = Math.max(f.atkCd, .16);
+    f.rollT = .38; f.rollStartT = performance.now() / 1000; f.atkCd = Math.max(f.atkCd, .16);
     const d = Math.max(.2, Math.hypot(f.face.x, f.face.y));
     f.vx = f.face.x / d * 440; f.vy = f.face.y / d * 440;
     spawnParticles(f.x, f.y, 6, ['#cfd6ff', '#ffffff'], 90, .3, 2.5);
@@ -294,6 +331,7 @@ function tryJump(f) { // ✕ JUMP — with a direction held it becomes a dodge r
 }
 function tryFusionDrop(f) { // △ POWER FUSION while transformed — otherwise DISCARD item
   if (over || f.atkCd > 0 || f.downT > 0) return;
+  if (f.grabbing) { throwFoe2D(f); return; }
   if (f.transformed > 0) {
     if (f.gauge < 50) { floater(f.x, f.y - 34, 'NEED 50 GAUGE', '#ffb3ab'); return; }
     f.gauge -= 50; f.transformed = f.gauge * .12; f.atkCd = .9; f.atkKind = 'swing';
@@ -334,7 +372,9 @@ function endMatch(w) {
 
 // ============ AI ============
 function ai(f, dt, now) {
-  if (f.downT > 0) return;
+  if (f.grabbedBy) { if (Math.random() < dt * 1.6) escapeGrab2D(f); return; }
+  if (f.grabbing) { if (Math.random() < .5) tryAttack(f); return; }
+  if (f.downT > 0) { if (f.downT <= .42 && Math.random() < dt * 2.4) doRecover2D(f); return; }
   const o = fighters[0];
   f.aiAtk -= dt; f.aiCatchCd -= dt;
   // Catch incoming throws (75% reflexes)
@@ -375,7 +415,8 @@ function ai(f, dt, now) {
   if (od <= 52 && f.aiAtk <= 0) {
     f.face = { x: (o.x - f.x) / od, y: (o.y - f.y) / od };
     f.aiAtk = .55;
-    if (f.transformed > 0 && f.gauge >= 50 && Math.random() < .3) tryFusionDrop(f);
+    if (!f.item && Math.random() < .22) tryAction(f);
+    else if (f.transformed > 0 && f.gauge >= 50 && Math.random() < .3) tryFusionDrop(f);
     else if (f.item && (f.item.arch === 'throw' || f.item.arch === 'boom') && Math.random() < .4) tryAction(f);
     else if (Math.random() < .1) { tryJump(f); }
     else tryAttack(f);
@@ -402,17 +443,18 @@ joyEl.addEventListener('mousedown', e => { mouseDown = true; moveJoy(e); });
 window.addEventListener('mousemove', e => { if (mouseDown) moveJoy(e); });
 window.addEventListener('mouseup', () => { mouseDown = false; joy.x = joy.y = 0; stickEl.style.left = '44px'; stickEl.style.top = '44px'; });
 const keys = {};
-window.addEventListener('keydown', e => { keys[e.code] = true; if (e.code === 'KeyF') tryAttack(fighters[0]); if (e.code === 'KeyG') tryAction(fighters[0]); if (e.code === 'KeyH') tryFusionDrop(fighters[0]); if (e.code === 'Space') { e.preventDefault(); tryJump(fighters[0]); } if (e.code === 'KeyR') reset(); });
+window.addEventListener('keydown', e => { keys[e.code] = true; const p0 = fighters[0]; if (p0.grabbedBy && ['KeyF', 'KeyG', 'KeyH', 'Space'].includes(e.code)) { p0.mash++; if (p0.mash >= 4) escapeGrab2D(p0); return; } if (e.code === 'KeyF') tryAttack(fighters[0]); if (e.code === 'KeyG') tryAction(fighters[0]); if (e.code === 'KeyH') tryFusionDrop(fighters[0]); if (e.code === 'Space') { e.preventDefault(); tryJump(fighters[0]); } if (e.code === 'KeyR') reset(); });
 window.addEventListener('keyup', e => { keys[e.code] = false; });
 function bindBtn(id, fn) {
   const el = document.getElementById(id);
   el.addEventListener('touchstart', e => { e.preventDefault(); fn(); }, { passive: false });
   el.addEventListener('mousedown', e => { e.preventDefault(); fn(); });
 }
-bindBtn('btnAttack', () => tryAttack(fighters[0]));
-bindBtn('btnAction', () => tryAction(fighters[0]));
-bindBtn('btnJump', () => tryJump(fighters[0]));
-bindBtn('btnFusion', () => tryFusionDrop(fighters[0]));
+function btnPress(fn) { const p0 = fighters[0]; if (p0.grabbedBy) { p0.mash++; if (p0.mash >= 4) escapeGrab2D(p0); return; } fn(); }
+bindBtn('btnAttack', () => btnPress(() => tryAttack(fighters[0])));
+bindBtn('btnAction', () => btnPress(() => tryAction(fighters[0])));
+bindBtn('btnJump', () => btnPress(() => tryJump(fighters[0])));
+bindBtn('btnFusion', () => btnPress(() => tryFusionDrop(fighters[0])));
 cv.addEventListener('touchstart', e => { if (over) reset(); }, { passive: true });
 cv.addEventListener('mousedown', () => { if (over) reset(); });
 
@@ -432,30 +474,39 @@ function step(dt, now) {
   if (keys.KeyW || keys.ArrowUp) my -= 1; if (keys.KeyS || keys.ArrowDown) my += 1;
   if (keys.KeyA || keys.ArrowLeft) mx -= 1; if (keys.KeyD || keys.ArrowRight) mx += 1;
   const ml = Math.hypot(mx, my); if (ml > 1) { mx /= ml; my /= ml; }
-  if (p.downT > 0) { mx = 0; my = 0; }
+  if (p.downT > 0 || p.grabbedBy) { mx = 0; my = 0; }
   if (ml > .12) { p.vx += mx * p.speed * dt * 7; p.vy += my * p.speed * dt * 7; p.face = { x: mx, y: my }; }
   ai(fighters[1], dt, now);
 
   for (const f of fighters) {
     const sp = f.speed * (f.transformed > 0 ? 1.3 : 1);
-    const vl = Math.hypot(f.vx, f.vy); if (vl > sp) { f.vx = f.vx / vl * sp; f.vy = f.vy / vl * sp; }
+    const vl = Math.hypot(f.vx, f.vy); if (vl > sp && f.throwFoeT <= 0) { f.vx = f.vx / vl * sp; f.vy = f.vy / vl * sp; }
     f.x = clamp(f.x + f.vx * dt, ARENA.x + f.r, ARENA.x + ARENA.w - f.r);
     f.y = clamp(f.y + f.vy * dt, ARENA.y + f.r, ARENA.y + ARENA.h - f.r);
+    if (f.grabbedBy) { f.x = clamp(f.grabbedBy.x + f.grabbedBy.face.x * 8, ARENA.x + f.r, ARENA.x + ARENA.w - f.r); f.y = clamp(f.grabbedBy.y - 30, ARENA.y + f.r, ARENA.y + ARENA.h - f.r); f.vx = 0; f.vy = 0; }
     f.vx *= Math.pow(.0001, dt); f.vy *= Math.pow(.0001, dt); // friction-ish damp
     if (Math.abs(f.vx) < 2) f.vx = 0; if (Math.abs(f.vy) < 2) f.vy = 0;
     f.atkCd -= dt; f.hurtT -= dt; f.atkT = Math.max(0, f.atkT - dt);
     f.jumpT = Math.max(0, f.jumpT - dt); f.catchCd -= dt; f.rollT = Math.max(0, f.rollT - dt); f.downT = Math.max(0, f.downT - dt); f.comboT -= dt; if (f.comboT <= 0) f.combo = 0;
+    f.grabCd = Math.max(0, f.grabCd - dt);
+    if (f.grabbing) { f.grabT -= dt; if (f.grabT <= 0) throwFoe2D(f); }
+    if (f.throwFoeT > 0) {
+      f.throwFoeT -= dt;
+      const o = fighters[1 - fighters.indexOf(f)];
+      if (!f.thrownHitDone && o && o.throwFoeT <= 0 && o.downT <= 0 && Math.hypot(o.x - f.x, o.y - f.y) < f.r + o.r + 4) { f.thrownHitDone = true; const d = Math.max(1, Math.hypot(f.vx, f.vy)); hurt(o, 10, f.vx / d, f.vy / d, 200, 'thrown'); }
+      if (f.throwFoeT <= 0) { const d = Math.max(1, Math.hypot(f.vx, f.vy)); hurt(f, 12, -f.vx / d, -f.vy / d, 60, 'thrown'); f.downT = Math.max(f.downT, .45); }
+    }
     if (f.transformed > 0 && Math.random() < .35) particles.push({ x: f.x + (Math.random() - .5) * 26, y: f.y + 12, vx: (Math.random() - .5) * 20, vy: -55 - Math.random() * 30, t: 0, life: .5, color: '#ffd94d', size: 2.5 });
     if (f.transformed > 0) { f.gauge = Math.max(0, f.gauge - dt * (100 / 12)); f.transformed = f.gauge * .12; if (f.gauge <= 0) f.transformed = 0; }
     // Gem pickup (0.6s delay after spawn)
     for (let i = gems.length - 1; i >= 0; i--) {
-      if (now - gems[i].born > .6 && f.transformed <= 0 && f.downT <= 0 && Math.hypot(gems[i].x - f.x, gems[i].y - f.y) < f.r + 13) {
+      if (now - gems[i].born > .6 && f.transformed <= 0 && f.downT <= 0 && !f.grabbedBy && !f.grabbing && Math.hypot(gems[i].x - f.x, gems[i].y - f.y) < f.r + 13) {
         gems.splice(i, 1); f.gems++; spawnParticles(f.x, f.y, 6, ['#ff8fa8', '#ff3355', '#ffffff'], 90, .3, 2.5); floater(f.x, f.y - 28, 'GEM!', '#ff8fa8');
         if (f.gems >= 3) { f.gems = 0; f.transformed = 12; f.gauge = 100; showFlash(f.name + ' TRANSFORMED!'); ringFx(f.x, f.y, 62, '#ffd94d'); spawnParticles(f.x, f.y, 26, ['#ffd94d', '#fff6b0', '#ffb52e'], 250, .6, 3.5); shake = Math.min(12, shake + 6); }
       }
     }
     // Item pickup
-    if (!f.item && f.downT <= 0) for (let i = groundItems.length - 1; i >= 0; i--) {
+    if (!f.item && f.downT <= 0 && !f.grabbedBy && !f.grabbing) for (let i = groundItems.length - 1; i >= 0; i--) {
       if (Math.hypot(groundItems[i].x - f.x, groundItems[i].y - f.y) < f.r + 15) { equip(f, groundItems[i].def); groundItems.splice(i, 1); }
     }
   }
@@ -472,7 +523,7 @@ function step(dt, now) {
     let done = false;
     for (const f of fighters) {
       if (f === t.owner && t.age < .3) continue;
-      if (f.jumpT > 0 || f.rollT > 0) continue; // airborne or rolling: it flies past
+      if (f.rollT > 0) continue; // rolling dodges thrown items; airborne fighters can now be hit
       if (Math.hypot(f.x - t.x, f.y - t.y) > f.r + 13) continue;
       // CATCH
       if (!f.item && now <= f.catchUntil) {
@@ -525,6 +576,13 @@ function step(dt, now) {
     }
   });
   if (flashT > 0) { flashT -= dt; if (flashT <= 0) document.getElementById('flash').style.opacity = 0; }
+  // Falling debris — telegraphed stage hazard
+  debrisTimer -= dt;
+  if (debrisTimer <= 0) { debrisTimer = 7 + Math.random() * 4; const tgt = fighters[Math.floor(Math.random() * 2)]; debris.push({ x: tgt.x, y: tgt.y, t: 1.15 }); if (Math.random() < .6) debris.push({ x: ARENA.x + 30 + Math.random() * (ARENA.w - 60), y: ARENA.y + 30 + Math.random() * (ARENA.h - 60), t: 1.15 }); }
+  for (let i = debris.length - 1; i >= 0; i--) { const d = debris[i]; d.t -= dt;
+    if (d.t <= 0) { spawnParticles(d.x, d.y, 12, ['#c9a06a', '#8a6a3a'], 200, .4, 3.5); ringFx(d.x, d.y, 44, '#c9a06a'); shake = Math.min(12, shake + 3);
+      fighters.forEach(f => { if (f.hp > 0 && f.jumpT <= 0 && Math.hypot(f.x - d.x, f.y - d.y) < 42) { const dd = Math.max(1, Math.hypot(f.x - d.x, f.y - d.y)); hurt(f, 14, (f.x - d.x) / dd, (f.y - d.y) / dd, 240, 'boom'); } });
+      groundItems.push({ def: findItem('Rock'), x: d.x, y: d.y, ph: 0, born: now }); debris.splice(i, 1); } }
   // FX updates
   for (let i = particles.length - 1; i >= 0; i--) { const q = particles[i]; q.t += dt; q.x += q.vx * dt; q.y += q.vy * dt; q.vx *= .92; q.vy *= .92; if (q.t >= q.life) particles.splice(i, 1); }
   for (let i = rings.length - 1; i >= 0; i--) { const r = rings[i]; r.t += dt; r.r += (r.maxR - r.r) * dt * 9; if (r.t > .38) rings.splice(i, 1); }
@@ -595,6 +653,14 @@ function draw(now) {
   ctx.fillStyle = 'rgba(161,63,214,.30)'; ctx.beginPath(); ctx.arc(hazard.x, hazard.y, hazard.r * hpulse + 9, 0, TAU); ctx.fill();
   ctx.fillStyle = '#a13fd6'; ctx.beginPath(); ctx.arc(hazard.x, hazard.y, hazard.r * hpulse, 0, TAU); ctx.fill();
   ctx.fillStyle = '#d9a5ff'; ctx.beginPath(); ctx.arc(hazard.x - 4, hazard.y - 4, 5, 0, TAU); ctx.fill();
+  // Debris warnings + falling rocks
+  for (const d of debris) {
+    ctx.strokeStyle = 'rgba(255,60,50,' + (.5 + Math.sin(now * 14) * .3) + ')'; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.arc(d.x, d.y, 26, 0, TAU); ctx.stroke();
+    if (d.t < .5) { const pr = 1 - d.t / .5; const ry = d.y - (1 - pr * pr) * 150;
+      ctx.fillStyle = '#9a8a7a'; ctx.beginPath(); ctx.arc(d.x, ry, 13, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#6a5a4a'; ctx.beginPath(); ctx.arc(d.x - 4, ry - 3, 5, 0, TAU); ctx.fill(); }
+  }
   // Thrown items (grow slightly = height arc illusion)
   for (const t of thrown) {
     if (t.trail) for (let ti = 0; ti < t.trail.length; ti++) { const tp = t.trail[ti]; ctx.fillStyle = 'rgba(255,255,255,' + (ti / t.trail.length * .25) + ')'; ctx.beginPath(); ctx.arc(tp.x, tp.y, 3 + ti, 0, TAU); ctx.fill(); }
@@ -642,6 +708,7 @@ function draw(now) {
     const spd = Math.hypot(f.vx, f.vy);
     const foe = fighters[1 - fighters.indexOf(f)];
     if (f.hp <= 0 || f.downT > 0) frame = 'ko';
+    else if (f.grabbedBy) frame = 'hurt';
     else if (over && f.hp >= foe.hp) frame = 'victory';
     else if (f.hurtT > 0) frame = 'hurt';
     else if (f.atkT > 0) frame = (f.atkKind === 'swing' || f.atkKind === 'throw') ? 'swing' : 'punch';
