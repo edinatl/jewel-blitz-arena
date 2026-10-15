@@ -1,0 +1,133 @@
+This file is the reference brief. It records the systems the plan was modeled on, in the
+source game's own names. It is not the setting, the cast, or the item list. Where it and
+`PLAN.md` disagree, the plan wins. There is no coconut-era setting left in the plan. Do not
+mine this file for place names, character names, or currency.
+
+Jewel Blitz Arena is a four-actor 3D arena brawler with a persistent item economy bolted on. The match itself is a short, physics-heavy free-for-all. The long-term game is an inventory, crafting graph, and unlock ladder that feeds back into what can spawn in those matches.
+
+## Product and architecture
+
+Jewel Blitz Arena is a party-scale simulation: up to four actors, no block, scripted stage state machines, and a loot table. There is a combo system, and status is a horizontal bar.
+
+Default controller mapping (based on Dreamcast button layout), remappable in options:
+
+- Analog or D-pad: move
+- A: jump
+- X: attack, and use or throw a held item
+- B: action (pick up, grab, board a gimmick)
+- Y: strong attack
+- Attack + jump, or strong attack + jump: the two Power Fusions while transformed
+- Attack + strong near an opponent: throw
+
+There is no block. A directional tap just before a hit dodges. Items and boardable gimmicks show a ring at pickup range. Thrown items can be caught on a timed Action press. Walls can be sprung off. Some pillars can be grabbed: a ground grab rebounds you into a charge, an air grab hangs you on the pillar.
+
+## Match rules
+
+A match is depletion of life in a 3D volume, not a side-view combo exchange. Jewels spawn in the field and in crates. Three jewels force a temporary transformation. The Power Gauge then drains. While transformed you get a Power Drive (the basic special) and two Power Fusions, which spend gauge. There is no super armor on the transform. Extra Options can set jewels on the field from 3 to 7 (default 7), toggle the gauge timer, and scale damage taken and attack output during transformation (defaults are 50 percent damage taken and 100 percent attack).
+
+On a knockout, a 9-second help window can revive the downed actor if a teammate is close and shares stamina. That window is itself an option. Match time expiry calls a meteor sudden-death that is effectively a one-hit kill. If that second window also expires without a winner, the match draws. Boss timers are the same idea: Pharaoh Walker’s timeout is a tail beam, Dr. Erode’s is a full-stage electric attack.
+
+Arcade free-for-alls advance the top two survivors. On a boss, those two cooperate. A second controller can interrupt a CPU match to join as ally or rival.
+
+## Stage state machines
+
+Five story stages, two boss stages, then unlockable Original-only arenas. Most story stages are timed phase graphs, not static maps.
+
+- Blue Sky. Airship with seat-mounted guns, then the ship breaks up and everyone freefalls (umbrellas slow the fall; jewels can be lost here), then a floating ruin with tanks and rock throwers. Adventure crates here often yield ingredient cards.
+- Dark Castle. Exterior, then an interior. Collapsing bridge, lily pads, a bell that relocates you, ghosts that drop items, and a couple of stage-only weapons (a projectile sword, a spear from a door). Layout splits by player count.
+- Tomb. Coffins that stun and can drop a Jewel, a rotating hazard wheel, an earthquake drop, then a boulder chase. A lion-head jar puzzle heals or dizzies. A jackpot reel can pay food, bombs, coins, or jewels.
+- Iceberg. Submarines with different loadouts (cannon, missile, vehicle launcher), rideable bombers, throwable icebergs, slippery ice.
+- Space Station. Elevator floors, a conveyor whose speed a red button toggles, hanging transporters, and an alien insect with a liquid attack, spawned young, and a tail swipe. Eggs are throwable.
+
+Boss stages:
+
+- Pharaoh Walker, on the desert. A sphinx-like robot run by masked operators. Laser is an instant kill, jumps dizzy you, tongue and crouch-spin are the other tools. Practical routes are break the legs and hit the head, or break a leg, mount, and hit the tail controller. The masked operators fire projectiles once the body is opened up.
+- Chaos. A corridor of weapon golems (bazooka, ice staff, hammer, and others) with hanging poles, then Dr. Erode. You collect jewels in this stage but do not transform until the boss. Erode swings and grabs, stabs, spews poison, and uses electric hands. Food and cards are the survival items.
+
+Original-only, unlocked by Arcade clears:
+
+- Desert. The Walker stage with the boss removed. Cactuses are the interactive objects.
+- Extra Stage 1. Mel’s shop interior. Small, a climbable mast, almost no room to dodge.
+- Extra Stage 2. Narrow beams over a city. Fall is the hazard. Float and multi-jump characters are favored.
+- Extra Stage 3. Stacked floating blocks over water. Wall jumps matter.
+
+Extra arenas are selected by scrolling the stage cursor off the normal list until an “Extra Arena” box appears.
+
+## Mode layer
+
+Four play modes, plus shop and system menus.
+
+- 1-on-1. The story ladder as duels. A second player can jump in. No item economy.
+- Arcade. The NAOMI ladder: three free-for-alls and two bosses, six stages total. Top two advance and cooperate on bosses. This is the unlock driver for characters, Extra Options, and extra stages.
+- Original. Rules sandbox for one to four humans or CPU: time, items on or off, teams, stage, including bosses once unlocked. Handy Items from the VMU can appear here.
+- Adventure. Single-player only. Same ladder, but every handled item is written into the Item Book, and hits and containers drop money. Difficulty runs 1 through 8. Low difficulty is mostly 1-on-1. Level 8 is mostly 1-on-3, and a full clear is cited at about 8,000 gold before time adjustment. A clear also pays a special item, usually around rarity level 6. After each stage a chest dumps coins, sometimes bags.
+- Item Shop. Mel’s room. Buy, sell, mix, talk, Item Book, Fitting Room.
+- Save / Load. VMU. The Mini-Book app costs 128 blocks.
+- Network. Japanese Dreamcast build only, pointed at Capcom’s site. Not in the Western release.
+
+Reported Adventure money objects: bronze coin 100, silver 500, gold 1,000, money bag 2,000, three gold bars 3,000, five gold bars 5,000, gold treasure box 8,000.
+
+## Characters
+
+Fourteen playable on Dreamcast. Kraken and Valgas stay out until the PSP collection.
+
+Returning: Edward Falcon (Red Whirlwind), Ayame, Gunrock, Ryoma, Wang-Tang, Galuda, Rouge, Jack.
+
+New: Accel (masked gunman, motorcycle-themed Power Change), Julia Whitepearl (split personality, circus / bird Power Change), Pete (living inventor doll, toy-robot Power Change; he is the odd moveset, with more fusion variants than the cast), Gourmand (airship chef, fire-breathing tyrannosaur Power Change).
+
+Unlockable:
+
+- Pride Falcon, Edward’s father. Arcade clear with seven different characters.
+- Mel, the shopkeeper. Clear with eight different characters. She uses a Julia-like kit, floats on an umbrella, and her Power Change is angel wings rather than a full costume swap. One fusion fires homing money bags and can be repeated several times before the gauge dies.
+
+Bosses are not playable: Pharaoh Walker, then Dr. Erode, owner of the flying castle, using a dark Jewel and trying to take the fighters’ souls.
+
+Story frame is thin by design. After the first game’s Jewel hunt, a fortress appears in the sky, Dr. Erode captures the fighters, and the ladder is the escape.
+
+## Item system
+
+This is the part that matters for an architecture read. Items are ownership-gated loot.
+
+Data model:
+
+- Rarity levels roughly 1 through 7. Higher level means rarer, not strictly stronger.
+- Once you own at least one of an item, it enters the crate table in later matches. Starter items and character-unlocked items are always eligible. Decoration items and some rare materials never enter the crate table.
+- Quantity is stored. You can raise the slot count of one item, which steals capacity from others.
+- Up to five items can be flagged as Handy Items in the Item Book. 
+
+Crafting is a binary mix with an optional modifier, not a fixed recipe book exposed in the UI:
+
+- Item + item, item + material, or material + material.
+- An Essence card can be added and biases the result.
+- Outcomes are success, a doubled result, or failure. Failure yields scrap and a coupon. Three coupons buy one spin of Mel’s roulette. The roulette area can be widened with gold, up to a cited 60,000 for the widest band.
+- Special cards are the practical route to level 6 and 7 results.
+- Texts, if given to Mel, unlock combination notes in the Item Book.
+
+Shop examples from the buy list: Gun 1,500 / sell 500, Machine Gun 5,500 / 2,000, Bazooka 6,000 / 1,800, Flamethrower 4,500 / 800, Ray Gun 6,000 / 1,500. Food, shields, and cosmetics have their own prices. Selling is the gold sink’s relief valve.
+
+Functional categories, not an exhaustive 120-plus dump:
+
+- Firearms and energy guns: Gun, Machine Gun, Bazooka, Flamethrower, Ray Gun, Arm Gun, Powerful Buster.
+- Thrown and placed explosives: Fire-Bottle, small / medium / large bombs, stick bomb, fireworks, beehive.
+- Melee: iron pipe, swords, Power Sword, hammer, rods, bats, frozen tuna, harisen, morning star, Devil Sickle.
+- Healing: apple, shortcake, meat, and larger foods up through wedding cake and roast pork.
+- Status: adhesive spray, petrifier, transparentizer, shields, leg weights and traps.
+- Mobility: wings, rollerblades, Shoes of Achilles.
+- Summons: kitten, panther, fire / ice / thunder dragons.
+- Stage toys that became inventory items: trumpet, meteor, typhoon, pitfall hoop, Jewel Magazine, Exciting Book.
+- Materials: flame, ice, thunder, light, gunpowder, iron, gold, and similar mix fodder.
+- Cosmetics, Fitting Room only: head, arm, waist, and leg slots. Hats, animal ears, tails, paws, crowns, a wind-up key. These change appearance, not moves.
+
+## Hidden and high-rarity bonuses
+
+- Extra Options fill one entry per distinct Arcade clear: extra-item toggle, Jewel count, gauge timer, transform damage and attack scales, help countdown, target line, sound test.
+- Pride and Mel, as above.
+- Desert plus three extra arenas after Arcade clears with the full cast, including Pride and Mel. Desert is also separately reported as “all characters,” so the exact count per arena is the one place the 2000 guides disagree. The access method, scrolling off the stage list, is consistent.
+- Adventure clear bonus: a special item, usually level 6, with better odds and more gold at higher difficulty and faster time.
+- Pride appears in the shop and can hand over rare gifts. The Light Jewel (item 121 on the Mini-Book list) is the one guides single out, with better odds after long play and heavy purchasing. The Emperor’s Crown (item 108; a red turban / crown also cited as item 103) is the other. Selling that crown is the documented 100,000 gold spike. 
+- Failed mixes are not dead ends. Coupons fund roulette, which is a second random table and a gold sink.
+- Pause, then X + Y, expands the pause screen. Cosmetic, not a gameplay unlock.
+
+## What the systems are doing
+
+The match is intentionally shallow on paper: three buttons, no block, shared items, scripted stage phases. Depth is in contention for jewels and crate spawns while the stage graph changes under you. Owning an item is what makes it appear, so Adventure and the mixer are progression, not side content.
