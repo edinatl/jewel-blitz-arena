@@ -1,7 +1,12 @@
-# Power Arena — Prototype v0.5
+# Power Arena — Prototype v0.6
 
 An original arena brawler inspired by Power Stone 2's formula.
 2 fighters, 1 arena, local play + a solo bot. No Capcom assets, names, or characters.
+
+## What changed in v0.6 (grabs + recovery)
+- **Opponent grabs:** Heavy (the ○ Action button) with empty hands next to a foe **grabs them overhead** — press any attack to **throw them** across the arena (12 landing damage + a short knockdown, and a gem pops loose). If you do nothing they auto-throw after 1.1s. The victim **mashes action buttons** to escape early (4 presses); the bot wriggles out on its own sometimes and will grab you back — its close-range heavy is now a grab attempt.
+- **Recovery roll:** press **Jump** in the last 0.42s of a knockdown to stand straight into an invincible dodge roll instead of lying there the full 0.85s. The bot does it too.
+- The web demos went further in the same pass: the 3D demo is now a **4-fighter free-for-all** with character select, perfect dodges, hitstop, falling debris and a halftime GEM RUSH event.
 
 ## What changed in v0.5 (Design v2 systems — same rules as the web demos)
 
