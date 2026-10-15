@@ -27,7 +27,15 @@ public static class PrototypeBuilder
         floor.name = "ArenaFloor";
         floor.transform.position = new Vector3(0f, -0.25f, 0f);
         floor.transform.localScale = new Vector3(18f, 0.5f, 18f);
-        SetColor(floor, new Color(0.28f, 0.32f, 0.42f));
+        SetColor(floor, new Color(0.85f, 0.62f, 0.30f)); // desert sand fallback
+        // v0.3: comic desert art as the floor texture when the art asset is imported
+        var desertTex = UnityEditor.AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Art/desert_arena.png");
+        if (desertTex != null)
+        {
+            var fm = floor.GetComponent<Renderer>().sharedMaterial;
+            fm.mainTexture = desertTex;
+            fm.color = Color.white;
+        }
 
         // Low visible walls so fighters stay in the ring.
         MakeWall("Wall_North", new Vector3(0f, 0.6f, 9.2f), new Vector3(19f, 1.2f, 0.4f));
