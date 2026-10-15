@@ -41,8 +41,12 @@ public sealed class MatchStateLayoutTests
                 + MatchState.GenericStride * PoolCaps.StageCreatures
                 + MatchState.CpuBrainStride * PoolCaps.CpuBrains
                 + sizeof(ulong) // Seed
-                + sizeof(int) * 6 // Frame, ActorCount, StageId, Active*
-                + sizeof(uint); // ReservedHeader
+                + sizeof(int) * 3 // Frame, ActorCount, StageId
+                + sizeof(int) * 3 // ActiveJewel/Loose/Projectile
+                + sizeof(int) * 4 // JewelCap, NextJewelSpawnFrame, HouseRulesBits, MatchEndFrame
+                + sizeof(int) // NextPlacementFromBottom
+                + sizeof(int) * PoolCaps.Actors // PlacementBySlot
+                + sizeof(int) * PoolCaps.Jewels; // JewelRespawnFrame
 
             Assert.That(sizeof(MatchState), Is.EqualTo(expected),
                 "Padding detected — Pack=1 layout drifted. Reorder or pad fields explicitly.");
