@@ -11,6 +11,14 @@ namespace JewelBlitzArena.Net
         public const int HashIntervalFrames = 30;
         public const int MaxPlayers = 4;
 
+        /// <summary>Architecture §3: show disconnect timer after this many stalled frames (~3 s @ 60 Hz).</summary>
+        public const int StallDisconnectWarnFrames = 3 * SimulationTickHintHz;
+
+        /// <summary>Architecture §3: replace peer with CPU after this many stalled frames (~10 s @ 60 Hz).</summary>
+        public const int StallDisconnectReplaceFrames = 10 * SimulationTickHintHz;
+
+        private const int SimulationTickHintHz = 60;
+
         public int LocalPlayerIndex { get; }
         public int PlayerCount { get; }
         public int InputDelay { get; }

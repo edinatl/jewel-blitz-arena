@@ -63,4 +63,7 @@ GGPO-style session shell in `src/JewelBlitzArena.Net` (input delay, rollback win
 ```bash
 dotnet test JewelBlitzArena.sln -c Release --filter NetcodeScaffold
 dotnet run --project tools/JewelBlitzArena.NetSmoke -c Release -- --frames 180 --delivery-delay 3
+dotnet run --project tools/JewelBlitzArena.LanSmoke -c Release -- --frames 120 --port 41400
 ```
+
+Presentation reads S4 camera volumes from the content catalog by `PhaseIndex`. Net sessions stall (HUD “waiting”) when a peer falls more than the rollback window behind.

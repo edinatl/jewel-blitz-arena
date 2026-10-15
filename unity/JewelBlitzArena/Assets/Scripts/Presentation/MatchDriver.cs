@@ -60,6 +60,8 @@ namespace JewelBlitzArena.Presentation
 
         public LoopbackGreyboxRunner? Loopback => _loopback;
 
+        public ContentCatalog? Catalog => _catalog;
+
         public float Alpha { get; private set; }
 
         public ulong LastHash { get; private set; }
@@ -67,6 +69,12 @@ namespace JewelBlitzArena.Presentation
         public int RollbackCount => _loopback?.RollbackCount ?? 0;
 
         public bool DesyncFlagged => _loopback?.DesyncFlagged ?? false;
+
+        public bool IsStalling => _loopback?.IsStalling ?? false;
+
+        public int StallFrames => _loopback?.StallFrames ?? 0;
+
+        public bool ShowDisconnectWarning => _loopback?.ShowDisconnectWarning ?? false;
 
         private void Awake()
         {
@@ -129,9 +137,15 @@ namespace JewelBlitzArena.Presentation
                 Mode = ModeId.Custom,
                 Seed = seed,
                 ActorCount = actorCount,
+                StageId = SampleContentFactory.CitrineBazaarStageId,
             };
             req.Seed = seed;
             req.ActorCount = actorCount;
+            if (req.StageId == 0)
+            {
+                req.StageId = SampleContentFactory.CitrineBazaarStageId;
+            }
+
             _metaFlow!.StartCustom(req);
             _offlineSession = _metaFlow.Session;
             LastHash = _metaFlow.Session.Hash();

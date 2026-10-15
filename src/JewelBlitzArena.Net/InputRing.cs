@@ -65,6 +65,24 @@ namespace JewelBlitzArena.Net
             return _flags[idx] == Confirmed && _frameTags[idx] == frame;
         }
 
+        /// <summary>Highest absolute frame with a confirmed input, or -1 if none.</summary>
+        public int LatestConfirmedFrame
+        {
+            get
+            {
+                int best = -1;
+                for (int i = 0; i < _capacity; i++)
+                {
+                    if (_flags[i] == Confirmed && _frameTags[i] > best)
+                    {
+                        best = _frameTags[i];
+                    }
+                }
+
+                return best;
+            }
+        }
+
         public InputFrame GetOrPredict(int frame)
         {
             int idx = IndexOf(frame);

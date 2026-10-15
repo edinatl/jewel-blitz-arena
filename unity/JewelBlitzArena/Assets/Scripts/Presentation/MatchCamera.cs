@@ -1,10 +1,13 @@
+using JewelBlitzArena.Data;
 using JewelBlitzArena.PresentationBridge;
 using JewelBlitzArena.Sim;
 using UnityEngine;
 
 namespace JewelBlitzArena.Presentation
 {
-    /// <summary>Shared overhead camera stub — framing living actors; no split screen.</summary>
+    /// <summary>
+    /// Shared overhead camera — frames living actors clamped to the phase camera volume (S4).
+    /// </summary>
     public sealed class MatchCamera : MonoBehaviour
     {
         [SerializeField] private MatchDriver? driver;
@@ -12,8 +15,9 @@ namespace JewelBlitzArena.Presentation
         [SerializeField] private float height = 14f;
         [SerializeField] private float pitchDegrees = 55f;
         [SerializeField] private float followLerp = 8f;
-        [SerializeField] private float minOrthoSize = 8f;
         [SerializeField] private float padding = 3f;
+
+        private int _lastPhase = -1;
 
         private void Start()
         {
@@ -41,56 +45,29 @@ namespace JewelBlitzArena.Presentation
             }
 
             driver.GetDisplayStates(out _, out MatchState state);
-            Vector3 center = Vector3.zero;
-            int alive = 0;
-            float maxDist = 0f;
+            ContentCatalog? catalog = driver.Catalog;
+            CameraVolume volume = StageCameraVolumes.Resolve(catalog, in state);
+            CameraFrame frame = StageCameraVolumes.FrameActors(ref state, in volume, padding);
 
-            for (int i = 0; i < state.ActorCount; i++)
+            // Snap look height on phase change; otherwise critically-damped-ish follow.
+            float lerp = followLerp;
+            if (frame.PhaseIndex != _lastPhase)
             {
-                ActorSlot actor = MatchStateAccess.Actor(ref state, i);
-                if (!actor.IsAlive)
-                {
-                    continue;
-                }
-
-                Vector3 p = new Vector3(
-                    FixDisplay.ToFloat(actor.PosX),
-                    0f,
-                    FixDisplay.ToFloat(actor.PosZ));
-                center += p;
-                alive++;
-            }
-
-            if (alive == 0)
-            {
-                center = Vector3.zero;
-            }
-            else
-            {
-                center /= alive;
-            }
-
-            for (int i = 0; i < state.ActorCount; i++)
-            {
-                ActorSlot actor = MatchStateAccess.Actor(ref state, i);
-                if (!actor.IsAlive)
-                {
-                    continue;
-                }
-
-                Vector3 p = new Vector3(
-                    FixDisplay.ToFloat(actor.PosX),
-                    0f,
-                    FixDisplay.ToFloat(actor.PosZ));
-                maxDist = Mathf.Max(maxDist, Vector3.Distance(center, p));
+                lerp = 40f;
+                _lastPhase = frame.PhaseIndex;
             }
 
             Quaternion rot = Quaternion.Euler(pitchDegrees, 0f, 0f);
-            Vector3 desired = center + rot * new Vector3(0f, 0f, -height);
-            transform.position = Vector3.Lerp(transform.position, desired, 1f - Mathf.Exp(-followLerp * Time.deltaTime));
+            Vector3 look = new Vector3(frame.LookX, 0f, frame.LookZ);
+            Vector3 desired = look + rot * new Vector3(0f, 0f, -Mathf.Max(height, frame.LookY));
+            float t = 1f - Mathf.Exp(-lerp * Time.deltaTime);
+            transform.position = Vector3.Lerp(transform.position, desired, t);
             transform.rotation = rot;
 
-            targetCamera.orthographicSize = Mathf.Max(minOrthoSize, maxDist + padding);
+            targetCamera.orthographicSize = Mathf.Lerp(
+                targetCamera.orthographicSize,
+                frame.OrthoSize,
+                t);
         }
     }
 }

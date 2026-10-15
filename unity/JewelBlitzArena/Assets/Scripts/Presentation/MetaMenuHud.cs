@@ -90,13 +90,22 @@ namespace JewelBlitzArena.Presentation
         private void DrawMatchHud(int pad)
         {
             driver!.GetDisplayStates(out _, out MatchState state);
-            GUILayout.BeginArea(new Rect(pad, pad, 460, 240));
+            var volume = JewelBlitzArena.PresentationBridge.StageCameraVolumes.Resolve(driver.Catalog, in state);
+            GUILayout.BeginArea(new Rect(pad, pad, 480, 280));
             string mode = driver.SimMode == GreyboxSimMode.LoopbackNet ? "LoopbackNet" : "OfflineMeta";
             GUILayout.Label($"Jewel Blitz Arena — {mode}");
-            GUILayout.Label($"frame {state.Frame}  hash 0x{driver.LastHash:X16}");
+            GUILayout.Label(
+                $"frame {state.Frame}  phase {state.PhaseIndex}  hash 0x{driver.LastHash:X16}");
+            GUILayout.Label(
+                $"camera vol r={volume.Radius:0.#}  center=({volume.CenterX:0.#},{volume.CenterY:0.#},{volume.CenterZ:0.#})");
             if (driver.SimMode == GreyboxSimMode.LoopbackNet)
             {
                 GUILayout.Label($"rollbacks={driver.RollbackCount}  desync={driver.DesyncFlagged}");
+                if (driver.IsStalling)
+                {
+                    string warn = driver.ShowDisconnectWarning ? "  DISCONNECT TIMER" : string.Empty;
+                    GUILayout.Label($"⏳ waiting for peer… stallFrames={driver.StallFrames}{warn}");
+                }
             }
 
             if (driver.MetaFlow != null)

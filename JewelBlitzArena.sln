@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JewelBlitzArena.Net", "src\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JewelBlitzArena.NetSmoke", "tools\JewelBlitzArena.NetSmoke\JewelBlitzArena.NetSmoke.csproj", "{E9088B51-15FC-484F-BC11-73BF367C8F9E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "JewelBlitzArena.LanSmoke", "tools\JewelBlitzArena.LanSmoke\JewelBlitzArena.LanSmoke.csproj", "{54B0CE67-4968-41EA-A9F8-54CB1997DDEF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -145,6 +147,18 @@ Global
 		{E9088B51-15FC-484F-BC11-73BF367C8F9E}.Release|x64.Build.0 = Release|Any CPU
 		{E9088B51-15FC-484F-BC11-73BF367C8F9E}.Release|x86.ActiveCfg = Release|Any CPU
 		{E9088B51-15FC-484F-BC11-73BF367C8F9E}.Release|x86.Build.0 = Release|Any CPU
+		{54B0CE67-4968-41EA-A9F8-54CB1997DDEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54B0CE67-4968-41EA-A9F8-54CB1997DDEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54B0CE67-4968-41EA-A9F8-54CB1997DDEF}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{54B0CE67-4968-41EA-A9F8-54CB1997DDEF}.Debug|x64.Build.0 = Debug|Any CPU
+		{54B0CE67-4968-41EA-A9F8-54CB1997DDEF}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{54B0CE67-4968-41EA-A9F8-54CB1997DDEF}.Debug|x86.Build.0 = Debug|Any CPU
+		{54B0CE67-4968-41EA-A9F8-54CB1997DDEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54B0CE67-4968-41EA-A9F8-54CB1997DDEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{54B0CE67-4968-41EA-A9F8-54CB1997DDEF}.Release|x64.ActiveCfg = Release|Any CPU
+		{54B0CE67-4968-41EA-A9F8-54CB1997DDEF}.Release|x64.Build.0 = Release|Any CPU
+		{54B0CE67-4968-41EA-A9F8-54CB1997DDEF}.Release|x86.ActiveCfg = Release|Any CPU
+		{54B0CE67-4968-41EA-A9F8-54CB1997DDEF}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -159,5 +173,6 @@ Global
 		{3BF7F129-87CE-46B1-8BFD-D45A34A33753} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{995528A8-2E98-4FAC-A157-C17F17A05167} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{E9088B51-15FC-484F-BC11-73BF367C8F9E} = {07C2787E-EAC7-C090-1BA3-A61EC2A24D84}
+		{54B0CE67-4968-41EA-A9F8-54CB1997DDEF} = {07C2787E-EAC7-C090-1BA3-A61EC2A24D84}
 	EndGlobalSection
 EndGlobal

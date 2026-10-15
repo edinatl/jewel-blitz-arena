@@ -1,3 +1,4 @@
+using System;
 using JewelBlitzArena.Data;
 using JewelBlitzArena.Net;
 using JewelBlitzArena.Sim;
@@ -34,6 +35,15 @@ namespace JewelBlitzArena.PresentationBridge
 
         public bool DesyncFlagged =>
             _harness.Player0.DesyncFlagged || _harness.Player1.DesyncFlagged;
+
+        public bool IsStalling =>
+            _harness.Player0.IsStalling || _harness.Player1.IsStalling;
+
+        public int StallFrames =>
+            Math.Max(_harness.Player0.StallFrames, _harness.Player1.StallFrames);
+
+        public bool ShowDisconnectWarning =>
+            _harness.Player0.ShowDisconnectWarning || _harness.Player1.ShowDisconnectWarning;
 
         public void Reset(ulong seed, ContentCatalog? catalog = null)
         {

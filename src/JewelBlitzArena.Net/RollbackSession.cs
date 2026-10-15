@@ -24,6 +24,9 @@ namespace JewelBlitzArena.Net
         private bool _desyncFlagged;
         private ulong _lastHash;
         private int _lastHashFrame = -1;
+        private bool _isStalling;
+        private int _stallFrames;
+        private int _stalledRemotePlayer = -1;
 
         public RollbackSession(SessionConfig config, INetTransport transport)
         {
@@ -55,6 +58,21 @@ namespace JewelBlitzArena.Net
 
         public int LastHashFrame => _lastHashFrame;
 
+        /// <summary>True when a remote peer is more than the rollback window behind (architecture §3 stalls).</summary>
+        public bool IsStalling => _isStalling;
+
+        /// <summary>Consecutive Advance calls that stalled without stepping sim.</summary>
+        public int StallFrames => _stallFrames;
+
+        /// <summary>Remote player index causing the stall, or -1.</summary>
+        public int StalledRemotePlayer => _stalledRemotePlayer;
+
+        /// <summary>True once stall has lasted ~3 s — lobby should show disconnect timer.</summary>
+        public bool ShowDisconnectWarning => _stallFrames >= SessionConfig.StallDisconnectWarnFrames;
+
+        /// <summary>True once stall has lasted ~10 s — peer should be replaced by CPU (later).</summary>
+        public bool DisconnectReplaceReady => _stallFrames >= SessionConfig.StallDisconnectReplaceFrames;
+
         public void Reset(in MatchConfig matchConfig, ContentCatalog? catalog = null)
         {
             _sim.Reset(matchConfig, catalog);
@@ -64,6 +82,9 @@ namespace JewelBlitzArena.Net
             _desyncFlagged = false;
             _lastHash = _sim.Hash();
             _lastHashFrame = 0;
+            _isStalling = false;
+            _stallFrames = 0;
+            _stalledRemotePlayer = -1;
             _snapshots.Reset();
             _snapshots.Store(0, _sim.Snapshot());
             for (int i = 0; i < _rings.Length; i++)
@@ -75,8 +96,9 @@ namespace JewelBlitzArena.Net
         /// <summary>
         /// Advance one sim frame. <paramref name="localInput"/> is scheduled at
         /// <c>simFrame + inputDelay</c> (architecture default delay = 2).
+        /// Returns false when stalled (sim not stepped).
         /// </summary>
-        public void Advance(InputFrame localInput)
+        public bool Advance(InputFrame localInput)
         {
             PollRemote();
 
@@ -84,12 +106,65 @@ namespace JewelBlitzArena.Net
             _rings[_config.LocalPlayerIndex].SetLocalScheduled(assignFrame, localInput);
             _transport.Send(InputFramePacket.From(assignFrame, (byte)_config.LocalPlayerIndex, localInput));
 
+            if (TryBeginStall())
+            {
+                return false;
+            }
+
+            ClearStall();
             StepConfirmedOrPredicted(_simFrame);
             _simFrame = _sim.Frame;
             _snapshots.Store(_simFrame, _sim.Snapshot());
 
             TrimRings();
             MaybeRecordHash();
+            return true;
+        }
+
+        private bool TryBeginStall()
+        {
+            // Before any remote input is confirmed, allow prediction through the input-delay
+            // fill window; stall only once a peer has gone silent past the rollback window.
+            for (int p = 0; p < _config.PlayerCount; p++)
+            {
+                if (p == _config.LocalPlayerIndex)
+                {
+                    continue;
+                }
+
+                int latest = _rings[p].LatestConfirmedFrame;
+                if (latest < 0)
+                {
+                    // No remote packets yet: stall only after we've predicted past the window.
+                    if (_simFrame > _config.RollbackWindow)
+                    {
+                        _isStalling = true;
+                        _stallFrames++;
+                        _stalledRemotePlayer = p;
+                        return true;
+                    }
+
+                    continue;
+                }
+
+                int behind = _simFrame - latest;
+                if (behind > _config.RollbackWindow)
+                {
+                    _isStalling = true;
+                    _stallFrames++;
+                    _stalledRemotePlayer = p;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private void ClearStall()
+        {
+            _isStalling = false;
+            _stallFrames = 0;
+            _stalledRemotePlayer = -1;
         }
 
         /// <summary>Inject a remote packet (tests / alternate transports).</summary>
