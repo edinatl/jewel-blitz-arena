@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Jewel Blitz Arena — 3D Demo v0.8</title>
+<title>Jewel Blitz Arena — 3D Demo v0.9</title>
 <style>
   html, body { margin:0; padding:0; overflow:hidden; background:#1a140d; font-family:system-ui, sans-serif; -webkit-user-select:none; user-select:none; touch-action:none; }
   #c { position:fixed; inset:0; }
@@ -18,6 +18,13 @@
   #banner { position:fixed; top:36%; left:0; right:0; text-align:center; color:#ffd94d; font-size:34px; font-weight:900; text-shadow:0 2px 8px #000; display:none; pointer-events:none; z-index:6; animation:bannerPop .45s ease-out; }
   @keyframes bannerPop { 0% { transform:scale(.4); opacity:0; } 60% { transform:scale(1.15); } 100% { transform:scale(1); opacity:1; } }
   #sub { position:fixed; top:47%; left:0; right:0; text-align:center; color:#fff; font-size:16px; text-shadow:0 1px 4px #000; display:none; pointer-events:none; z-index:6; }
+  #hud2 { position:fixed; top:102px; left:0; right:0; display:flex; justify-content:space-between; padding:0 10px; pointer-events:none; z-index:5; }
+  #hud2 .panel { width:31%; }
+  #select { position:fixed; inset:0; background:rgba(8,6,14,.74); z-index:20; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; color:#fff; }
+  #select h1 { font-size:27px; margin:0; color:#ffd94d; text-shadow:0 2px 8px #000; }
+  #select .row { display:flex; gap:14px; }
+  .selBtn { pointer-events:auto; cursor:pointer; border:2px solid rgba(255,255,255,.5); background:rgba(20,20,34,.92); color:#fff; border-radius:14px; padding:16px 18px; font-size:17px; font-weight:900; text-align:center; min-width:132px; }
+  .selBtn small { display:block; font-weight:600; font-size:12px; color:#bfe3ff; margin-top:4px; }
   #flash { position:fixed; top:16%; left:0; right:0; text-align:center; color:#7df9ff; font-size:19px; font-weight:800; text-shadow:0 1px 5px #000; opacity:0; transition:opacity .25s; pointer-events:none; z-index:6; }
   #joy { position:fixed; left:22px; bottom:26px; width:124px; height:124px; border-radius:50%; background:rgba(255,255,255,.10); border:2px solid rgba(255,255,255,.35); z-index:7; }
   #stick { position:absolute; left:38px; top:38px; width:48px; height:48px; border-radius:50%; background:rgba(255,255,255,.45); }
@@ -36,18 +43,31 @@
 <div id="c"></div>
 <div id="hud">
   <div class="panel">
-    <div class="pname" style="color:#9fd0ff">SOLDIER — YOU</div>
+    <div class="pname" id="name0" style="color:#9fd0ff">BLAZE — YOU</div>
     <div class="bar"><div class="fill" id="hp0"></div></div>
     <div class="meta" id="meta0">Gems: ☆☆☆</div>
     <div class="item" id="item0">Item: —</div>
   </div>
   <div id="timer">2:00</div>
   <div class="panel" style="text-align:right">
-    <div class="pname" style="color:#ffb1a6">SAMURAI — BOT</div>
+    <div class="pname" id="name1" style="color:#ffb1a6">RONIN — BOT</div>
     <div class="bar"><div class="fill" id="hp1"></div></div>
     <div class="meta" id="meta1">Gems: ☆☆☆</div>
     <div class="item" id="item1">Item: —</div>
   </div>
+</div>
+<div id="hud2">
+  <div class="panel"><div class="pname" style="color:#ffcf9f;font-size:12px">BRUNO — BOT</div><div class="bar"><div class="fill" id="hp2"></div></div><div class="meta" id="meta2">Gems: ☆☆☆</div><div class="item" id="item2">Item: —</div></div>
+  <div class="panel" style="text-align:right"><div class="pname" style="color:#ffe9a6;font-size:12px">AEGIS — BOT</div><div class="bar"><div class="fill" id="hp3"></div></div><div class="meta" id="meta3">Gems: ☆☆☆</div><div class="item" id="item3">Item: —</div></div>
+</div>
+<div id="select">
+  <h1>JEWEL BLITZ ARENA</h1>
+  <div style="font-size:14px">4-FIGHTER FREE-FOR-ALL — choose your fighter</div>
+  <div class="row">
+    <button class="selBtn" id="selSoldier">🔫 BLAZE<small>Soldier · Rocket Salvo Drive</small></button>
+    <button class="selBtn" id="selSamurai">⚔️ RONIN<small>Samurai · Blade Wave Drive</small></button>
+  </div>
+  <div style="font-size:12px;color:#ffd94d;text-align:center">□ Attack · ○ Throw / Catch / GRAB · ✕ Jump / Roll · △ Fusion<br>Grab: press ○ next to a foe, then □ to throw them!</div>
 </div>
 <div id="flash"></div>
 <div id="banner"></div>
@@ -57,7 +77,7 @@
 <div class="btn pbtn" id="btnAttack"><span class="sym">□</span><span class="lab">ATTACK</span></div>
 <div class="btn pbtn" id="btnAction"><span class="sym">○</span><span class="lab">ACTION</span></div>
 <div class="btn pbtn" id="btnJump"><span class="sym">✕</span><span class="lab">JUMP</span></div>
-<div id="help">SPRITES × 3D ARENA · PS-STYLE PAD · □ ATTACK · ○ ACTION = throw / catch / board turret · ✕ JUMP (move + ✕ = dodge roll) · △ FUSION / drop · 3 gems = TRANSFORM</div>
+<div id="help">4P FREE-FOR-ALL · SPRITES × 3D · □ ATTACK · ○ ACTION = throw / catch / GRAB / board turret · ✕ JUMP (move + ✕ = dodge roll) · △ FUSION / drop · 3 gems = TRANSFORM</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
@@ -134,8 +154,13 @@ function buildCactus() {
 // ============ 3D FIGHTERS (built from primitives, animated in code) ============
 function buildFighterMesh(kind) {
   const S = kind === 'Soldier';
-  const pal = S ? { main: 0x546e42, sec: 0x3d5230, skin: 0xf5c299, acc: 0x33362a, dark: 0x29261f }
-                : { main: 0x2a4bd7, sec: 0x1a2f80, skin: 0xf5c299, acc: 0xffc740, dark: 0x26221f };
+  const PALS = {
+    Soldier: { main: 0x546e42, sec: 0x3d5230, skin: 0xf5c299, acc: 0x33362a, dark: 0x29261f },
+    Samurai: { main: 0x2a4bd7, sec: 0x1a2f80, skin: 0xf5c299, acc: 0xffc740, dark: 0x26221f },
+    Warrior: { main: 0x7a4a21, sec: 0x54331a, skin: 0xe8b088, acc: 0xd8d8d8, dark: 0x2e2018 },
+    Gladiator: { main: 0xb03a2e, sec: 0x8c6a2f, skin: 0xf5c299, acc: 0xffc740, dark: 0x33231a }
+  };
+  const pal = PALS[kind] || PALS.Soldier;
   const root = new THREE.Group();
   const body = new THREE.Group(); root.add(body);
   function pivot(x, y, z) { const g = new THREE.Group(); g.position.set(x, y, z); body.add(g); return g; }
@@ -155,12 +180,23 @@ function buildFighterMesh(kind) {
     add(head, sph(.29, pal.main, 1, .62, 1), 0, .1, 0);
     add(body, box(.46, .55, .18, pal.sec), 0, 1.48, -.3);
     const rifle = add(body, box(.07, .62, .07, pal.dark), .18, 1.55, -.36); rifle.rotation.z = .5;
-  } else {
+  } else if (kind === 'Samurai') {
     add(head, sph(.30, pal.main, 1, .66, 1), 0, .1, 0);
     const hL = add(head, new THREE.Mesh(new THREE.ConeGeometry(.05, .32, 8), MAT(pal.acc)), -.2, .36, .1); hL.rotation.z = .42;
     const hR = add(head, new THREE.Mesh(new THREE.ConeGeometry(.05, .32, 8), MAT(pal.acc)), .2, .36, .1); hR.rotation.z = -.42;
     const kat = add(body, box(.05, .95, .05, 0xd0d4da), -.12, 1.5, -.33); kat.rotation.z = -.55;
     add(body, box(.16, .1, .16, pal.dark), -.34, 1.86, -.22);
+  }
+  if (kind === 'Warrior') {
+    add(head, box(.54, .12, .54, pal.dark), 0, .16, 0);
+    const ax = add(body, box(.06, .8, .06, pal.dark), .2, 1.5, -.34); ax.rotation.z = .5;
+    add(body, box(.3, .22, .05, 0xd0d4da), .34, 1.86, -.36);
+    add(body, box(.5, .3, .2, 0x9a6a3a), 0, 1.1, .16);
+  }
+  if (kind === 'Gladiator') {
+    add(head, box(.08, .3, .5, 0xff5347), 0, .3, 0);
+    add(armL, box(.06, .62, .5, pal.acc), -.12, -.34, 0);
+    add(body, box(.56, .2, .4, pal.acc), 0, 1.86, 0);
   }
   const mats = [], baseHex = [];
   root.traverse(o => { if (o.isMesh) { mats.push(o.material); baseHex.push(o.material.color.getHex()); } });
@@ -377,7 +413,8 @@ function buildTurret() {
   turret.mesh = g; turret.top = top;
 }
 // ============ GAME STATE ============
-const state = { over: false, timeLeft: 120 };
+const state = { over: false, winner: null, eventDone: false, timeLeft: 120 };
+let selecting = true, hitstop = 0, lastActionT = -9;
 const fighters = [], gems = [], groundItems = [], shots = [], throwns = [], parts = [], rings = [];
 const boxes = [], coins = [], pendingBooms = [];
 let boxTimer = 7;
@@ -404,6 +441,7 @@ const SPR_TEX = {}; let SPRITES_READY = false, sprLoaded = 0, sprTotal = 0;
   }
 })();
 function makeSpriteRig(f) {
+  if (!SPR_SRC[f.kind.toLowerCase()]) return null;
   const g = new THREE.Group();
   const shadow = new THREE.Mesh(new THREE.CircleGeometry(.55, 20), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: .3 }));
   shadow.rotation.x = -Math.PI / 2; shadow.position.y = .02; g.add(shadow);
@@ -415,7 +453,8 @@ function makeSpriteRig(f) {
 }
 function pickFrame(f, now) {
   if (f.dead) return 'ko';
-  if (state.over) { const foe = f === player ? bot : player; return f.hp >= foe.hp ? 'victory' : 'ko'; }
+  if (state.over) return state.winner === f ? 'victory' : 'ko';
+  if (f.grabbedBy) return 'hurt';
   if (f.downT > 0) return 'ko';
   if (now - f.hurtT < .18) return 'hurt';
   const atkAge = now - f.atkT;
@@ -430,11 +469,11 @@ function pickFrame(f, now) {
   return 'idle';
 }
 function animateSpriteFighter(f, dt, now) {
-  const rig = f.spr, foe = f === player ? bot : player;
+  const rig = f.spr, foe = nearestFoe(f) || bot;
   const sp = Math.hypot(f.vx, f.vz), sf = clamp(sp / 6, 0, 1);
   f.runPh += dt * (4 + sp * 1.7);
   if (f.boarded) rig.group.position.set(turret.x, .55, turret.z);
-  else rig.group.position.set(f.x, 0, f.z);
+  else rig.group.position.set(f.x, f.grabbedBy ? 1.55 : 0, f.z);
   rig.group.rotation.y = Math.atan2(camera.position.x - rig.group.position.x, camera.position.z - rig.group.position.z);
   const key = f.kind.toLowerCase(), gold = f.transformed > 0;
   const texKey = gold ? pickFrame(f, now) + '_gold' : pickFrame(f, now);
@@ -464,15 +503,21 @@ function makeFighter(kind, name, x, z, isBot) {
     hp: 400, maxHp: 400, gems: 0, transformed: 0, item: null, itemUses: 0,
     atkCd: 0, atkT: 0, atkMax: 1, catchUntil: -9, lastCatchTry: -9, catchCd: 0, hurtT: -9, hazardCd: 0,
     jumpT: 0, atkKind: '', combo: 0, comboT: 0, downT: 0, rollT: 0, gold: 0, gauge: 0, wallJumped: false, boarded: null,
-    isBot, aiT: 0, runPh: Math.random() * 6, goldOn: false, dead: false
+    isBot, aiT: 0, runPh: Math.random() * 6, goldOn: false, dead: false,
+    grabbing: null, grabbedBy: null, grabT: 0, grabCd: 0, rollStartT: -9, throwFoeT: 0, mash: 0, thrownHits: null
   };
   f.mesh.root.position.set(x, 0, z);
   f.spr = makeSpriteRig(f);
   fighters.push(f);
   return f;
 }
-const player = makeFighter('Soldier', 'SOLDIER', -4.5, 0, false);
-const bot = makeFighter('Samurai', 'SAMURAI', 4.5, 0, true);
+const player = makeFighter('Soldier', 'BLAZE', -4.5, 0, false);
+const bot = makeFighter('Samurai', 'RONIN', 4.5, 0, true);
+const p3 = makeFighter('Warrior', 'BRUNO', -4.5, -4.5, true);
+const p4 = makeFighter('Gladiator', 'AEGIS', 4.5, 4.5, true);
+function foesOf(f) { return fighters.filter(x => x !== f && !x.dead); }
+function nearestFoe(f) { let best = null, bd = 1e9; foesOf(f).forEach(x => { const d = Math.hypot(x.x - f.x, x.z - f.z); if (d < bd) { bd = d; best = x; } }); return best; }
+function aliveCount() { return fighters.filter(x => !x.dead).length; }
 
 // Hazard orb
 const hazard = { mesh: sph(.55, 0xb44dff), x: 0, z: -6, vx: 120, vz: 95 };
@@ -486,6 +531,13 @@ function spawnGem(x, z, delay) {
   mesh.position.set(x, .9, z);
   scene.add(mesh);
   gems.push({ mesh, x, z, born: perfNow(), pickupAt: perfNow() + (delay || 0) });
+}
+function spawnDebris(x, z) {
+  x = clamp(x, -HALF, HALF); z = clamp(z, -HALF, HALF);
+  const warn = new THREE.Mesh(new THREE.RingGeometry(.8, 1.05, 28), new THREE.MeshBasicMaterial({ color: 0xff5347, transparent: true, opacity: .5, side: THREE.DoubleSide }));
+  warn.rotation.x = -Math.PI / 2; warn.position.set(x, .05, z); scene.add(warn);
+  const rock = buildItemMesh(findItem('Rock')); rock.position.set(x, 9, z); rock.scale.multiplyScalar(1.5); scene.add(rock);
+  debris.push({ x, z, t: 1.15, warn, rock });
 }
 function spawnGroundItem(def, x, z, popIn) {
   const mesh = buildItemMesh(def);
@@ -536,14 +588,23 @@ function flashMsg(txt) {
 
 // ============ COMBAT ============
 const dist = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
-function hurt(victim, dmg, kb, fromX, fromZ, cause) {
+function hurt(victim, dmg, kb, fromX, fromZ, cause, src) {
   if (state.over || victim.dead) return;
-  if (victim.rollT > 0) return;
-  if (victim.jumpT > 0 && cause !== 'shot') return;
+  if (victim.rollT > 0) {
+    if (src && cause !== 'hazard' && perfNow() - victim.rollStartT < .16) {
+      hitstop = Math.max(hitstop, .09);
+      src.atkCd = Math.max(src.atkCd, .3);
+      if (victim === player) flashMsg('PERFECT DODGE!');
+      ringFx(victim.x, victim.z, 0x7df9ff, 1.6);
+    }
+    return;
+  }
   if (victim.downT > 0) return;
+  if (victim.jumpT > 0 && cause === 'melee' && !(src && src.jumpT > 0)) return;
   const mult = victim.transformed > 0 ? .6 : 1;
   victim.hp -= dmg * mult;
   victim.hurtT = perfNow();
+  if (dmg >= 8 && (cause === 'melee' || cause === 'thrown')) hitstop = Math.max(hitstop, .045);
   if (victim.transformed <= 0 && dmg > 0) {
     victim.gems = Math.max(0, victim.gems - 1);
     const a = Math.random() * TAU;
@@ -555,45 +616,58 @@ function hurt(victim, dmg, kb, fromX, fromZ, cause) {
   victim.vz += (victim.z - fromZ) / d * kbPower * .016;
   if (cause !== 'hazard') burst(victim.x, 1.4, victim.z, 0xffe08a, 7, 2.6, .4);
   shake = Math.max(shake, Math.min(.3, dmg * .008));
-  const atk = victim === player ? bot : player;
-  if (cause !== 'hazard' && victim.transformed <= 0) {
+  const atk = src || null;
+  if (atk && cause !== 'hazard' && victim.transformed <= 0) {
     if (atk.comboT > 0) atk.combo++; else atk.combo = 1;
     atk.comboT = 1.2;
+    if (atk === player && atk.combo === 2) flashMsg('COMBO x2!');
     if (atk.combo >= 3) {
-      atk.combo = 0; victim.downT = .85; victim.atkCd = Math.max(victim.atkCd, .85);
+      atk.combo = 0; victim.downT = .85; victim.atkCd = Math.max(victim.atkCd, .85); hitstop = Math.max(hitstop, .07);
+      if (victim.grabbedBy) { const g = victim.grabbedBy; g.grabbing = null; victim.grabbedBy = null; g.grabCd = .8; }
       ringFx(victim.x, victim.z, 0xffffff, 2.2);
       if (victim.gems > 0) { victim.gems--; spawnGem(victim.x + 1.2, victim.z - 1, .6); }
       else for (let i = 0; i < 3; i++) spawnCoin(victim.x + (Math.random() - .5) * 1.4, victim.z + (Math.random() - .5) * 1.4);
-      if (victim === player) flashMsg('KNOCKDOWN!');
+      if (atk === player || victim === player) flashMsg('KNOCKDOWN!');
     }
   }
-  if (victim.hp <= 0) { victim.hp = 0; victim.dead = true; endMatch(victim === bot ? player : bot); }
+  if (victim.hp <= 0) {
+    victim.hp = 0; victim.dead = true;
+    if (victim.grabbedBy) { victim.grabbedBy.grabbing = null; victim.grabbedBy = null; }
+    if (victim.grabbing) { victim.grabbing.grabbedBy = null; victim.grabbing = null; }
+    for (let i = 0; i < victim.gems; i++) spawnGem(victim.x + (Math.random() - .5) * 2, victim.z + (Math.random() - .5) * 2, .5);
+    spawnCoin(victim.x - .6, victim.z); spawnCoin(victim.x + .6, victim.z);
+    burst(victim.x, 1.6, victim.z, 0xff5347, 22, 4, .8);
+    const alive = fighters.filter(x => !x.dead);
+    if (alive.length <= 1) endMatch(alive[0] || victim);
+    else flashMsg(victim.name + ' IS OUT! ' + alive.length + ' REMAIN');
+  }
 }
 function showBannerFlash() {}
-function explode(x, z, owner) {
+function explode(x, z, dmg, owner) {
   ringFx(x, z, 0xffa53a, 3.4);
   burst(x, .9, z, 0xff8c3a, 22, 4.5, .7);
   burst(x, .9, z, 0xffd23a, 12, 3, .5);
   shake = Math.max(shake, .45);
-  fighters.forEach(f => { const d = dist({ x, z }, f); if (d < 2.4 && f !== owner) hurt(f, 20, 260, x, z, 'boom'); });
+  fighters.forEach(f => { const d = dist({ x, z }, f); if (d < 2.4 && f !== owner) hurt(f, dmg || 20, 260, x, z, 'boom', owner); });
 }
 function tryAttack(f) { // SQUARE: attack (Power Drive while transformed; fires turret when boarded)
   const now = perfNow();
   if (state.over || f.dead || f.atkCd > 0 || f.downT > 0) return;
   if (f.boarded) { turretFire(f); return; }
-  const foe = f === player ? bot : player;
+  if (f.grabbing) { throwFoe(f); return; }
+  const foe = nearestFoe(f); if (!foe) return;
   f.face = aimFace(f, foe);
   if (f.transformed > 0) { powerDrive3D(f); return; }
   if (f.jumpT > 0) {
     f.atkCd = .35; f.atkT = now; f.atkMax = .35; f.atkKind = 'swing';
     f.vx += f.face.x * 2.2; f.vz += f.face.z * 2.2;
-    if (dist(f, foe) < 2.1) hurt(foe, 10, 215, f.x, f.z, 'melee');
+    if (dist(f, foe) < 2.1) hurt(foe, 10, 215, f.x, f.z, 'melee', f);
     return;
   }
   if (!f.item) {
     f.atkCd = .3; f.atkT = now; f.atkMax = .3; f.atkKind = 'punch';
     smashBoxes(f, 1.9);
-    if (dist(f, foe) < 1.95) hurt(foe, 8, 120, f.x, f.z, 'melee');
+    if (dist(f, foe) < 1.95) hurt(foe, 8, 120, f.x, f.z, 'melee', f);
     return;
   }
   const def = f.item;
@@ -602,7 +676,7 @@ function tryAttack(f) { // SQUARE: attack (Power Drive while transformed; fires 
   if (def.arch === 'melee' || def.arch === 'special') {
     burst(f.x + f.face.x, 1.2, f.z + f.face.z, 0xffffff, 3, 1.6, .25);
     smashBoxes(f, 1.9);
-    if (dist(f, foe) < 1.95) hurt(foe, def.damage, def.knockback, f.x, f.z, 'melee');
+    if (dist(f, foe) < 1.95) hurt(foe, def.damage, def.knockback, f.x, f.z, 'melee', f);
   } else if (def.arch === 'gun') {
     const big = def.name === 'Rocket Launcher' || def.name === 'Grenade Launcher';
     const mesh = sph(big ? .3 : .14, big ? 0xffc740 : 0x7df9ff);
@@ -621,7 +695,7 @@ function tryAttack(f) { // SQUARE: attack (Power Drive while transformed; fires 
   useUp(f);
 }
 function powerDrive3D(f) { // unique special per fighter, costs 25 gauge
-  const now = perfNow(), foe = f === player ? bot : player;
+  const now = perfNow(), foe = nearestFoe(f); if (!foe) return;
   f.atkCd = .55; f.atkT = now; f.atkMax = .55; f.atkKind = 'shoot';
   f.gauge = Math.max(0, f.gauge - 25); f.transformed = f.gauge * .12;
   f.face = aimFace(f, foe);
@@ -640,10 +714,42 @@ function powerDrive3D(f) { // unique special per fighter, costs 25 gauge
   burst(f.x, 1.4, f.z, 0xffd94d, 10, 2.6, .4);
   if (f === player) flashMsg('POWER DRIVE!');
 }
+function throwFoe(f) {
+  const v = f.grabbing; if (!v) return;
+  f.grabbing = null; v.grabbedBy = null; f.grabCd = .8; f.atkCd = .4; f.atkT = perfNow(); f.atkMax = .4; f.atkKind = 'throw';
+  v.throwFoeT = .55; v.thrownHits = new Set(); v.vx = f.face.x * 11.5; v.vz = f.face.z * 11.5; v.jumpT = 0;
+  if (f === player || v === player) flashMsg(f.name + ' THREW ' + v.name + '!');
+  ringFx(f.x, f.z, 0xffffff, 1.4);
+}
+function startGrab(f, foe) {
+  f.grabbing = foe; foe.grabbedBy = f; f.grabT = 1.1; f.atkCd = .3;
+  foe.vx = foe.vz = 0; foe.mash = 0;
+  if (f === player) flashMsg('GRABBED ' + foe.name + ' - TAP SQUARE TO THROW!');
+  else if (foe === player) flashMsg('GRABBED! MASH BUTTONS TO ESCAPE!');
+  ringFx(foe.x, foe.z, 0xffd94d, 1.5);
+}
+function escapeGrab(v) {
+  const g = v.grabbedBy; if (!g) return;
+  g.grabbing = null; v.grabbedBy = null; g.grabCd = .8; g.atkCd = Math.max(g.atkCd, .3);
+  v.vx = -g.face.x * 4; v.vz = -g.face.z * 4; v.jumpT = .3;
+  if (v === player) flashMsg('ESCAPED!');
+}
+function mashGrab() { const pl = player; if (!pl.grabbedBy) return; pl.mash++; if (pl.mash >= 4) escapeGrab(pl); }
+function doRecover(f) {
+  f.downT = 0; f.rollT = .32; f.rollStartT = perfNow();
+  f.vx = f.face.x * 7; f.vz = f.face.z * 7;
+  ringFx(f.x, f.z, 0x7df9ff, 1.2);
+  if (f === player) flashMsg('RECOVERY ROLL!');
+}
 function tryAction(f) { // CIRCLE: throw / catch / board turret
   const now = perfNow();
   if (state.over || f.dead || f.atkCd > 0 || f.downT > 0) return;
   if (f.boarded) { unboard(f); return; }
+  if (f.grabbing) { throwFoe(f); return; }
+  if (!f.item && f.grabCd <= 0) {
+    const gfoe = nearestFoe(f);
+    if (gfoe && !gfoe.grabbedBy && gfoe.downT <= 0 && gfoe.throwFoeT <= 0 && gfoe.transformed <= 0 && dist(f, gfoe) < 1.65) { startGrab(f, gfoe); return; }
+  }
   if (f.item) { f.atkCd = .45; f.atkKind = 'throw'; throwItem(f); return; }
   if (Math.hypot(f.x - turret.x, f.z - turret.z) < 1.7 && !turret.user && f === player) {
     f.boarded = turret; turret.user = f; flashMsg('TURRET BOARD — SQUARE fires, CIRCLE exits');
@@ -662,7 +768,7 @@ function unboard(f) {
 function turretFire(f) {
   if (turret.cd > 0) return;
   turret.cd = .7;
-  const now = perfNow(), foe = f === player ? bot : player;
+  const now = perfNow(), foe = nearestFoe(f); if (!foe) return;
   f.atkT = now; f.atkMax = .3; f.atkKind = 'shoot';
   const dx = foe.x - turret.x, dz = foe.z - turret.z, d = Math.max(.4, Math.hypot(dx, dz));
   f.face = { x: dx / d, z: dz / d };
@@ -671,8 +777,10 @@ function turretFire(f) {
   shots.push({ mesh, x: mesh.position.x, z: mesh.position.z, vx: f.face.x * 14, vz: f.face.z * 14, dmg: 14, boom: true, owner: f, t: 0 });
   burst(mesh.position.x, 1.35, mesh.position.z, 0xffd23a, 5, 1.8, .3);
 }
-function tryJump(f) { // CROSS: jump / dodge roll (moving) / wall jump (airborne near wall)
-  if (state.over || f.dead || f.downT > 0 || f.rollT > 0) return;
+function tryJump(f) { // CROSS: jump / dodge roll / wall jump / recovery roll when knocked down
+  if (state.over || f.dead || f.rollT > 0) return;
+  if (f.grabbing) { throwFoe(f); return; }
+  if (f.downT > 0) { if (f.downT <= .42) doRecover(f); return; }
   if (f.boarded) { unboard(f); return; }
   const now = perfNow();
   if (f.jumpT > 0) {
@@ -686,7 +794,7 @@ function tryJump(f) { // CROSS: jump / dodge roll (moving) / wall jump (airborne
   }
   const moving = Math.hypot(f.vx, f.vz) > 1.6 || (f === player && Math.hypot(joy.x, joy.y) > .3);
   if (moving) {
-    f.rollT = .38; f.atkCd = Math.max(f.atkCd, .16);
+    f.rollT = .38; f.rollStartT = now; f.atkCd = Math.max(f.atkCd, .16);
     const d = Math.max(.2, Math.hypot(f.face.x, f.face.z));
     f.vx = f.face.x / d * 7.5; f.vz = f.face.z / d * 7.5;
     return;
@@ -695,10 +803,11 @@ function tryJump(f) { // CROSS: jump / dodge roll (moving) / wall jump (airborne
 }
 function tryFusionDrop(f) { // TRIANGLE: Power Fusion while transformed, else discard
   if (state.over || f.dead || f.atkCd > 0 || f.downT > 0) return;
+  if (f.grabbing) { throwFoe(f); return; }
   if (f.transformed > 0) {
     if (f.gauge < 50) { if (f === player) flashMsg('NEED 50 GAUGE'); return; }
     f.gauge -= 50; f.transformed = f.gauge * .12; f.atkCd = .9; f.atkT = perfNow(); f.atkMax = .9; f.atkKind = 'swing';
-    const foe = f === player ? bot : player;
+    const foe = nearestFoe(f); if (!foe) return;
     flashMsg(f.name + ' — POWER FUSION!');
     for (let i = 0; i < 3; i++) pendingBooms.push({ x: foe.x + (Math.random() - .5) * 2.6, z: foe.z + (Math.random() - .5) * 2.6, t: .35 + i * .22, owner: f });
     ringFx(f.x, f.z, 0xffd94d, 3.2); shake = Math.max(shake, .4);
@@ -721,7 +830,7 @@ function aimFace(f, foe) {
 function throwItem(f) {
   const now = perfNow();
   if (state.over || f.dead || f.atkCd > 0 || !f.item) return;
-  const def = f.item, foe = f === player ? bot : player;
+  const def = f.item, foe = nearestFoe(f); if (!foe) return;
   f.face = aimFace(f, foe);
   f.atkCd = .45; f.atkT = now; f.atkMax = .45; f.atkKind = 'throw';
   const mesh = buildItemMesh(def);
@@ -734,14 +843,14 @@ function tryHeavy(f) {
   const now = perfNow();
   if (state.over || f.dead || f.atkCd > 0) return;
   if (f.item) { throwItem(f); return; }
-  const foe = f === player ? bot : player;
+  const foe = nearestFoe(f); if (!foe) return;
   f.face = aimFace(f, foe);
   f.atkCd = .6; f.atkT = now; f.atkMax = .6;
   f.vx += f.face.x * 1.6; f.vz += f.face.z * 1.6;
   if (dist(f, foe) < 2.1) hurt(foe, 11 * (f.transformed > 0 ? 1.5 : 1), 240, f.x, f.z, 'heavy');
 }
 function endMatch(winner) {
-  state.over = true;
+  state.over = true; state.winner = winner;
   const b = document.getElementById('banner');
   b.textContent = winner.name + ' WINS!';
   b.style.display = 'block';
@@ -751,9 +860,12 @@ function endMatch(winner) {
 
 // ============ BOT AI ============
 function botThink(f, dt) {
-  if (f.boarded || f.downT > 0) return;
+  if (f.boarded || f.grabbedBy) return;
+  if (f.grabbing) { if (Math.random() < .45) tryAttack(f); return; }
   f.aiT -= dt;
-  const foe = player, now = perfNow();
+  const foe = nearestFoe(f), now = perfNow();
+  if (!foe) return;
+  if (f.downT > 0) { if (f.downT <= .42 && Math.random() < dt * 2.4) doRecover(f); return; }
   const d = dist(f, foe);
   let tx = null, tz = null;
   let bestGem = null, bd = 1e9;
@@ -765,7 +877,7 @@ function botThink(f, dt) {
   else { tx = foe.x; tz = foe.z; }
   let mx = tx - f.x, mz = tz - f.z;
   const md = Math.hypot(mx, mz); if (md > .01) { mx /= md; mz /= md; }
-  if (tx === foe.x && d < 5.2) { mx += -mz * .5; mz += mx * .5; const n = Math.hypot(mx, mz); mx /= n; mz /= n; }
+  if (tx === foe.x && d < 5.2) { const px = -mz * .5, pz = mx * .5; mx += px; mz += pz; const n = Math.hypot(mx, mz) || 1; mx /= n; mz /= n; }
   const sp = 5.7 * (f.transformed > 0 ? 1.25 : 1);
   f.vx += (mx * sp - f.vx) * Math.min(1, dt * 7);
   f.vz += (mz * sp - f.vz) * Math.min(1, dt * 7);
@@ -775,39 +887,61 @@ function botThink(f, dt) {
   if (f.item && (f.item.arch === 'gun')) { if (d < 11) { f.face = aimFace(f, foe); tryAttack(f); return; } }
   if (f.item && (f.item.arch === 'throw' || f.item.arch === 'boom')) { if (d > 3 && d < 10) { tryAction(f); return; } }
   if (d < 1.95) {
+    if (!f.item && Math.random() < .2) { tryAction(f); return; }
     if (f.transformed > 0 && f.gauge >= 50 && Math.random() < .3) { tryFusionDrop(f); return; }
     if (Math.random() < .08) { tryJump(f); return; }
     tryAttack(f); return;
   }
-  const now2 = perfNow();
   if (!f.item && throwns.some(t => t.owner !== f && Math.hypot(t.x - f.x, t.z - f.z) < 3.4)) {
-    if (Math.random() < .75 && f.catchCd <= 0) { f.face = aimFace(f, foe); f.catchCd = .9; f.catchUntil = now2 + .28; f.atkKind = 'punch'; f.atkCd = .3; }
+    if (Math.random() < .75 && f.catchCd <= 0) { f.face = aimFace(f, foe); f.catchCd = .9; f.catchUntil = now + .28; f.atkKind = 'punch'; f.atkCd = .3; }
     else if (Math.random() < .4) tryJump(f);
   }
 }
 
 // ============ SIMULATION STEP ============
 let gemTimer = 1.2, itemTimer = 2.5;
+const debris = []; let debrisTimer = 8;
 function step(dt) {
   const now = perfNow();
+  if (selecting) { fighters.forEach(f => animateFighter(f, dt, now)); return; }
+  if (hitstop > 0) { hitstop -= dt; dt *= .15; }
   if (!state.over) {
     state.timeLeft -= dt;
-    if (state.timeLeft <= 0) { state.timeLeft = 0; endMatch(player.hp === bot.hp ? (Math.random() < .5 ? player : bot) : (player.hp > bot.hp ? player : bot)); }
+    if (state.timeLeft <= 0) { state.timeLeft = 0; const pool = fighters.filter(x => !x.dead); const wp = pool.length ? pool : fighters; endMatch(wp.reduce((a, b) => b.hp > a.hp ? b : a, wp[0])); }
     gemTimer -= dt; if (gemTimer <= 0) { gemTimer = 1.6 + Math.random() * 2; if (gems.length < 4) spawnGem((Math.random() * 2 - 1) * 6.5, (Math.random() * 2 - 1) * 6.5, 0); }
     itemTimer -= dt; if (itemTimer <= 0) { itemTimer = 3 + Math.random() * 2.5; if (groundItems.length < 6) spawnGroundItem(randItem(), (Math.random() * 2 - 1) * 6.8, (Math.random() * 2 - 1) * 6.8, true); }
+    if (!state.eventDone && state.timeLeft <= 60) {
+      state.eventDone = true;
+      flashMsg('STAGE EVENT - GEM RUSH!');
+      shake = Math.max(shake, .5);
+      for (let i = 0; i < 3; i++) spawnGem((Math.random() * 2 - 1) * 5.5, (Math.random() * 2 - 1) * 5.5, .3);
+      for (let i = 0; i < 3; i++) spawnDebris((Math.random() * 2 - 1) * 6, (Math.random() * 2 - 1) * 6);
+      spawnGroundItem(randItem(), 0, 3.5, true); spawnGroundItem(randItem(), 0, -3.5, true);
+    }
+    debrisTimer -= dt;
+    if (debrisTimer <= 0) { debrisTimer = 7 + Math.random() * 4; const tgt = fighters[Math.floor(Math.random() * fighters.length)]; if (tgt && !tgt.dead) spawnDebris(tgt.x, tgt.z); spawnDebris((Math.random() * 2 - 1) * 6.5, (Math.random() * 2 - 1) * 6.5); }
   }
   turret.cd = Math.max(0, turret.cd - dt);
-  if (turret.top && turret.user) { const foe = turret.user === player ? bot : player; turret.top.rotation.y = Math.atan2(foe.x - turret.x, foe.z - turret.z); }
+  if (turret.top && turret.user) { const foe = nearestFoe(turret.user); if (foe) turret.top.rotation.y = Math.atan2(foe.x - turret.x, foe.z - turret.z); }
   fighters.forEach(f => {
     f.atkCd = Math.max(0, f.atkCd - dt);
     f.hazardCd = Math.max(0, f.hazardCd - dt);
     f.jumpT = Math.max(0, f.jumpT - dt); f.catchCd -= dt; f.rollT = Math.max(0, f.rollT - dt); f.downT = Math.max(0, f.downT - dt); f.comboT -= dt; if (f.comboT <= 0) f.combo = 0;
+    f.grabCd = Math.max(0, f.grabCd - dt);
+    if (f.grabbing) { f.grabT -= dt; if (f.grabT <= 0) throwFoe(f); }
+    if (f.grabbedBy && f.isBot && Math.random() < dt * 1.1) escapeGrab(f);
+    if (f.throwFoeT > 0) {
+      if ((Math.abs(f.x) > HALF - .1 && Math.sign(f.vx) === Math.sign(f.x)) || (Math.abs(f.z) > HALF - .1 && Math.sign(f.vz) === Math.sign(f.z))) f.throwFoeT = Math.min(f.throwFoeT, .02);
+      f.throwFoeT -= dt;
+      foesOf(f).forEach(x => { if (x.throwFoeT <= 0 && x.downT <= 0 && Math.hypot(x.x - f.x, x.z - f.z) < 1.1 && !(f.thrownHits && f.thrownHits.has(x))) { if (f.thrownHits) f.thrownHits.add(x); hurt(x, 10, 200, f.x - f.vx * .1, f.z - f.vz * .1, 'thrown', f); } });
+      if (f.throwFoeT <= 0) { hurt(f, 12, 180, f.x - f.vx, f.z - f.vz, 'thrown', null); f.downT = Math.max(f.downT, .45); f.thrownHits = null; }
+    }
     if (f.transformed > 0) {
       f.gauge = Math.max(0, f.gauge - dt * (100 / 12)); f.transformed = f.gauge * .12;
       if (Math.random() < .3) burst(f.x, 1.2, f.z, 0xffd94d, 1, 1, .5);
       if (f.gauge <= 0) { f.transformed = 0; setGold(f, false); }
     }
-    if (!f.isBot && !state.over && !f.dead && !f.boarded) {
+    if (!f.isBot && !state.over && !f.dead && !f.boarded && !f.grabbedBy) {
       let ix = joy.x, iz = joy.y;
       keys.forEach(k => {
         if (k === 'KeyW' || k === 'ArrowUp') iz -= 1; if (k === 'KeyS' || k === 'ArrowDown') iz += 1;
@@ -822,9 +956,10 @@ function step(dt) {
     }
     if (f.isBot && !state.over && !f.dead) botThink(f, dt);
     if (!f.boarded) { f.x = clamp(f.x + f.vx * dt, -HALF, HALF); f.z = clamp(f.z + f.vz * dt, -HALF, HALF); }
+    if (f.grabbedBy) { const g = f.grabbedBy; f.x = g.x + g.face.x * .35; f.z = g.z + g.face.z * .35; f.vx = 0; f.vz = 0; }
     if (!f.isBot || state.over) { f.vx *= Math.pow(.0001, dt); f.vz *= Math.pow(.0001, dt); }
     // Pickups
-    if (!state.over && !f.dead && f.downT <= 0 && !f.boarded) {
+    if (!state.over && !f.dead && f.downT <= 0 && !f.boarded && !f.grabbedBy) {
       for (let i = groundItems.length - 1; i >= 0; i--) {
         const g = groundItems[i];
         if (!f.item && Math.hypot(g.x - f.x, g.z - f.z) < 1.05) {
@@ -866,11 +1001,13 @@ function step(dt) {
   for (let i = shots.length - 1; i >= 0; i--) {
     const s = shots[i]; s.t += dt; s.x += s.vx * dt; s.z += s.vz * dt;
     s.mesh.position.set(s.x, 1.15, s.z);
-    const foe = s.owner === player ? bot : player;
     let dead = s.t > 1.6 || Math.abs(s.x) > 9.4 || Math.abs(s.z) > 9.4;
-    if (!dead && Math.hypot(foe.x - s.x, foe.z - s.z) < .85) {
-      if (s.boom) explode(s.x, s.z, s.owner); else hurt(foe, s.dmg * (s.owner.transformed > 0 ? 1.5 : 1), 120, s.x - s.vx * .1, s.z - s.vz * .1, 'shot');
-      dead = true;
+    if (!dead) for (const foe of fighters) {
+      if (foe === s.owner || foe.dead) continue;
+      if (Math.hypot(foe.x - s.x, foe.z - s.z) < .85) {
+        if (s.boom) explode(s.x, s.z, s.dmg, s.owner); else hurt(foe, s.dmg * (s.owner.transformed > 0 ? 1.5 : 1), 120, s.x - s.vx * .1, s.z - s.vz * .1, 'shot', s.owner);
+        dead = true; break;
+      }
     }
     if (!dead) for (let bi = boxes.length - 1; bi >= 0; bi--) { const b = boxes[bi];
       if (Math.hypot(b.x - s.x, b.z - s.z) < .9) { b.hp--; burst(b.x, .8, b.z, 0xc98f3d, 5, 1.8, .3); if (b.hp <= 0) { breakBox3D(b); boxes.splice(bi, 1); } dead = true; break; } }
@@ -884,29 +1021,43 @@ function step(dt) {
     t.y = 1.25 + Math.sin(prog * Math.PI) * .95 - prog * .3;
     t.mesh.position.set(t.x, t.y, t.z);
     t.mesh.rotation.x += dt * 9; t.mesh.rotation.z += dt * 7;
-    const foe = t.owner === player ? bot : player;
     let done = false;
-    if (foe.jumpT <= 0 && foe.rollT <= 0 && Math.hypot(foe.x - t.x, foe.z - t.z) < .95 && t.age > .08) {
+    let foe = null, fd = 1e9;
+    if (t.age > .08) for (const x of fighters) { if (x === t.owner || x.dead) continue; const dd = Math.hypot(x.x - t.x, x.z - t.z); if (dd < .95 && dd < fd) { fd = dd; foe = x; } }
+    if (foe && foe.rollT <= 0) {
       if (!foe.item && now < foe.catchUntil) {
         foe.item = t.def; foe.itemUses = t.def.uses; refreshHeld(foe);
         burst(foe.x, 1.4, foe.z, 0x7df9ff, 9, 2.2, .45);
         if (foe === player) flashMsg('CAUGHT the ' + t.def.name + '!');
-        else if (t.owner === player) flashMsg('Samurai CAUGHT your ' + t.def.name + '!');
+        else if (t.owner === player) flashMsg(foe.name + ' CAUGHT your ' + t.def.name + '!');
         done = true;
       } else {
-        if (t.def.arch === 'boom') explode(t.x, t.z, t.owner);
-        else hurt(foe, t.def.throwDamage * (t.owner.transformed > 0 ? 1.4 : 1), t.def.knockback, t.x - t.vx * .1, t.z - t.vz * .1, 'thrown');
+        if (t.def.arch === 'boom') explode(t.x, t.z, t.def.damage, t.owner);
+        else hurt(foe, t.def.throwDamage * (t.owner.transformed > 0 ? 1.4 : 1), t.def.knockback, t.x - t.vx * .1, t.z - t.vz * .1, 'thrown', t.owner);
         done = true;
       }
     }
     if (!done) for (let bi = boxes.length - 1; bi >= 0; bi--) { const b = boxes[bi];
       if (Math.hypot(b.x - t.x, b.z - t.z) < .9) { b.hp--; if (b.hp <= 0) { breakBox3D(b); boxes.splice(bi, 1); } done = true; break; } }
     if (!done && (t.age > 1.05 || Math.abs(t.x) > 9.2 || Math.abs(t.z) > 9.2)) {
-      if (t.def.arch === 'boom') explode(t.x, t.z, t.owner);
+      if (t.def.arch === 'boom') explode(t.x, t.z, t.def.damage, t.owner);
       else spawnGroundItem(t.def, clamp(t.x, -HALF, HALF), clamp(t.z, -HALF, HALF), false);
       done = true;
     }
     if (done) { scene.remove(t.mesh); throwns.splice(i, 1); }
+  }
+  // Falling debris (telegraphed stage hazard)
+  for (let i = debris.length - 1; i >= 0; i--) {
+    const d = debris[i]; d.t -= dt;
+    d.warn.material.opacity = .35 + Math.sin(now * 14) * .2;
+    if (d.t < .5) { const pr = 1 - d.t / .5; d.rock.position.y = 9 - pr * pr * 8.6; d.rock.rotation.x += dt * 6; }
+    if (d.t <= 0) {
+      burst(d.x, .6, d.z, 0xc9a06a, 12, 3, .5); shake = Math.max(shake, .3);
+      fighters.forEach(f => { if (!f.dead && f.jumpT <= 0 && Math.hypot(f.x - d.x, f.z - d.z) < 1.2) hurt(f, 14, 260, d.x, d.z, 'boom', null); });
+      scene.remove(d.warn); scene.remove(d.rock);
+      spawnGroundItem(findItem('Rock'), d.x, d.z, false);
+      debris.splice(i, 1);
+    }
   }
   // Particles & rings & idle item motion
   for (let i = parts.length - 1; i >= 0; i--) {
@@ -965,7 +1116,7 @@ function animateFighter(f, dt, now) {
   if (f.transformed > 0 && !f.dead) { const pu = 1.22 + Math.sin(now * 6) * .03; m.body.scale.setScalar(pu); }
   else if (!f.dead) m.body.scale.setScalar(1);
   if (f.boarded) {
-    const bf = f === player ? bot : player;
+    const bf = nearestFoe(f) || player;
     m.root.position.set(turret.x, .55, turret.z);
     m.root.rotation.y = Math.atan2(bf.x - turret.x, bf.z - turret.z);
     m.body.position.y = 0;
@@ -977,7 +1128,7 @@ function animateFighter(f, dt, now) {
     m.body.rotation.x += (-1.5 - m.body.rotation.x) * Math.min(1, dt * 5);
     m.legL.rotation.x = .25; m.legR.rotation.x = -.25; m.armL.rotation.x = .4; m.armR.rotation.x = -.4;
   }
-  m.root.position.set(f.x, 0, f.z);
+  m.root.position.set(f.x, f.grabbedBy ? 1.55 : 0, f.z);
   m.root.rotation.y = Math.atan2(f.face.x, f.face.z);
 }
 
@@ -1000,17 +1151,20 @@ function bindBtn(id, fn) {
   el.addEventListener('touchstart', e => { e.preventDefault(); fn(); }, { passive: false });
   el.addEventListener('mousedown', fn);
 }
-bindBtn('btnAttack', () => tryAttack(player));
-bindBtn('btnAction', () => tryAction(player));
-bindBtn('btnJump', () => tryJump(player));
-bindBtn('btnFusion', () => tryFusionDrop(player));
+function pressJump() { if (player.transformed > 0 && perfNow() - lastActionT < .13) { tryFusionDrop(player); return; } tryJump(player); }
+bindBtn('btnAttack', () => { if (selecting) return; if (player.grabbedBy) { mashGrab(); return; } lastActionT = perfNow(); tryAttack(player); });
+bindBtn('btnAction', () => { if (selecting) return; if (player.grabbedBy) { mashGrab(); return; } lastActionT = perfNow(); tryAction(player); });
+bindBtn('btnJump', () => { if (selecting) return; if (player.grabbedBy) { mashGrab(); return; } pressJump(); });
+bindBtn('btnFusion', () => { if (selecting) return; if (player.grabbedBy) { mashGrab(); return; } tryFusionDrop(player); });
 addEventListener('keydown', e => {
   keys.add(e.code);
-  if (e.code === 'KeyF') tryAttack(player);
-  if (e.code === 'KeyG') tryAction(player);
+  if (selecting) return;
+  if (player.grabbedBy && ['KeyF', 'KeyG', 'KeyH', 'Space'].includes(e.code)) { mashGrab(); return; }
+  if (e.code === 'KeyF') { lastActionT = perfNow(); tryAttack(player); }
+  if (e.code === 'KeyG') { lastActionT = perfNow(); tryAction(player); }
   if (e.code === 'KeyH') tryFusionDrop(player);
   if (e.code === 'KeyR' && state.over) resetMatch();
-  if (e.code === 'Space') { e.preventDefault(); tryJump(player); }
+  if (e.code === 'Space') { e.preventDefault(); pressJump(); }
 });
 addEventListener('keyup', e => keys.delete(e.code));
 renderer.domElement.addEventListener('touchstart', e => { if (state.over) { e.preventDefault(); resetMatch(); } }, { passive: false });
@@ -1020,7 +1174,7 @@ addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; cam
 // ============ HUD ============
 const el = id => document.getElementById(id);
 function updateHud() {
-  [player, bot].forEach((f, i) => {
+  fighters.forEach((f, i) => {
     el('hp' + i).style.width = (f.hp / f.maxHp * 100) + '%';
     el('hp' + i).style.background = f.hp > 150 ? '#42d35a' : (f.hp > 60 ? '#ffc740' : '#ff5347');
     el('meta' + i).textContent = f.transformed > 0 ? '★ TRANSFORMED ' + Math.ceil(f.transformed) + 's ★' : 'Gems: ' + '★'.repeat(f.gems) + '☆'.repeat(3 - f.gems);
@@ -1035,15 +1189,18 @@ function resetMatch() {
   [...gems, ...groundItems, ...shots, ...throwns, ...parts, ...rings, ...boxes, ...coins].forEach(o => scene.remove(o.mesh));
   gems.length = groundItems.length = shots.length = throwns.length = parts.length = rings.length = 0;
   boxes.length = 0; coins.length = 0; pendingBooms.length = 0; boxTimer = 7;
+  debris.forEach(d => { scene.remove(d.warn); scene.remove(d.rock); }); debris.length = 0; debrisTimer = 8;
   turret.user = null; turret.cd = 0;
   fighters.forEach((f, i) => {
     f.hp = f.maxHp; f.gems = 0; f.transformed = 0; f.gauge = 0; f.gold = 0; f.item = null; f.dead = false; f.vx = f.vz = 0;
     f.jumpT = 0; f.downT = 0; f.rollT = 0; f.combo = 0; f.comboT = 0; f.boarded = null;
-    f.x = i === 0 ? -4.5 : 4.5; f.z = 0; f.face = { x: i === 0 ? 1 : -1, z: 0 };
+    f.grabbing = null; f.grabbedBy = null; f.throwFoeT = 0; f.grabCd = 0; f.mash = 0; f.thrownHits = null;
+    const SP = [[-4.5, 0], [4.5, 0], [-4.5, -4.5], [4.5, 4.5]];
+    f.x = SP[i][0]; f.z = SP[i][1]; f.face = aimFace(f, { x: 0, z: 0 });
     setGold(f, false); refreshHeld(f);
     f.mesh.body.rotation.x = 0; f.mesh.body.scale.setScalar(1);
   });
-  state.over = false; state.timeLeft = 120; gemTimer = 1.2; itemTimer = 2;
+  state.over = false; state.winner = null; state.eventDone = false; hitstop = 0; state.timeLeft = 120; gemTimer = 1.2; itemTimer = 2;
   el('banner').style.display = 'none'; el('sub').style.display = 'none';
   spawnGem(-2.2, 0, 0); spawnGem(2.2, 0, 0);
   ['Cactus', 'Cactus', 'Crate', 'Wooden Barrel', 'Cactus', 'Rock', 'Bench', 'Toolbox'].forEach((n, i) => {
@@ -1053,6 +1210,26 @@ function resetMatch() {
   [[-4.2, -3.6], [4.2, 3.6]].forEach(p => { const bm = buildBoxMesh(); bm.position.set(p[0], .45, p[1]); scene.add(bm); boxes.push({ mesh: bm, x: p[0], z: p[1], hp: 2, ph: Math.random() * 6 }); });
 }
 resetMatch();
+function chooseChar(kind) {
+  if (kind !== player.kind) {
+    const other = kind === 'Soldier' ? 'Samurai' : 'Soldier';
+    [player, bot].forEach(f => { scene.remove(f.mesh.root); if (f.spr) scene.remove(f.spr.group); });
+    player.kind = kind; bot.kind = other;
+    player.mesh = buildFighterMesh(kind); bot.mesh = buildFighterMesh(other);
+    player.name = kind === 'Soldier' ? 'BLAZE' : 'RONIN';
+    bot.name = other === 'Soldier' ? 'BLAZE' : 'RONIN';
+    player.spr = makeSpriteRig(player); bot.spr = makeSpriteRig(bot);
+    player.sprHidden = bot.sprHidden = false;
+    refreshHeld(player); refreshHeld(bot);
+    el('name0').textContent = player.name + ' — YOU';
+    el('name1').textContent = bot.name + ' — BOT';
+  }
+  selecting = false;
+  document.getElementById('select').style.display = 'none';
+  resetMatch();
+}
+document.getElementById('selSoldier').addEventListener('click', () => chooseChar('Soldier'));
+document.getElementById('selSamurai').addEventListener('click', () => chooseChar('Samurai'));
 let last = performance.now();
 function loop(t) {
   requestAnimationFrame(loop);
@@ -1060,8 +1237,9 @@ function loop(t) {
   step(dt);
   // Camera: gentle follow + hit shake
   shake = Math.max(0, shake - dt * 1.4);
-  const mx = (player.x + bot.x) / 2, mz = (player.z + bot.z) / 2;
-  const sep = Math.hypot(player.x - bot.x, player.z - bot.z);
+  const camPool = fighters.filter(x => !x.dead); const cp = camPool.length ? camPool : fighters;
+  const mx = cp.reduce((sum, x) => sum + x.x, 0) / cp.length, mz = cp.reduce((sum, x) => sum + x.z, 0) / cp.length;
+  let sep = 4; cp.forEach(a => cp.forEach(b => { sep = Math.max(sep, Math.hypot(a.x - b.x, a.z - b.z)); }));
   const zoom = clamp(11 + sep * .95, 13, 27);
   camera.position.set(mx * .22 + (Math.random() - .5) * shake, 15.5 + (zoom - 13) * .62, 12.2 + (zoom - 13) * .8 + mz * .18 + (Math.random() - .5) * shake);
   camera.lookAt(mx * .3, 0, mz * .3 - .5);
