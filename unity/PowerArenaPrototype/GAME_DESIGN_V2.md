@@ -31,7 +31,7 @@ Analog stick / D-pad / touch joystick: full 360° movement.
 | Button | Action |
 |---|---|
 | □ Attack | Attack / use held item. While transformed: **Power Drive** |
-| ○ Action | Pick up is automatic; Action = throw held item, **catch** incoming items, **grab opponents** ✅, board stage gimmicks (turret), revive in co-op 🔜 |
+| ○ Action | **Pick up is MANUAL** (Ben's call): Action at an item's feet picks it up; Action with an item throws it **in the facing direction** (no aim assist); □ with a throwable throws it **aimed at the closest foe**; Action also = **catch** incoming items, **grab opponents** ✅, board stage gimmicks (turret), revive in co-op 🔜 |
 | ✕ Jump | Jump. Jump + direction = **dodge roll** (i-frames). Jump at a wall = **wall jump** 🛠 |
 | △ | Transformed: **Power Fusion**. Otherwise: **Discard item** |
 
