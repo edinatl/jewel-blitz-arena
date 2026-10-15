@@ -1,8 +1,9 @@
 using UnityEngine;
 
 // An item lying in the arena — spawned by the Spawner, dropped when a thrown
-// item lands, or placed as stage furniture at match start. Walk over it with
-// empty hands to pick it up.
+// item lands, or placed as stage furniture at match start. Since v0.7 it is
+// picked up MANUALLY: stand next to it with empty hands and press the Action
+// button (heavy key) — walking over it no longer picks it up.
 public class ItemPickup : MonoBehaviour
 {
     public ItemDefinition Def;
@@ -21,24 +22,13 @@ public class ItemPickup : MonoBehaviour
         Vector3 p = transform.position;
         p.y = baseY + Mathf.Sin(Time.time * 2f + bobPhase) * 0.12f;
         transform.position = p;
+    }
 
-        var players = GameObject.FindGameObjectsWithTag("Player");
-        for (int i = 0; i < players.Length; i++)
-        {
-            var combat = players[i].GetComponent<PlayerCombat>();
-            if (combat == null || combat.HasItem) continue;
-            var health = players[i].GetComponent<Health>();
-            if (health != null && health.IsKO) continue;
-            float flatDist = Vector2.Distance(
-                new Vector2(transform.position.x, transform.position.z),
-                new Vector2(players[i].transform.position.x, players[i].transform.position.z));
-            if (flatDist <= pickupDistance)
-            {
-                combat.EquipItem(Def);
-                Destroy(gameObject);
-                return;
-            }
-        }
+    // Called by PlayerCombat.TryPickupNearest (Action button).
+    public void PickupBy(PlayerCombat combat)
+    {
+        combat.EquipItem(Def);
+        Destroy(gameObject);
     }
 
     public static GameObject Spawn(Vector3 position, ItemDefinition def)
