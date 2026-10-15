@@ -373,8 +373,19 @@ public class PlayerCombat : MonoBehaviour
         // Holding anything? Heavy = THROW it. This is the heart of the game.
         if (HasItem)
         {
-            nextAttackTime = Time.time + 0.45f;
-            ThrowHeldItem();
+            // CIRCLE: throwables THROW in the facing direction; anything
+            // else DROPS at your feet (Ben's call). (SQUARE still throws
+            // throwables aimed at the closest foe.)
+            if (HeldItem.Archetype == ItemArchetype.Throwable || HeldItem.Archetype == ItemArchetype.Explosive)
+            {
+                nextAttackTime = Time.time + 0.45f;
+                ThrowHeldItem();
+            }
+            else
+            {
+                nextAttackTime = Time.time + 0.3f;
+                DropHeldItem();
+            }
             return;
         }
 
@@ -606,7 +617,7 @@ public class PlayerCombat : MonoBehaviour
         if (HasItem) return false;
         var pickups = FindObjectsOfType<ItemPickup>();
         ItemPickup best = null;
-        float bd = 1.6f;
+        float bd = 2.2f;
         for (int i = 0; i < pickups.Length; i++)
         {
             Vector3 to = pickups[i].transform.position - transform.position;
@@ -625,6 +636,17 @@ public class PlayerCombat : MonoBehaviour
         Vector3 dir = opp.transform.position - transform.position;
         dir.y = 0f;
         return dir.sqrMagnitude > 0.01f ? dir.normalized : transform.forward;
+    }
+
+    // Drop the held item at your feet as a ground pickup.
+    public void DropHeldItem()
+    {
+        if (!HasItem) return;
+        ItemDefinition def = HeldItem;
+        ClearItem();
+        Vector3 spot = transform.position + transform.forward * 0.9f;
+        spot.y = 0.9f;
+        ItemPickup.Spawn(spot, def);
     }
 
     public void ThrowHeldItem()
