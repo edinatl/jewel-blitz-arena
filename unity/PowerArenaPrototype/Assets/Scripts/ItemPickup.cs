@@ -7,6 +7,7 @@ using UnityEngine;
 public class ItemPickup : MonoBehaviour
 {
     public ItemDefinition Def;
+    public System.Action OnPickedUp; // ItemPad hooks this to schedule a respawn
     public float pickupDistance = 1.35f;
     private float bobPhase;
     private float baseY = 0.9f;
@@ -28,6 +29,7 @@ public class ItemPickup : MonoBehaviour
     public void PickupBy(PlayerCombat combat)
     {
         combat.EquipItem(Def);
+        if (OnPickedUp != null) OnPickedUp();
         Destroy(gameObject);
     }
 
