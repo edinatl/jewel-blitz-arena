@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Jewel Blitz Arena — 3D Demo v1.4</title>
+<title>Jewel Blitz Arena — 3D Demo v1.5</title>
 <style>
   html, body { margin:0; padding:0; overflow:hidden; background:#1a140d; font-family:system-ui, sans-serif; -webkit-user-select:none; user-select:none; touch-action:none; }
   #c { position:fixed; inset:0; }
@@ -101,6 +101,10 @@ const CATALOG = [].concat(
   mkCat(["Fire Wand","Ice Wand","Lightning Rod","Wind Fan","Poison Dagger","Vampire Fang","Golden Hammer","Giant Glove","Shock Glove","Magnet Coil","Gravity Orb","Mirror Shield","Spring Punch Glove"], 'special', 14, 4, 9, 520, 0, .42, 220, .65, .78, 60)
 );
 CATALOG.forEach(d => { if (d.arch === 'throw') { const idx = CATALOG.indexOf(d); if (idx >= 66) { d.throwDamage = 16; d.throwSpeed = 400; d.knockback = 200; d.scale = .9; } } });
+// Ben's rule (2026-10-15): every weapon has limited uses by damage tier —
+// basic (<=10 dmg) 10 uses, medium (11-15) 5, powerful (16+) 3. Throwables are
+// judged by their throwDamage. Bombs stay at 1 (they detonate); food stays 1 (eaten).
+CATALOG.forEach(d => { if (d.arch === 'boom' || d.arch === 'food') return; const dmg = d.arch === 'throw' ? d.throwDamage : d.damage; d.uses = dmg >= 16 ? 3 : dmg >= 11 ? 5 : 10; });
 const findItem = n => CATALOG.find(d => d.name === n);
 const randItem = () => CATALOG[Math.floor(Math.random() * CATALOG.length)];
 const TAU = Math.PI * 2;
@@ -592,11 +596,11 @@ function spawnDebris(x, z) {
   const rock = buildItemMesh(findItem('Rock')); rock.position.set(x, 9, z); rock.scale.multiplyScalar(1.5); scene.add(rock);
   debris.push({ x, z, t: 1.15, warn, rock });
 }
-function spawnGroundItem(def, x, z, popIn) {
+function spawnGroundItem(def, x, z, popIn, uses) {
   const mesh = buildItemMesh(def);
   mesh.position.set(x, 0, z);
   scene.add(mesh);
-  groundItems.push({ def, mesh, x, z, ph: Math.random() * 6, born: popIn ? perfNow() : -9 });
+  groundItems.push({ def, mesh, x, z, ph: Math.random() * 6, born: popIn ? perfNow() : -9, uses: uses == null ? def.uses : uses });
 }
 function dropItemVisual(f) {
   if (!f.item) return;
@@ -835,7 +839,7 @@ function tryAction(f) { // CIRCLE: throw / catch / board turret
     groundItems.forEach((g, i) => { const dd = Math.hypot(g.x - f.x, g.z - f.z); if (dd < bd) { bd = dd; bi = i; } });
     if (bi >= 0) {
       const g = groundItems[bi];
-      f.item = g.def; f.itemUses = g.def.uses; refreshHeld(f);
+      f.item = g.def; f.itemUses = (g.uses != null ? g.uses : g.def.uses); refreshHeld(f);
       burst(g.x, .8, g.z, 0xffffff, 5, 1.6, .35);
       scene.remove(g.mesh); groundItems.splice(bi, 1);
       if (g.pad) { g.pad.entry = null; g.pad.timer = 1; }
@@ -866,11 +870,12 @@ function tryAction(f) { // CIRCLE: throw / catch / board turret
 }
 function dropItem3D(f) {
   const def = f.item; if (!def) return;
+  const usesLeft = f.itemUses;
   f.item = null; f.itemUses = 0; refreshHeld(f);
   const mesh = buildItemMesh(def);
   const gx = clamp(f.x + f.face.x * .9, -HALF, HALF), gz = clamp(f.z + f.face.z * .9, -HALF, HALF);
   mesh.position.set(gx, 0, gz); scene.add(mesh);
-  groundItems.push({ def, mesh, x: gx, z: gz, ph: Math.random() * 6 });
+  groundItems.push({ def, mesh, x: gx, z: gz, ph: Math.random() * 6, uses: usesLeft });
   f.atkCd = .3;
 }
 function unboard(f) {
@@ -928,8 +933,8 @@ function tryFusionDrop(f) { // TRIANGLE: Power Fusion while transformed, else di
     return;
   }
   if (f.item) {
-    const def = f.item; f.item = null; f.itemUses = 0; refreshHeld(f);
-    spawnGroundItem(def, f.x + f.face.x, f.z + f.face.z, false);
+    const def = f.item; const usesLeft = f.itemUses; f.item = null; f.itemUses = 0; refreshHeld(f);
+    spawnGroundItem(def, f.x + f.face.x, f.z + f.face.z, false, usesLeft);
     if (f === player) flashMsg('DROPPED ' + def.name);
   }
 }
@@ -949,7 +954,7 @@ function throwItem(f) {
   const mesh = buildItemMesh(def);
   scene.add(mesh);
   const sp = def.throwSpeed / 38;
-  throwns.push({ def, mesh, x: f.x, z: f.z, y: 1.3, vx: f.face.x * sp, vz: f.face.z * sp, age: 0, owner: f });
+  throwns.push({ def, mesh, x: f.x, z: f.z, y: 1.3, vx: f.face.x * sp, vz: f.face.z * sp, age: 0, owner: f, uses: f.itemUses - 1 }); // this throw spends one use
   f.item = null; f.itemUses = 0; refreshHeld(f);
 }
 function tryHeavy(f) {
@@ -1128,7 +1133,7 @@ function step(dt) {
     if (t.age > .08) for (const x of fighters) { if (x === t.owner || x.dead) continue; const dd = Math.hypot(x.x - t.x, x.z - t.z); if (dd < .95 && dd < fd) { fd = dd; foe = x; } }
     if (foe && foe.rollT <= 0) {
       if (!foe.item && now < foe.catchUntil) {
-        foe.item = t.def; foe.itemUses = t.def.uses; refreshHeld(foe);
+        foe.item = t.def; foe.itemUses = (t.uses != null ? Math.max(1, t.uses) : t.def.uses); refreshHeld(foe);
         burst(foe.x, 1.4, foe.z, 0x7df9ff, 9, 2.2, .45);
         if (foe === player) flashMsg('CAUGHT the ' + t.def.name + '!');
         else if (t.owner === player) flashMsg(foe.name + ' CAUGHT your ' + t.def.name + '!');
@@ -1143,7 +1148,8 @@ function step(dt) {
       if (Math.hypot(b.x - t.x, b.z - t.z) < .9) { b.hp--; if (b.hp <= 0) { breakBox3D(b); boxes.splice(bi, 1); } done = true; break; } }
     if (!done && (t.age > 1.05 || Math.abs(t.x) > 9.2 || Math.abs(t.z) > 9.2)) {
       if (t.def.arch === 'boom') explode(t.x, t.z, t.def.damage, t.owner);
-      else spawnGroundItem(t.def, clamp(t.x, -HALF, HALF), clamp(t.z, -HALF, HALF), false);
+      else if (t.uses != null && t.uses <= 0) burst(t.x, .6, t.z, 0xcfc4a5, 10, 2.4, .45); // out of uses — it breaks on landing
+      else spawnGroundItem(t.def, clamp(t.x, -HALF, HALF), clamp(t.z, -HALF, HALF), false, t.uses);
       done = true;
     }
     if (done) { scene.remove(t.mesh); throwns.splice(i, 1); }
@@ -1290,7 +1296,7 @@ function updateHud() {
     el('hp' + i).style.width = (f.hp / f.maxHp * 100) + '%';
     el('hp' + i).style.background = f.hp > 150 ? '#42d35a' : (f.hp > 60 ? '#ffc740' : '#ff5347');
     el('meta' + i).textContent = f.transformed > 0 ? '★ TRANSFORMED ' + Math.ceil(f.transformed) + 's ★' : 'Gems: ' + '★'.repeat(f.gems) + '☆'.repeat(3 - f.gems);
-    el('item' + i).textContent = 'Item: ' + (f.item ? f.item.name + (f.item.arch !== 'throw' && f.item.arch !== 'food' ? ' ×' + f.itemUses : '') : '—') + ' · G' + f.gold + (f.transformed > 0 ? ' · GAUGE ' + Math.round(f.gauge) : '');
+    el('item' + i).textContent = 'Item: ' + (f.item ? f.item.name + (f.item.arch !== 'food' ? ' ×' + f.itemUses : '') : '—') + ' · G' + f.gold + (f.transformed > 0 ? ' · GAUGE ' + Math.round(f.gauge) : '');
   });
   const t = Math.max(0, Math.ceil(state.timeLeft));
   el('timer').textContent = Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0');
