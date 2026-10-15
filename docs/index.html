@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Jewel Blitz Arena — 3D Demo v0.5</title>
+<title>Jewel Blitz Arena — 3D Demo v0.7</title>
 <style>
   html, body { margin:0; padding:0; overflow:hidden; background:#1a140d; font-family:system-ui, sans-serif; -webkit-user-select:none; user-select:none; touch-action:none; }
   #c { position:fixed; inset:0; }
@@ -22,8 +22,13 @@
   #joy { position:fixed; left:22px; bottom:26px; width:124px; height:124px; border-radius:50%; background:rgba(255,255,255,.10); border:2px solid rgba(255,255,255,.35); z-index:7; }
   #stick { position:absolute; left:38px; top:38px; width:48px; height:48px; border-radius:50%; background:rgba(255,255,255,.45); }
   .btn { position:fixed; width:86px; height:86px; border-radius:50%; border:2px solid rgba(255,255,255,.4); color:#fff; font-weight:900; font-size:13px; z-index:7; display:flex; align-items:center; justify-content:center; text-align:center; }
-  #btnLight { right:118px; bottom:30px; background:rgba(63,125,255,.55); }
-  #btnHeavy { right:22px; bottom:96px; background:rgba(255,83,71,.55); }
+  .pbtn { width:64px; height:64px; flex-direction:column; line-height:1; gap:2px; }
+  .pbtn .sym { font-size:20px; font-weight:900; }
+  .pbtn .lab { font-size:8px; font-weight:800; letter-spacing:.4px; }
+  #btnAttack { right:122px; bottom:58px; background:rgba(201,95,184,.6); }
+  #btnAction { right:10px; bottom:58px; background:rgba(229,72,77,.6); }
+  #btnJump { right:66px; bottom:4px; background:rgba(62,106,225,.6); }
+  #btnFusion { right:66px; bottom:112px; background:rgba(47,174,95,.6); }
   #help { position:fixed; bottom:4px; left:0; right:0; text-align:center; color:rgba(255,255,255,.75); font-size:11px; z-index:5; pointer-events:none; text-shadow:0 1px 3px #000; }
 </style>
 </head>
@@ -48,9 +53,11 @@
 <div id="banner"></div>
 <div id="sub">Tap anywhere to fight again</div>
 <div id="joy"><div id="stick"></div></div>
-<div class="btn" id="btnLight">HIT /<br>CATCH</div>
-<div class="btn" id="btnHeavy">THROW /<br>HEAVY</div>
-<div id="help">3D ARENA · Joystick to move · Walk over items to grab · HIT uses / catches · THROW throws it · Any hit knocks a gem loose · 3 gems = TRANSFORM</div>
+<div class="btn pbtn" id="btnFusion"><span class="sym">△</span><span class="lab">FUSION·DROP</span></div>
+<div class="btn pbtn" id="btnAttack"><span class="sym">□</span><span class="lab">ATTACK</span></div>
+<div class="btn pbtn" id="btnAction"><span class="sym">○</span><span class="lab">ACTION</span></div>
+<div class="btn pbtn" id="btnJump"><span class="sym">✕</span><span class="lab">JUMP</span></div>
+<div id="help">3D ARENA · PS-STYLE PAD · □ ATTACK · ○ ACTION = throw / catch / board turret · ✕ JUMP (move + ✕ = dodge roll) · △ FUSION / drop · 3 gems = TRANSFORM</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
@@ -166,33 +173,221 @@ function setGold(f, on) {
   f.mesh.mats.forEach((m, i) => m.color.setHex(on ? 0xffcc26 : f.mesh.baseHex[i]));
   f.mesh.light.intensity = on ? 2.4 : 0;
 }
-// ============ ITEM MESHES ============
+// ============ ITEM MODELS (v0.7: one 3D model + idle animation per item, PS2 item families) ============
+function EM(color, ecolor, ei) { const m = MAT(color); if (ecolor !== undefined) { m.emissive = new THREE.Color(ecolor); m.emissiveIntensity = ei === undefined ? 1 : ei; } return m; }
+function pBox(p, x, y, z, w, h, d, c, ec, ei) { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), EM(c, ec, ei)); m.position.set(x, y, z); p.add(m); return m; }
+function pSph(p, x, y, z, r, c, ec, ei) { const m = new THREE.Mesh(new THREE.SphereGeometry(r, 14, 10), EM(c, ec, ei)); m.position.set(x, y, z); p.add(m); return m; }
+function pCyl(p, x, y, z, rt, rb, h, c, ec, ei) { const m = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, 10), EM(c, ec, ei)); m.position.set(x, y, z); p.add(m); return m; }
+function pCone(p, x, y, z, r, h, c, ec, ei) { const m = new THREE.Mesh(new THREE.ConeGeometry(r, h, 10), EM(c, ec, ei)); m.position.set(x, y, z); p.add(m); return m; }
+function pTor(p, x, y, z, r, tb, c, ec, ei, arc) { const m = new THREE.Mesh(new THREE.TorusGeometry(r, tb, 8, 18, arc === undefined ? Math.PI * 2 : arc), EM(c, ec, ei)); m.position.set(x, y, z); p.add(m); return m; }
+function pIco(p, x, y, z, r, c) { const m = new THREE.Mesh(new THREE.IcosahedronGeometry(r, 0), MAT(c)); m.position.set(x, y, z); p.add(m); return m; }
+
+// ---- melee family builders (all ~1.1 units tall) ----
+function bSword(g, bladeC, guardC) { pBox(g, 0, .62, 0, .07, .8, .03, bladeC); pBox(g, 0, .22, 0, .22, .05, .06, guardC); pCyl(g, 0, .08, 0, .035, .035, .22, 0x4a3220); }
+function bKatana(g) { pBox(g, 0, .62, 0, .06, .78, .025, 0xd8dee8); pBox(g, 0, .24, 0, .02, .14, .02, 0xd8dee8); pCyl(g, 0, .2, 0, .05, .05, .05, 0x8a6a20); pCyl(g, 0, .08, 0, .032, .032, .22, 0x222222); }
+function bAxe(g, headC) { pCyl(g, 0, .55, 0, .035, .035, 1.0, 0x6b4a2a); pBox(g, .12, .95, 0, .24, .3, .05, headC); }
+function bHammer(g, headC, big) { pCyl(g, 0, .5, 0, .04, .04, .9, 0x6b4a2a); const h = big ? 1.3 : 1; pBox(g, 0, .92, 0, .5 * h, .24, .24, headC); }
+function bSpear(g) { pCyl(g, 0, .6, 0, .03, .03, 1.2, 0x6b4a2a); pCone(g, 0, 1.3, 0, .06, .22, 0xb8c0cc); }
+function bClub(g, c) { pCyl(g, 0, .55, 0, .07, .1, .95, c); pCyl(g, 0, .05, 0, .035, .035, .2, 0x4a3220); }
+function bBat(g, c) { pCyl(g, 0, .6, 0, .05, .075, 1.0, c); pCyl(g, 0, .02, 0, .035, .035, .16, 0x333333); }
+
 function buildItemMesh(def) {
-  const g = new THREE.Group();
-  const c = def.color;
-  if (def.name === 'Cactus') { const cc = buildCactus(); cc.scale.setScalar(1.1); g.add(cc); return g; }
-  let m;
-  switch (def.arch) {
-    case 'melee': m = box(.11, .95, .11, c); m.position.y = .48; m.rotation.z = .45; g.add(m); break;
-    case 'gun': m = box(.55, .17, .17, c); m.position.y = .5; g.add(m); m = box(.3, .12, .12, 0x333333); m.position.set(.28, .5, 0); g.add(m); break;
-    case 'throw': m = box(.52, .52, .52, c); m.position.y = .3; g.add(m); break;
-    case 'boom': m = sph(.3, c); m.position.y = .32; g.add(m); break;
-    case 'food': m = sph(.28, c, 1, .72, 1); m.position.y = .2; g.add(m); break;
-    default: m = new THREE.Mesh(new THREE.OctahedronGeometry(.32), MAT(c)); m.position.y = .36; g.add(m);
-  }
+  const g = new THREE.Group(), n = def.name, ac = def.color, F = s => n.indexOf(s) >= 0;
+  let anim = 'none', glowMats = [], sparkColor = 0xffffff, fuseH = 0;
+  const glow = m => { glowMats.push(m.material); };
+  if (def.arch === 'melee') {
+    if (F('Katana')) bKatana(g);
+    else if (F('Broadsword')) { bSword(g, 0xb8c0cc, 0x8a6a20); pBox(g, 0, .62, 0, .1, .8, .04, 0xb8c0cc); }
+    else if (F('Laser Sword')) { pBox(g, 0, .62, 0, .06, .8, .03, 0x66eeff, 0x2299cc, 1.6); glow(g.children[0]); pBox(g, 0, .22, 0, .2, .05, .06, 0x333344); pCyl(g, 0, .08, 0, .035, .035, .22, 0x333344); anim = 'glow'; }
+    else if (F('Rapier')) { bSword(g, 0xd8dee8, 0x8a6a20); pTor(g, 0, .22, 0, .09, .02, 0x8a6a20); }
+    else if (F('Battle Axe')) bAxe(g, 0x8a8f9a);
+    else if (F('War Mace')) { pCyl(g, 0, .5, 0, .04, .04, .9, 0x6b4a2a); pSph(g, 0, 1.0, 0, .16, 0x555560); for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2; pCone(g, Math.cos(a) * .16, 1.0, Math.sin(a) * .16, .045, .12, 0x8a8f9a); } }
+    else if (F('Halberd')) { bAxe(g, 0x8a8f9a); pCone(g, 0, 1.28, 0, .05, .2, 0xb8c0cc); pCyl(g, 0, .62, 0, .03, .03, 1.25, 0x6b4a2a); }
+    else if (F('Spear')) bSpear(g);
+    else if (F('Chainsaw')) { pBox(g, 0, .5, 0, .3, .3, .16, 0xcc4422); pBox(g, 0, .62, .12, .08, .16, .7, 0x9aa0aa); pCyl(g, 0, .32, 0, .03, .03, .18, 0x333333); }
+    else if (F('Spiked Club')) { bClub(g, 0x6b4a2a); for (let i = 0; i < 5; i++) pCone(g, 0, .45 + i * .14, .09, .035, .1, 0x9aa0aa); }
+    else if (F('Golf Club')) { pCyl(g, 0, .55, 0, .025, .025, 1.0, 0x888888); const h = pBox(g, .1, .06, 0, .2, .09, .09, 0x555560); h.rotation.z = .5; }
+    else if (F('Tennis Racket')) { pCyl(g, 0, .35, 0, .03, .03, .6, 0x8a5a20); pTor(g, 0, .85, 0, .2, .025, 0xcc4422); }
+    else if (F('Broom')) { pCyl(g, 0, .6, 0, .03, .03, 1.1, 0x8a6a20); pBox(g, 0, .02, 0, .16, .22, .12, 0xd8b45a); }
+    else if (F('Shovel')) { pCyl(g, 0, .6, 0, .03, .03, 1.0, 0x6b4a2a); pBox(g, 0, .05, 0, .18, .22, .04, 0x8a8f9a); }
+    else if (F('Torch')) { pCyl(g, 0, .5, 0, .035, .035, .9, 0x6b4a2a); glow(pSph(g, 0, 1.05, 0, .13, 0xff8c1e, 0xff5500, 1.8)); anim = 'glow'; sparkColor = 0xffa53a; fuseH = 1.1; }
+    else if (F('Umbrella')) { pCyl(g, 0, .55, 0, .025, .025, 1.0, 0x333333); const c = pCone(g, 0, 1.05, 0, .42, .25, ac); }
+    else if (F('Wrench')) { pBox(g, 0, .55, 0, .09, .9, .05, 0x9aa0aa); pBox(g, 0, 1.02, 0, .2, .12, .05, 0x9aa0aa); }
+    else if (F('Frying Pan')) { pCyl(g, 0, .55, 0, .16, .14, .07, 0x3a3a44); pBox(g, 0, .85, 0, .06, .5, .05, 0x3a3a44); }
+    else if (F('Hammer')) bHammer(g, 0x8a8f9a, false);
+    else if (F('Mallet')) { pCyl(g, 0, .5, 0, .04, .04, .85, 0x8a6a20); pCyl(g, 0, .92, 0, .15, .15, .34, 0xd8b45a); }
+    else if (F('Pipe')) pCyl(g, 0, .55, 0, .06, .06, 1.0, 0x8a8f9a);
+    else if (F('Cricket')) { pBox(g, 0, .5, 0, .22, .8, .06, 0xd8b45a); pCyl(g, 0, .02, 0, .035, .035, .22, 0x4a3220); }
+    else bBat(g, 0x9a6a38);
+  } else if (def.arch === 'gun') {
+    const body = (l) => { pBox(g, 0, .5, 0, .16, .2, l, 0x3a3a44); pCyl(g, 0, .56, l / 2 + .1, .045, .045, .5, 0x555560).rotation.x = Math.PI / 2; pBox(g, 0, .32, -.14, .09, .2, .1, 0x2a2a32); };
+    if (F('Rocket Launcher')) { pCyl(g, 0, .55, 0, .14, .14, 1.1, 0x4a5a3a).rotation.x = Math.PI / 2; pCone(g, 0, .55, -.62, .14, .2, 0x3a4a2a); pBox(g, 0, .28, .12, .08, .16, .08, 0x2a2a32); }
+    else if (F('Grenade Launcher')) { pCyl(g, 0, .55, 0, .1, .1, .95, 0x555560).rotation.x = Math.PI / 2; pCyl(g, 0, .42, -.12, .12, .12, .22, 0x777780); }
+    else if (F('Machine Gun')) { body(.7); pBox(g, 0, .34, 0, .09, .22, .12, 0x2a2a32); pCyl(g, 0, .62, .32, .05, .05, .34, 0x555560).rotation.x = Math.PI / 2; }
+    else if (F('Shotgun')) { body(.6); pCyl(g, 0, .56, .3, .05, .05, .5, 0x555560).rotation.x = Math.PI / 2; pCyl(g, 0, .47, -.18, .05, .05, .4, 0x555560).rotation.x = Math.PI / 2; pBox(g, 0, .5, 0, .2, .08, .7, 0x6b4a2a); }
+    else if (F('Flame Thrower')) { pBox(g, 0, .5, 0, .16, .2, .6, 0x7a3a1a); pCyl(g, .12, .5, -.1, .07, .07, .3, 0xaa3322); pCyl(g, -.12, .5, -.1, .07, .07, .3, 0xaa3322); glow(pCyl(g, 0, .56, .38, .05, .05, .12, 0xff8c1e, 0xff5500, 1.8)).rotation.x = Math.PI / 2; anim = 'glow'; sparkColor = 0xffa53a; fuseH = .6; }
+    else if (F('Freeze Ray')) { body(.55); glow(pCone(g, 0, .56, .42, .07, .18, 0x9fe8ff, 0x33aaff, 1.8)).rotation.x = Math.PI / 2; anim = 'glow'; }
+    else if (F('Laser Gun')) { body(.5); glow(pCyl(g, 0, .56, .36, .03, .03, .16, 0xff4444, 0xff2222, 1.8)).rotation.x = Math.PI / 2; anim = 'glow'; }
+    else if (F('Plasma Rifle')) { body(.6); glow(pTor(g, 0, .56, .28, .06, .02, 0x44ffcc, 0x11cc88, 1.6)); glow(pTor(g, 0, .56, .42, .06, .02, 0x44ffcc, 0x11cc88, 1.6)); anim = 'glow'; }
+    else if (F('Railgun')) { pBox(g, -.06, .5, 0, .05, .14, .9, 0x3a3a44); pBox(g, .06, .5, 0, .05, .14, .9, 0x3a3a44); glow(pBox(g, 0, .5, .42, .05, .05, .2, 0x9fe8ff, 0x33aaff, 1.6)); anim = 'glow'; }
+    else if (F('Lightning Gun')) { body(.5); glow(pTor(g, 0, .56, .2, .045, .018, 0xffee55, 0xccaa00, 1.7)); glow(pTor(g, 0, .56, .32, .045, .018, 0xffee55, 0xccaa00, 1.7)); anim = 'glow'; }
+    else if (F('Crossbow')) { pBox(g, 0, .5, 0, .1, .12, .8, 0x6b4a2a); pBox(g, -.22, .55, .3, .5, .06, .06, 0x8a6a20); pBox(g, .22, .55, .3, .5, .06, .06, 0x8a6a20); }
+    else if (F('Bow')) { pTor(g, 0, .55, 0, .35, .03, 0x8a6a20, undefined, undefined, Math.PI); g.children[g.children.length - 1].rotation.z = Math.PI / 2; }
+    else if (F('Slingshot')) { pCyl(g, -.08, .62, 0, .03, .03, .4, 0x8a6a20); pCyl(g, .08, .62, 0, .03, .03, .4, 0x8a6a20); pCyl(g, 0, .38, 0, .035, .035, .5, 0x6b4a2a); }
+    else if (F('Water Cannon')) { body(.5); pCyl(g, 0, .42, -.14, .09, .09, .24, 0x3388cc); }
+    else if (F('Bubble Gun')) { body(.4); const b = pSph(g, 0, .62, .4, .12, 0xaad4ff); b.material.transparent = true; b.material.opacity = .55; }
+    else if (F('Sonic Blaster')) { body(.45); pCone(g, 0, .56, .42, .12, .24, 0x777788).rotation.x = Math.PI / 2; }
+    else if (F('Revolver')) { pBox(g, 0, .5, 0, .13, .16, .5, 0x555560); pCyl(g, 0, .5, 0, .08, .08, .18, 0x777780).rotation.z = Math.PI / 2; pBox(g, 0, .32, -.12, .08, .18, .09, 0x6b4a2a); }
+    else { body(.45); } // Blaster Pistol + fallback
+    if (anim === 'none') anim = 'sway';
+  } else if (def.arch === 'throw') {
+    if (F('Chair')) { pBox(g, 0, .45, 0, .5, .08, .5, 0x8a5a20); pBox(g, 0, .85, -.22, .5, .8, .08, 0x8a5a20); [[-.2, -.2], [.2, -.2], [-.2, .2], [.2, .2]].forEach(l => pCyl(g, l[0], .2, l[1], .035, .035, .4, 0x6b4218)); }
+    else if (F('Stool')) { pCyl(g, 0, .5, 0, .24, .24, .08, 0x8a5a20); [[-.15, 0], [.15, 0], [0, .15]].forEach(l => pCyl(g, l[0], .22, l[1], .03, .03, .45, 0x6b4218)); }
+    else if (F('Bench')) { pBox(g, 0, .42, 0, 1.1, .08, .4, 0x8a5a20); [[-.45, 0], [.45, 0]].forEach(l => pBox(g, l[0], .18, 0, .08, .36, .36, 0x6b4218)); }
+    else if (F('Small Table')) { pBox(g, 0, .62, 0, .7, .07, .7, 0x9a6a30); [[-.28, -.28], [.28, -.28], [-.28, .28], [.28, .28]].forEach(l => pCyl(g, l[0], .3, l[1], .03, .03, .6, 0x6b4218)); }
+    else if (F('Table Lamp')) { pCyl(g, 0, .08, 0, .14, .1, .08, 0x555560); pCyl(g, 0, .4, 0, .03, .03, .6, 0x555560); glow(pCone(g, 0, .75, 0, .2, .22, 0xffe9a8, 0xcc9900, 1.2)); anim = 'glow'; }
+    else if (F('Wooden Barrel') || F('Ale Barrel')) { pCyl(g, 0, .5, 0, .3, .26, .8, F('Ale') ? 0x9a6a30 : 0x8a5a20); pTor(g, 0, .7, 0, .29, .02, 0x555560).rotation.x = Math.PI / 2; pTor(g, 0, .3, 0, .27, .02, 0x555560).rotation.x = Math.PI / 2; if (F('Ale')) pCyl(g, 0, .95, 0, .24, .24, .1, 0xfff6dc); }
+    else if (F('Metal Barrel')) { pCyl(g, 0, .5, 0, .3, .3, .85, 0x5a6a7a); pTor(g, 0, .7, 0, .3, .02, 0x8a8f9a).rotation.x = Math.PI / 2; }
+    else if (F('Crate')) { pBox(g, 0, .5, 0, .62, .62, .62, 0xa0762e); pBox(g, 0, .5, .32, .66, .1, .1, 0x7a5a1e); pBox(g, 0, .5, -.32, .66, .1, .1, 0x7a5a1e); }
+    else if (F('Rock')) pIco(g, 0, .4, 0, .38, 0x8a8a8e);
+    else if (F('Brick')) pBox(g, 0, .3, 0, .5, .2, .24, 0xb0402a);
+    else if (F('Anvil')) { pBox(g, 0, .15, 0, .5, .2, .3, 0x3a3a44); pBox(g, 0, .42, 0, .44, .22, .28, 0x4a4a54); pCone(g, .36, .42, 0, .09, .3, 0x4a4a54).rotation.z = -Math.PI / 2; }
+    else if (F('Safe')) { pBox(g, 0, .45, 0, .6, .7, .55, 0x3a4a3a); pCyl(g, 0, .45, .29, .09, .09, .06, 0x8a8f9a).rotation.x = Math.PI / 2; }
+    else if (F('Book')) { pBox(g, 0, .35, 0, .44, .12, .3, 0xa02020); pBox(g, .02, .35, 0, .38, .09, .26, 0xf5f0dc); }
+    else if (F('Vase')) { pCyl(g, 0, .35, 0, .16, .22, .5, 0x4a7a9a); pCyl(g, 0, .66, 0, .08, .1, .16, 0x4a7a9a); }
+    else if (F('Plant Pot')) { pCyl(g, 0, .2, 0, .24, .18, .3, 0xb5652a); pSph(g, 0, .55, 0, .22, 0x3f9e3f); }
+    else if (F('Globe')) { pSph(g, 0, .55, 0, .24, 0x3a7acc); pSph(g, -.08, .6, .1, .1, 0x3f9e3f); pCyl(g, 0, .12, 0, .05, .05, .2, 0x8a6a20); }
+    else if (F('Television')) { pBox(g, 0, .5, 0, .6, .5, .4, 0x3a3a44); glow(pBox(g, 0, .52, .21, .46, .34, .02, 0x9fe8ff, 0x3388cc, 1.1)); anim = 'glow'; }
+    else if (F('Microwave')) { pBox(g, 0, .45, 0, .55, .4, .4, 0x8a8f9a); pBox(g, 0, .45, .21, .34, .24, .02, 0x2a2a32); }
+    else if (F('Toolbox')) { pBox(g, 0, .4, 0, .6, .36, .34, 0xcc2222); pBox(g, 0, .66, 0, .4, .08, .08, 0x8a8f9a); }
+    else if (F('Backpack')) { pBox(g, 0, .5, 0, .44, .55, .3, 0x7a3a9a); pBox(g, 0, .62, .17, .3, .2, .06, 0x5a2a7a); }
+    else if (F('Tire')) pTor(g, 0, .45, 0, .3, .13, 0x2a2a2e).rotation.x = Math.PI / 2;
+    else if (F('Bowling Ball')) pSph(g, 0, .4, 0, .3, 0x22228a);
+    else if (F('Dumbbell')) { pCyl(g, 0, .4, 0, .045, .045, .7, 0x555560).rotation.z = Math.PI / 2; pCyl(g, -.3, .4, 0, .14, .14, .12, 0x3a3a44).rotation.z = Math.PI / 2; pCyl(g, .3, .4, 0, .14, .14, .12, 0x3a3a44).rotation.z = Math.PI / 2; }
+    else if (F('Kettle')) { pCyl(g, 0, .4, 0, .22, .18, .4, 0xb8c0cc); pCone(g, .26, .5, 0, .06, .24, 0xb8c0cc).rotation.z = -.7; pTor(g, 0, .68, 0, .12, .03, 0x555560, undefined, undefined, Math.PI); }
+    else if (F('Bucket')) { pCyl(g, 0, .35, 0, .24, .19, .45, 0x8a8f9a); pTor(g, 0, .62, 0, .2, .02, 0x555560, undefined, undefined, Math.PI); }
+    else if (F('Treasure Chest')) { pBox(g, 0, .32, 0, .6, .32, .4, 0x8a5a20); pBox(g, 0, .52, 0, .6, .16, .4, 0x9a6a30); pBox(g, 0, .4, .21, .08, .12, .02, 0xffd94d); }
+    else if (F('Statue Head')) { pBox(g, 0, .12, 0, .4, .24, .4, 0x9a9a9e); pSph(g, 0, .55, 0, .26, 0xb8b8bc); pBox(g, 0, .55, .24, .3, .12, .06, 0x8a8a8e); }
+    else if (F('Cactus')) { const cc = buildCactus(); cc.scale.setScalar(1.15); g.add(cc); anim = 'wobble'; }
+    else pBox(g, 0, .45, 0, .5, .5, .5, ac);
+  } else if (def.arch === 'boom') {
+    const bombBall = (r, c, ring) => { pSph(g, 0, .5, 0, r, c); pCyl(g, .1, .5 + r * .8, 0, .025, .025, .18, 0x6b4a2a); const s = pSph(g, .1, .5 + r * .8 + .1, 0, .045, 0xffd23a, 0xff5500, 2); glow(s); if (ring) pTor(g, 0, .5, 0, r * 1.02, .02, 0x444448).rotation.x = Math.PI / 2; };
+    if (F('Big Bomb')) bombBall(.42, 0x1a1a20, false);
+    else if (F('Dynamite')) { for (let i = -1; i <= 1; i++) pCyl(g, i * .11, .5, 0, .07, .07, .6, 0xcc2222); pCyl(g, 0, .85, 0, .02, .02, .14, 0x6b4a2a); glow(pSph(g, 0, .95, 0, .04, 0xffd23a, 0xff5500, 2)); }
+    else if (F('Grenade')) bombBall(.24, 0x3a5a3a, true);
+    else if (F('Fire Bomb')) { pSph(g, 0, .5, 0, .3, 0xcc5522); glow(pSph(g, 0, .72, 0, .14, 0xff8c1e, 0xff5500, 1.8)); }
+    else if (F('Ice Bomb')) { pSph(g, 0, .5, 0, .3, 0x9fd4ff, 0x3388cc, .8); glowMats.push(g.children[g.children.length - 1].material); }
+    else if (F('Shock Bomb')) { pSph(g, 0, .5, 0, .3, 0xd8b400, 0xaa8800, 1.2); glowMats.push(g.children[g.children.length - 1].material); }
+    else if (F('Poison Bomb')) { pSph(g, 0, .5, 0, .3, 0x6a2a9a, 0x3a105a, 1.2); glowMats.push(g.children[g.children.length - 1].material); }
+    else if (F('Holy Bomb')) { pSph(g, 0, .5, 0, .3, 0xf5f0dc, 0xffd94d, .9); glowMats.push(g.children[g.children.length - 1].material); pBox(g, 0, .8, 0, .05, .2, .05, 0xffd94d); pBox(g, 0, .8, 0, .14, .05, .05, 0xffd94d); }
+    else if (F('Powder Keg')) { pCyl(g, 0, .42, 0, .24, .2, .55, 0x8a5a20); pTor(g, 0, .58, 0, .23, .02, 0x555560).rotation.x = Math.PI / 2; }
+    else if (F('Oil Drum')) { pCyl(g, 0, .45, 0, .26, .26, .7, 0x3a3a44); pTor(g, 0, .6, 0, .26, .02, 0x8a8f9a).rotation.x = Math.PI / 2; }
+    else if (F('Gas Can')) { pBox(g, 0, .4, 0, .4, .45, .24, 0xcc2222); pCyl(g, .22, .68, 0, .04, .06, .24, 0x555560).rotation.z = -.5; }
+    else if (F('Firework')) { pBox(g, 0, .25, 0, .5, .4, .4, 0x8a5a20); for (let i = -1; i <= 1; i++) pCyl(g, i * .14, .62, 0, .05, .05, .45, [0xcc2222, 0x2266cc, 0x22aa44][i + 1]); }
+    else if (F('Land Mine')) { pCyl(g, 0, .22, 0, .3, .34, .16, 0x4a4a44); pCyl(g, 0, .33, 0, .08, .08, .06, 0xcc2222, 0xff2222, 1.4); glowMats.push(g.children[g.children.length - 1].material); }
+    else if (F('Sticky Bomb')) { pSph(g, 0, .5, 0, .28, 0x4a9a3a); for (let i = 0; i < 5; i++) { const a = i / 5 * Math.PI * 2; pSph(g, Math.cos(a) * .28, .5, Math.sin(a) * .28, .07, 0x6ac04a); } }
+    else if (F('Cluster Bomb')) { pSph(g, -.12, .45, 0, .18, 0x1a1a20); pSph(g, .12, .45, .08, .18, 0x1a1a20); pSph(g, 0, .68, -.06, .18, 0x1a1a20); }
+    else bombBall(.3, 0x1a1a20, false);
+    anim = 'pulse'; sparkColor = 0xffa53a; fuseH = .95;
+  } else if (def.arch === 'food') {
+    if (F('Cake')) { pCyl(g, 0, .3, 0, .3, .3, .22, 0xf5d0e0); pCyl(g, 0, .5, 0, .22, .22, .18, 0xe8a0c0); pSph(g, 0, .64, 0, .05, 0xcc2222); }
+    else if (F('Roast Chicken')) { pSph(g, 0, .45, 0, .28, 0xd88a3a); pCyl(g, .3, .6, 0, .04, .04, .3, 0xf5e8d0).rotation.z = -.6; pSph(g, .42, .72, 0, .07, 0xf5e8d0); }
+    else if (F('Pizza')) { pCyl(g, 0, .35, 0, .32, .32, .08, 0xe8b45a); for (let i = 0; i < 4; i++) { const a = i / 4 * Math.PI * 2 + .4; pSph(g, Math.cos(a) * .14, .4, Math.sin(a) * .14, .045, 0xcc2222); } }
+    else if (F('Burger')) { pSph(g, 0, .42, 0, .3, 0xe8b45a, undefined, undefined); g.children[0].scale.y = .6; pCyl(g, 0, .3, 0, .31, .31, .08, 0x6b4a2a); pSph(g, 0, .2, 0, .3, 0xe8d08a); g.children[2].scale.y = .4; }
+    else if (F('Sushi')) { pBox(g, 0, .28, 0, .7, .08, .4, 0x8a6a20); for (let i = -1; i <= 1; i++) { pBox(g, i * .2, .4, 0, .14, .12, .2, 0xf5f0dc); pBox(g, i * .2, .4, 0, .16, .05, .22, 0x2a4a2a); } }
+    else if (F('Apple')) { pSph(g, 0, .45, 0, .24, 0xcc2222); pCyl(g, 0, .68, 0, .02, .02, .14, 0x6b4a2a); }
+    else if (F('Banana')) { const b1 = pBox(g, -.12, .35, 0, .24, .12, .12, 0xffe94d); b1.rotation.z = .4; const b2 = pBox(g, .1, .42, 0, .24, .12, .12, 0xffe94d); b2.rotation.z = -.4; }
+    else if (F('Watermelon')) { const w = pSph(g, 0, .42, 0, .3, 0x2a8a3a); w.scale.y = .8; pSph(g, 0, .5, 0, .2, 0xcc4a5a); }
+    else if (F('Cheese')) { pCyl(g, 0, .3, 0, .3, .3, .24, 0xffd94d); }
+    else if (F('Honey')) { pCyl(g, 0, .35, 0, .18, .15, .4, 0xd88a1a, 0xaa5500, .5); pCyl(g, 0, .58, 0, .12, .12, .08, 0x8a5a20); glowMats.push(g.children[0].material); }
+    else if (F('Energy Drink')) { pCyl(g, 0, .4, 0, .12, .12, .45, 0x22ccaa, 0x00aa88, .7); pCyl(g, 0, .65, 0, .11, .11, .04, 0x8a8f9a); glowMats.push(g.children[0].material); }
+    else if (F('Magic Potion')) { glow(pSph(g, 0, .35, 0, .2, 0x9a4ae8, 0x5a1a9a, 1.4)); pCyl(g, 0, .58, 0, .06, .08, .18, 0xb8c0cc); }
+    anim = 'sparkle'; sparkColor = 0xfff6c8;
+  } else if (def.arch === 'special') {
+    if (F('Fire Wand')) { pCyl(g, 0, .5, 0, .035, .035, .9, 0x6b4a2a); glow(pSph(g, 0, 1.05, 0, .12, 0xff6a2a, 0xcc3300, 1.8)); }
+    else if (F('Ice Wand')) { pCyl(g, 0, .5, 0, .035, .035, .9, 0x6b4a2a); glow(pCone(g, 0, 1.08, 0, .09, .2, 0x9fe8ff, 0x33aaff, 1.8)); }
+    else if (F('Lightning Rod')) { pCyl(g, 0, .5, 0, .035, .035, .95, 0x555560); glow(pSph(g, 0, 1.06, 0, .1, 0xffee55, 0xccaa00, 1.8)); }
+    else if (F('Wind Fan')) { pCyl(g, 0, .3, 0, .035, .035, .5, 0x8a6a20); const f1 = pBox(g, 0, .62, 0, .5, .06, .06, 0xd8b45a); f1.rotation.z = .5; const f2 = pBox(g, 0, .62, 0, .5, .06, .06, 0xd8b45a); f2.rotation.z = -.5; }
+    else if (F('Poison Dagger')) { pBox(g, 0, .55, 0, .07, .6, .03, 0x4ae86a, 0x1a8a3a, 1.2); glowMats.push(g.children[g.children.length - 1].material); pCyl(g, 0, .18, 0, .04, .04, .05, 0x8a6a20); pCyl(g, 0, .06, 0, .03, .03, .2, 0x6b4a2a); }
+    else if (F('Vampire Fang')) pCone(g, 0, .55, 0, .1, .5, 0xf5f0dc).rotation.x = Math.PI;
+    else if (F('Golden Hammer')) { pCyl(g, 0, .5, 0, .045, .045, .9, 0x8a6a20); glow(pBox(g, 0, .95, 0, .55, .26, .26, 0xffd94d, 0xaa7700, 1.1)); }
+    else if (F('Giant Glove')) { pBox(g, 0, .5, 0, .4, .4, .34, 0xcc5a3a); pBox(g, 0, .5, .2, .42, .16, .36, 0xcc5a3a); pCyl(g, 0, .18, 0, .14, .14, .2, 0x8a4a2a); }
+    else if (F('Shock Glove')) { pBox(g, 0, .5, 0, .36, .36, .3, 0x4a5a6a); glow(pSph(g, 0, .5, .2, .06, 0xffee55, 0xccaa00, 2)); glow(pSph(g, .12, .55, 0, .05, 0xffee55, 0xccaa00, 2)); }
+    else if (F('Magnet Coil')) { for (let i = 0; i < 3; i++) pTor(g, 0, .35 + i * .22, 0, .16, .045, i % 2 ? 0xcc2222 : 0xf5f0dc).rotation.x = Math.PI / 2; pCyl(g, 0, .5, 0, .05, .05, .8, 0x555560); }
+    else if (F('Gravity Orb')) { glow(pSph(g, 0, .55, 0, .24, 0x6a2a9a, 0x3a105a, 1.6)); pTor(g, 0, .55, 0, .36, .03, 0xb08ad8, 0x6a2a9a, 1).rotation.x = Math.PI / 2 + .4; glowMats.push(g.children[g.children.length - 1].material); }
+    else if (F('Mirror Shield')) { const s = pCyl(g, 0, .55, 0, .3, .3, .05, 0xd8dee8, 0x88aacc, .8); s.rotation.x = Math.PI / 2; pTor(g, 0, .55, 0, .3, .04, 0x8a6a20); pBox(g, 0, .55, -.32, .08, .12, .08, 0x8a6a20); glowMats.push(g.children[0].material); }
+    anim = 'glow';
+  } else { pBox(g, 0, .45, 0, .5, .5, .5, ac); }
+  g.userData = { anim, glowMats, sparkColor, fuseH, baseScale: def.scale + .35 };
   g.scale.setScalar(def.scale + .35);
   return g;
 }
-
+function buildBoxMesh() {
+  const g = new THREE.Group();
+  pBox(g, 0, 0, 0, .9, .9, .9, 0xa0762e); pBox(g, 0, 0, .46, .94, .14, .04, 0x7a5a1e); pBox(g, 0, 0, -.46, .94, .14, .04, 0x7a5a1e);
+  g.userData = { anim: 'none', glowMats: [], baseScale: 1 };
+  return g;
+}
+function buildCoin() {
+  const m = new THREE.Mesh(new THREE.SphereGeometry(.16, 12, 10), EM(0xffd94d, 0xb8860b, .6));
+  m.scale.y = .45;
+  return m;
+}
+function spawnCoin(x, z) {
+  const mesh = buildCoin(); mesh.position.set(x, .5, z); scene.add(mesh);
+  coins.push({ mesh, x, z, vx: (Math.random() - .5) * 3, vz: (Math.random() - .5) * 3, ph: Math.random() * 6 });
+}
+function breakBox3D(b) {
+  const now = perfNow(), r = Math.random();
+  burst(b.x, .8, b.z, 0xc98f3d, 12, 2.5, .5); ringFx(b.x, b.z, 0xffe9a8, 2);
+  scene.remove(b.mesh);
+  if (r < .45) spawnGroundItem(randItem(), b.x, b.z, true);
+  else if (r < .75) spawnGem(b.x, b.z, 0);
+  else { spawnCoin(b.x + .4, b.z); spawnCoin(b.x - .4, b.z); }
+}
+function smashBoxes(f, range) {
+  for (let i = boxes.length - 1; i >= 0; i--) { const b = boxes[i];
+    if (Math.hypot(b.x - f.x, b.z - f.z) <= range + .9) {
+      b.hp--; burst(b.x, .8, b.z, 0xc98f3d, 6, 1.8, .35);
+      if (b.hp <= 0) { breakBox3D(b); boxes.splice(i, 1); }
+      break;
+    }
+  }
+}
+function animItemMesh(mesh, dt, now, x, z, ph) {
+  const ud = mesh.userData;
+  if (!ud || !ud.anim || ud.anim === 'none') return;
+  if (ud.anim === 'wobble') { mesh.rotation.z = Math.sin(now * 2 + ph) * .08; return; }
+  if (ud.anim === 'pulse') { const s = (ud.baseScale || 1) * (1 + Math.sin(now * 6 + ph) * .07); mesh.scale.setScalar(s); return; }
+  if (ud.anim === 'glow' && ud.glowMats) { ud.glowMats.forEach(m => { m.emissiveIntensity = .7 + Math.sin(now * 4 + ph) * .45; }); return; }
+  if (ud.anim === 'sparkle' && Math.random() < .06) burst(x, .95, z, ud.sparkColor || 0xffffff, 1, .8, .3);
+  if (ud.anim === 'sway') { mesh.rotation.z = Math.sin(now * 1.6 + ph) * .1; }
+}
+// ---- boardable turret (stage gimmick) ----
+const turret = { mesh: null, top: null, cd: 0, user: null, x: 7.4, z: 7.4 };
+function buildTurret() {
+  const g = new THREE.Group();
+  pCyl(g, 0, .4, 0, .42, .5, .8, 0x4a4a54);
+  pBox(g, 0, .85, 0, .7, .18, .7, 0x5a5a64);
+  const top = new THREE.Group(); top.position.y = 1.0; g.add(top);
+  pSph(top, 0, .1, 0, .28, 0x6a6a74);
+  pCyl(top, 0, .15, .3, .09, .11, .7, 0x3a3a44).rotation.x = Math.PI / 2;
+  g.position.set(turret.x, 0, turret.z);
+  scene.add(g);
+  turret.mesh = g; turret.top = top;
+}
 // ============ GAME STATE ============
 const state = { over: false, timeLeft: 120 };
 const fighters = [], gems = [], groundItems = [], shots = [], throwns = [], parts = [], rings = [];
+const boxes = [], coins = [], pendingBooms = [];
+let boxTimer = 7;
 let shake = 0;
 function makeFighter(kind, name, x, z, isBot) {
   const f = {
     kind, name, mesh: buildFighterMesh(kind), x, z, vx: 0, vz: 0, face: { x: isBot ? -1 : 1, z: 0 },
     hp: 400, maxHp: 400, gems: 0, transformed: 0, item: null, itemUses: 0,
-    atkCd: 0, atkT: 0, atkMax: 1, catchUntil: -9, lastCatchTry: -9, hurtT: -9, hazardCd: 0,
+    atkCd: 0, atkT: 0, atkMax: 1, catchUntil: -9, lastCatchTry: -9, catchCd: 0, hurtT: -9, hazardCd: 0,
+    jumpT: 0, atkKind: '', combo: 0, comboT: 0, downT: 0, rollT: 0, gold: 0, gauge: 0, wallJumped: false, boarded: null,
     isBot, aiT: 0, runPh: Math.random() * 6, goldOn: false, dead: false
   };
   f.mesh.root.position.set(x, 0, z);
@@ -207,6 +402,7 @@ const hazard = { mesh: sph(.55, 0xb44dff), x: 0, z: -6, vx: 120, vz: 95 };
 hazard.mesh.material.emissive = new THREE.Color(0x7a2bd0);
 hazard.mesh.position.set(0, .8, -6);
 scene.add(hazard.mesh);
+buildTurret();
 
 function spawnGem(x, z, delay) {
   const mesh = new THREE.Mesh(new THREE.OctahedronGeometry(.34), new THREE.MeshStandardMaterial({ color: 0xff2b3a, emissive: 0xa01020, roughness: .3 }));
@@ -265,6 +461,9 @@ function flashMsg(txt) {
 const dist = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
 function hurt(victim, dmg, kb, fromX, fromZ, cause) {
   if (state.over || victim.dead) return;
+  if (victim.rollT > 0) return;
+  if (victim.jumpT > 0 && cause !== 'shot') return;
+  if (victim.downT > 0) return;
   const mult = victim.transformed > 0 ? .6 : 1;
   victim.hp -= dmg * mult;
   victim.hurtT = perfNow();
@@ -272,7 +471,6 @@ function hurt(victim, dmg, kb, fromX, fromZ, cause) {
     victim.gems = Math.max(0, victim.gems - 1);
     const a = Math.random() * TAU;
     spawnGem(victim.x + Math.cos(a) * 1.5, victim.z + Math.sin(a) * 1.5, .6);
-    showBannerFlash(victim);
   }
   const d = Math.max(.4, Math.hypot(victim.x - fromX, victim.z - fromZ));
   const kbPower = (kb || 120) * (victim.transformed > 0 ? .4 : 1);
@@ -280,6 +478,18 @@ function hurt(victim, dmg, kb, fromX, fromZ, cause) {
   victim.vz += (victim.z - fromZ) / d * kbPower * .016;
   if (cause !== 'hazard') burst(victim.x, 1.4, victim.z, 0xffe08a, 7, 2.6, .4);
   shake = Math.max(shake, Math.min(.3, dmg * .008));
+  const atk = victim === player ? bot : player;
+  if (cause !== 'hazard' && victim.transformed <= 0) {
+    if (atk.comboT > 0) atk.combo++; else atk.combo = 1;
+    atk.comboT = 1.2;
+    if (atk.combo >= 3) {
+      atk.combo = 0; victim.downT = .85; victim.atkCd = Math.max(victim.atkCd, .85);
+      ringFx(victim.x, victim.z, 0xffffff, 2.2);
+      if (victim.gems > 0) { victim.gems--; spawnGem(victim.x + 1.2, victim.z - 1, .6); }
+      else for (let i = 0; i < 3; i++) spawnCoin(victim.x + (Math.random() - .5) * 1.4, victim.z + (Math.random() - .5) * 1.4);
+      if (victim === player) flashMsg('KNOCKDOWN!');
+    }
+  }
   if (victim.hp <= 0) { victim.hp = 0; victim.dead = true; endMatch(victim === bot ? player : bot); }
 }
 function showBannerFlash() {}
@@ -290,22 +500,32 @@ function explode(x, z, owner) {
   shake = Math.max(shake, .45);
   fighters.forEach(f => { const d = dist({ x, z }, f); if (d < 2.4 && f !== owner) hurt(f, 20, 260, x, z, 'boom'); });
 }
-function tryLight(f) {
+function tryAttack(f) { // SQUARE: attack (Power Drive while transformed; fires turret when boarded)
   const now = perfNow();
-  if (state.over || f.dead || f.atkCd > 0) return;
+  if (state.over || f.dead || f.atkCd > 0 || f.downT > 0) return;
+  if (f.boarded) { turretFire(f); return; }
   const foe = f === player ? bot : player;
   f.face = aimFace(f, foe);
+  if (f.transformed > 0) { powerDrive3D(f); return; }
+  if (f.jumpT > 0) {
+    f.atkCd = .35; f.atkT = now; f.atkMax = .35; f.atkKind = 'swing';
+    f.vx += f.face.x * 2.2; f.vz += f.face.z * 2.2;
+    if (dist(f, foe) < 2.1) hurt(foe, 10, 215, f.x, f.z, 'melee');
+    return;
+  }
   if (!f.item) {
-    if (now - f.lastCatchTry < .9) return;
-    f.lastCatchTry = now; f.catchUntil = now + .28; f.atkCd = .3; f.atkT = now; f.atkMax = .3;
-    ringFx(f.x, f.z, 0x7df9ff, 1);
+    f.atkCd = .3; f.atkT = now; f.atkMax = .3; f.atkKind = 'punch';
+    smashBoxes(f, 1.9);
+    if (dist(f, foe) < 1.95) hurt(foe, 8, 120, f.x, f.z, 'melee');
     return;
   }
   const def = f.item;
   f.atkCd = def.cooldown; f.atkT = now; f.atkMax = def.cooldown;
+  f.atkKind = def.arch === 'gun' ? 'shoot' : (def.arch === 'food' ? 'punch' : 'swing');
   if (def.arch === 'melee' || def.arch === 'special') {
     burst(f.x + f.face.x, 1.2, f.z + f.face.z, 0xffffff, 3, 1.6, .25);
-    if (dist(f, foe) < 1.95) hurt(foe, def.damage * (f.transformed > 0 ? 1.5 : 1), def.knockback, f.x, f.z, 'melee');
+    smashBoxes(f, 1.9);
+    if (dist(f, foe) < 1.95) hurt(foe, def.damage, def.knockback, f.x, f.z, 'melee');
   } else if (def.arch === 'gun') {
     const big = def.name === 'Rocket Launcher' || def.name === 'Grenade Launcher';
     const mesh = sph(big ? .3 : .14, big ? 0xffc740 : 0x7df9ff);
@@ -313,15 +533,105 @@ function tryLight(f) {
     scene.add(mesh);
     shots.push({ mesh, x: mesh.position.x, z: mesh.position.z, vx: f.face.x * 15, vz: f.face.z * 15, dmg: def.damage, boom: big, owner: f, t: 0 });
     burst(mesh.position.x, 1.15, mesh.position.z, 0xffd23a, 4, 1.6, .25);
+    smashBoxes(f, 1.5);
   } else if (def.arch === 'food') {
     f.hp = Math.min(f.maxHp, f.hp + def.heal);
     burst(f.x, 1.6, f.z, 0x7dff8a, 10, 2, .6);
     if (f === player) flashMsg('+' + def.heal + ' HP — ' + def.name);
-  } else { // throw / boom in hand = quick toss
-    throwItem(f);
-    return;
+  } else {
+    f.atkKind = 'throw'; throwItem(f); return;
   }
   useUp(f);
+}
+function powerDrive3D(f) { // unique special per fighter, costs 25 gauge
+  const now = perfNow(), foe = f === player ? bot : player;
+  f.atkCd = .55; f.atkT = now; f.atkMax = .55; f.atkKind = 'shoot';
+  f.gauge = Math.max(0, f.gauge - 25); f.transformed = f.gauge * .12;
+  f.face = aimFace(f, foe);
+  smashBoxes(f, 2.2);
+  if (f.kind === 'Samurai') {
+    const mesh = sph(.26, 0xa8e6ff); mesh.position.set(f.x + f.face.x, 1.2, f.z + f.face.z);
+    scene.add(mesh);
+    shots.push({ mesh, x: mesh.position.x, z: mesh.position.z, vx: f.face.x * 17, vz: f.face.z * 17, dmg: 22, boom: false, owner: f, t: 0, big: true });
+  } else {
+    for (let i = -1; i <= 1; i++) { const a = Math.atan2(f.face.z, f.face.x) + i * .16;
+      const mesh = sph(.16, 0xffd23a); mesh.position.set(f.x + Math.cos(a), 1.15, f.z + Math.sin(a));
+      scene.add(mesh);
+      shots.push({ mesh, x: mesh.position.x, z: mesh.position.z, vx: Math.cos(a) * 15, vz: Math.sin(a) * 15, dmg: 13, boom: true, owner: f, t: 0 });
+    }
+  }
+  burst(f.x, 1.4, f.z, 0xffd94d, 10, 2.6, .4);
+  if (f === player) flashMsg('POWER DRIVE!');
+}
+function tryAction(f) { // CIRCLE: throw / catch / board turret
+  const now = perfNow();
+  if (state.over || f.dead || f.atkCd > 0 || f.downT > 0) return;
+  if (f.boarded) { unboard(f); return; }
+  if (f.item) { f.atkCd = .45; f.atkKind = 'throw'; throwItem(f); return; }
+  if (Math.hypot(f.x - turret.x, f.z - turret.z) < 1.7 && !turret.user && f === player) {
+    f.boarded = turret; turret.user = f; flashMsg('TURRET BOARD — SQUARE fires, CIRCLE exits');
+    ringFx(turret.x, turret.z, 0x7df9ff, 2); return;
+  }
+  if (f.catchCd > 0) return;
+  f.catchCd = .9; f.catchUntil = now + .28; f.atkCd = .3; f.atkT = now; f.atkMax = .3; f.atkKind = 'catch';
+  ringFx(f.x, f.z, 0x7df9ff, 1);
+}
+function unboard(f) {
+  if (!f.boarded) return;
+  f.boarded.user = null; f.boarded = null;
+  f.x = clamp(turret.x - 1.8, -HALF, HALF); f.z = clamp(turret.z - 1.8, -HALF, HALF);
+  f.atkCd = .3;
+}
+function turretFire(f) {
+  if (turret.cd > 0) return;
+  turret.cd = .7;
+  const now = perfNow(), foe = f === player ? bot : player;
+  f.atkT = now; f.atkMax = .3; f.atkKind = 'shoot';
+  const dx = foe.x - turret.x, dz = foe.z - turret.z, d = Math.max(.4, Math.hypot(dx, dz));
+  f.face = { x: dx / d, z: dz / d };
+  const mesh = sph(.2, 0xffa53a); mesh.position.set(turret.x + f.face.x, 1.35, turret.z + f.face.z);
+  scene.add(mesh);
+  shots.push({ mesh, x: mesh.position.x, z: mesh.position.z, vx: f.face.x * 14, vz: f.face.z * 14, dmg: 14, boom: true, owner: f, t: 0 });
+  burst(mesh.position.x, 1.35, mesh.position.z, 0xffd23a, 5, 1.8, .3);
+}
+function tryJump(f) { // CROSS: jump / dodge roll (moving) / wall jump (airborne near wall)
+  if (state.over || f.dead || f.downT > 0 || f.rollT > 0) return;
+  if (f.boarded) { unboard(f); return; }
+  const now = perfNow();
+  if (f.jumpT > 0) {
+    const nearWall = Math.abs(f.x) > 7.2 || Math.abs(f.z) > 7.2;
+    if (nearWall && !f.wallJumped) {
+      f.wallJumped = true; f.jumpT = .5;
+      f.vx = clamp(-f.x * .55, -6, 6); f.vz = clamp(-f.z * .55, -6, 6);
+      if (f === player) flashMsg('WALL JUMP!');
+    }
+    return;
+  }
+  const moving = Math.hypot(f.vx, f.vz) > 1.6 || (f === player && Math.hypot(joy.x, joy.y) > .3);
+  if (moving) {
+    f.rollT = .38; f.atkCd = Math.max(f.atkCd, .16);
+    const d = Math.max(.2, Math.hypot(f.face.x, f.face.z));
+    f.vx = f.face.x / d * 7.5; f.vz = f.face.z / d * 7.5;
+    return;
+  }
+  f.jumpT = .55; f.wallJumped = false;
+}
+function tryFusionDrop(f) { // TRIANGLE: Power Fusion while transformed, else discard
+  if (state.over || f.dead || f.atkCd > 0 || f.downT > 0) return;
+  if (f.transformed > 0) {
+    if (f.gauge < 50) { if (f === player) flashMsg('NEED 50 GAUGE'); return; }
+    f.gauge -= 50; f.transformed = f.gauge * .12; f.atkCd = .9; f.atkT = perfNow(); f.atkMax = .9; f.atkKind = 'swing';
+    const foe = f === player ? bot : player;
+    flashMsg(f.name + ' — POWER FUSION!');
+    for (let i = 0; i < 3; i++) pendingBooms.push({ x: foe.x + (Math.random() - .5) * 2.6, z: foe.z + (Math.random() - .5) * 2.6, t: .35 + i * .22, owner: f });
+    ringFx(f.x, f.z, 0xffd94d, 3.2); shake = Math.max(shake, .4);
+    return;
+  }
+  if (f.item) {
+    const def = f.item; f.item = null; f.itemUses = 0; refreshHeld(f);
+    spawnGroundItem(def, f.x + f.face.x, f.z + f.face.z, false);
+    if (f === player) flashMsg('DROPPED ' + def.name);
+  }
 }
 function useUp(f) {
   f.itemUses--;
@@ -336,7 +646,7 @@ function throwItem(f) {
   if (state.over || f.dead || f.atkCd > 0 || !f.item) return;
   const def = f.item, foe = f === player ? bot : player;
   f.face = aimFace(f, foe);
-  f.atkCd = .45; f.atkT = now; f.atkMax = .45;
+  f.atkCd = .45; f.atkT = now; f.atkMax = .45; f.atkKind = 'throw';
   const mesh = buildItemMesh(def);
   scene.add(mesh);
   const sp = def.throwSpeed / 38;
@@ -364,6 +674,7 @@ function endMatch(winner) {
 
 // ============ BOT AI ============
 function botThink(f, dt) {
+  if (f.boarded || f.downT > 0) return;
   f.aiT -= dt;
   const foe = player, now = perfNow();
   const d = dist(f, foe);
@@ -384,11 +695,17 @@ function botThink(f, dt) {
   if (md > .3) f.face = { x: mx, z: mz }; else f.face = aimFace(f, foe);
   if (f.aiT > 0) return;
   f.aiT = .22;
-  if (f.item && (f.item.arch === 'gun')) { if (d < 11) { f.face = aimFace(f, foe); tryLight(f); return; } }
-  if (f.item && (f.item.arch === 'throw' || f.item.arch === 'boom')) { if (d > 3 && d < 10) { throwItem(f); return; } }
-  if (d < 1.95) { Math.random() < .35 ? tryHeavy(f) : tryLight(f); return; }
+  if (f.item && (f.item.arch === 'gun')) { if (d < 11) { f.face = aimFace(f, foe); tryAttack(f); return; } }
+  if (f.item && (f.item.arch === 'throw' || f.item.arch === 'boom')) { if (d > 3 && d < 10) { tryAction(f); return; } }
+  if (d < 1.95) {
+    if (f.transformed > 0 && f.gauge >= 50 && Math.random() < .3) { tryFusionDrop(f); return; }
+    if (Math.random() < .08) { tryJump(f); return; }
+    tryAttack(f); return;
+  }
+  const now2 = perfNow();
   if (!f.item && throwns.some(t => t.owner !== f && Math.hypot(t.x - f.x, t.z - f.z) < 3.4)) {
-    if (Math.random() < .75 && perfNow() - f.lastCatchTry > .9) { f.face = aimFace(f, foe); tryLight(f); }
+    if (Math.random() < .75 && f.catchCd <= 0) { f.face = aimFace(f, foe); f.catchCd = .9; f.catchUntil = now2 + .28; f.atkKind = 'punch'; f.atkCd = .3; }
+    else if (Math.random() < .4) tryJump(f);
   }
 }
 
@@ -402,15 +719,18 @@ function step(dt) {
     gemTimer -= dt; if (gemTimer <= 0) { gemTimer = 1.6 + Math.random() * 2; if (gems.length < 4) spawnGem((Math.random() * 2 - 1) * 6.5, (Math.random() * 2 - 1) * 6.5, 0); }
     itemTimer -= dt; if (itemTimer <= 0) { itemTimer = 3 + Math.random() * 2.5; if (groundItems.length < 6) spawnGroundItem(randItem(), (Math.random() * 2 - 1) * 6.8, (Math.random() * 2 - 1) * 6.8, true); }
   }
+  turret.cd = Math.max(0, turret.cd - dt);
+  if (turret.top && turret.user) { const foe = turret.user === player ? bot : player; turret.top.rotation.y = Math.atan2(foe.x - turret.x, foe.z - turret.z); }
   fighters.forEach(f => {
     f.atkCd = Math.max(0, f.atkCd - dt);
     f.hazardCd = Math.max(0, f.hazardCd - dt);
+    f.jumpT = Math.max(0, f.jumpT - dt); f.catchCd -= dt; f.rollT = Math.max(0, f.rollT - dt); f.downT = Math.max(0, f.downT - dt); f.comboT -= dt; if (f.comboT <= 0) f.combo = 0;
     if (f.transformed > 0) {
-      f.transformed -= dt;
+      f.gauge = Math.max(0, f.gauge - dt * (100 / 12)); f.transformed = f.gauge * .12;
       if (Math.random() < .3) burst(f.x, 1.2, f.z, 0xffd94d, 1, 1, .5);
-      if (f.transformed <= 0) setGold(f, false);
+      if (f.gauge <= 0) { f.transformed = 0; setGold(f, false); }
     }
-    if (!f.isBot && !state.over && !f.dead) {
+    if (!f.isBot && !state.over && !f.dead && !f.boarded) {
       let ix = joy.x, iz = joy.y;
       keys.forEach(k => {
         if (k === 'KeyW' || k === 'ArrowUp') iz -= 1; if (k === 'KeyS' || k === 'ArrowDown') iz += 1;
@@ -420,14 +740,14 @@ function step(dt) {
       const sp = 6.2 * (f.transformed > 0 ? 1.25 : 1);
       f.vx += (ix * sp - f.vx) * Math.min(1, dt * 9);
       f.vz += (iz * sp - f.vz) * Math.min(1, dt * 9);
+      if (f.downT > 0) { ix = 0; iz = 0; }
       if (il > .15) f.face = { x: ix, z: iz };
     }
     if (f.isBot && !state.over && !f.dead) botThink(f, dt);
-    f.x = clamp(f.x + f.vx * dt, -HALF, HALF);
-    f.z = clamp(f.z + f.vz * dt, -HALF, HALF);
+    if (!f.boarded) { f.x = clamp(f.x + f.vx * dt, -HALF, HALF); f.z = clamp(f.z + f.vz * dt, -HALF, HALF); }
     if (!f.isBot || state.over) { f.vx *= Math.pow(.0001, dt); f.vz *= Math.pow(.0001, dt); }
     // Pickups
-    if (!state.over && !f.dead) {
+    if (!state.over && !f.dead && f.downT <= 0 && !f.boarded) {
       for (let i = groundItems.length - 1; i >= 0; i--) {
         const g = groundItems[i];
         if (!f.item && Math.hypot(g.x - f.x, g.z - f.z) < 1.05) {
@@ -446,16 +766,17 @@ function step(dt) {
           f.gems++;
           burst(f.x, 1.5, f.z, 0xff5f6e, 10, 2.4, .5);
           if (f.gems >= 3 && f.transformed <= 0) {
-            f.transformed = 12; f.gems = 0; setGold(f, true);
+            f.transformed = 12; f.gauge = 100; f.gems = 0; setGold(f, true);
             ringFx(f.x, f.z, 0xffd94d, 3);
             flashMsg(f.name + ' TRANSFORMED!');
           }
         }
       }
     }
-    if (f.hazardCd <= 0 && Math.hypot(hazard.x - f.x, hazard.z - f.z) < 1.05 && !state.over) {
+    if (f.jumpT <= 0 && f.hazardCd <= 0 && Math.hypot(hazard.x - f.x, hazard.z - f.z) < 1.05 && !state.over) {
       f.hazardCd = 1; hurt(f, 9, 320, hazard.x, hazard.z, 'hazard');
     }
+    if (f.heldMesh && f.heldMesh.userData.anim === 'glow' && f.heldMesh.userData.glowMats) f.heldMesh.userData.glowMats.forEach(m => { m.emissiveIntensity = .8 + Math.sin(now * 5) * .4; });
     animateFighter(f, dt, now);
   });
   // Hazard patrol
@@ -474,6 +795,8 @@ function step(dt) {
       if (s.boom) explode(s.x, s.z, s.owner); else hurt(foe, s.dmg * (s.owner.transformed > 0 ? 1.5 : 1), 120, s.x - s.vx * .1, s.z - s.vz * .1, 'shot');
       dead = true;
     }
+    if (!dead) for (let bi = boxes.length - 1; bi >= 0; bi--) { const b = boxes[bi];
+      if (Math.hypot(b.x - s.x, b.z - s.z) < .9) { b.hp--; burst(b.x, .8, b.z, 0xc98f3d, 5, 1.8, .3); if (b.hp <= 0) { breakBox3D(b); boxes.splice(bi, 1); } dead = true; break; } }
     if (dead) { scene.remove(s.mesh); shots.splice(i, 1); }
   }
   // Thrown items
@@ -486,7 +809,7 @@ function step(dt) {
     t.mesh.rotation.x += dt * 9; t.mesh.rotation.z += dt * 7;
     const foe = t.owner === player ? bot : player;
     let done = false;
-    if (Math.hypot(foe.x - t.x, foe.z - t.z) < .95 && t.age > .08) {
+    if (foe.jumpT <= 0 && foe.rollT <= 0 && Math.hypot(foe.x - t.x, foe.z - t.z) < .95 && t.age > .08) {
       if (!foe.item && now < foe.catchUntil) {
         foe.item = t.def; foe.itemUses = t.def.uses; refreshHeld(foe);
         burst(foe.x, 1.4, foe.z, 0x7df9ff, 9, 2.2, .45);
@@ -499,6 +822,8 @@ function step(dt) {
         done = true;
       }
     }
+    if (!done) for (let bi = boxes.length - 1; bi >= 0; bi--) { const b = boxes[bi];
+      if (Math.hypot(b.x - t.x, b.z - t.z) < .9) { b.hp--; if (b.hp <= 0) { breakBox3D(b); boxes.splice(bi, 1); } done = true; break; } }
     if (!done && (t.age > 1.05 || Math.abs(t.x) > 9.2 || Math.abs(t.z) > 9.2)) {
       if (t.def.arch === 'boom') explode(t.x, t.z, t.owner);
       else spawnGroundItem(t.def, clamp(t.x, -HALF, HALF), clamp(t.z, -HALF, HALF), false);
@@ -521,7 +846,17 @@ function step(dt) {
     r.mesh.material.opacity = Math.max(0, .9 * (1 - r.t));
     if (r.t >= 1) { scene.remove(r.mesh); rings.splice(i, 1); }
   }
-  groundItems.forEach(g => { g.mesh.rotation.y += dt * 1.4; const s = g.born > 0 && now - g.born < .3 ? (now - g.born) / .3 : 1; g.mesh.scale.setScalar(s); g.mesh.position.y = Math.sin(now * 2.4 + g.ph) * .05; });
+  groundItems.forEach(g => { g.mesh.rotation.y += dt * 1.4; const s = g.born > 0 && now - g.born < .3 ? (now - g.born) / .3 : 1; const bs = (g.mesh.userData.baseScale || 1); g.mesh.scale.setScalar(bs * s); g.mesh.position.y = Math.sin(now * 2.4 + g.ph) * .05; animItemMesh(g.mesh, dt, now, g.x, g.z, g.ph); });
+  boxes.forEach(b => { b.mesh.rotation.y = Math.sin(now + b.ph) * .05; });
+  for (let i = coins.length - 1; i >= 0; i--) { const c = coins[i];
+    c.x += c.vx * dt; c.z += c.vz * dt; c.vx *= .92; c.vz *= .92; c.mesh.rotation.y += dt * 5;
+    for (const f of fighters) { const d = Math.hypot(f.x - c.x, f.z - c.z);
+      if (d < 2.4 && f.hp > 0 && !f.dead && f.downT <= 0) { c.x += (f.x - c.x) * dt * 7; c.z += (f.z - c.z) * dt * 7; }
+      if (d < .85 && f.hp > 0 && !f.dead) { f.gold += 10; if (f === player) flashMsg('+10 GOLD'); scene.remove(c.mesh); coins.splice(i, 1); break; } }
+    if (coins[i]) c.mesh.position.set(c.x, .5 + Math.sin(now * 3 + c.ph) * .08, c.z); }
+  for (let i = pendingBooms.length - 1; i >= 0; i--) { const pb = pendingBooms[i]; pb.t -= dt;
+    if (pb.t <= 0) { explode(pb.x, pb.z, 16, pb.owner); pendingBooms.splice(i, 1); } }
+  boxTimer -= dt; if (boxTimer <= 0) { boxTimer = 7; if (boxes.length < 2) { const bm = buildBoxMesh(); const bx = (Math.random() * 2 - 1) * 6.5, bz = (Math.random() * 2 - 1) * 6.5; bm.position.set(bx, .45, bz); scene.add(bm); boxes.push({ mesh: bm, x: bx, z: bz, hp: 2, ph: Math.random() * 6 }); } }
   gems.forEach(g => { g.mesh.rotation.y += dt * 3; if (!(perfNow() > g.pickupAt)) return; if (Math.hypot(g.mesh.position.x - g.x) > .01) return; g.mesh.position.y = .9 + Math.sin(now * 3 + g.x) * .12; });
 }
 
@@ -533,7 +868,8 @@ function animateFighter(f, dt, now) {
   const sw = Math.sin(f.runPh) * .8 * sf;
   m.legL.rotation.x = sw; m.legR.rotation.x = -sw;
   m.armL.rotation.x = -sw * .8; m.armR.rotation.x = sw * .8;
-  m.body.position.y = Math.abs(Math.sin(f.runPh)) * .09 * sf + Math.sin(now * 2.2 + f.x) * .02;
+  const airK = f.jumpT > 0 ? Math.sin((1 - f.jumpT / .55) * Math.PI) : 0;
+  m.body.position.y = Math.abs(Math.sin(f.runPh)) * .09 * sf + Math.sin(now * 2.2 + f.x) * .02 + airK * 1.1;
   m.body.rotation.x = .13 * sf;
   m.body.rotation.z = Math.sin(f.runPh) * .05 * sf;
   m.head.position.y = 2.06 + Math.sin(now * 2.2 + f.x) * .015;
@@ -550,7 +886,16 @@ function animateFighter(f, dt, now) {
   else m.head.rotation.x = 0;
   if (f.transformed > 0 && !f.dead) { const pu = 1.22 + Math.sin(now * 6) * .03; m.body.scale.setScalar(pu); }
   else if (!f.dead) m.body.scale.setScalar(1);
-  if (f.dead) {
+  if (f.boarded) {
+    const bf = f === player ? bot : player;
+    m.root.position.set(turret.x, .55, turret.z);
+    m.root.rotation.y = Math.atan2(bf.x - turret.x, bf.z - turret.z);
+    m.body.position.y = 0;
+    m.armL.rotation.x = -1.25; m.armR.rotation.x = -1.25;
+    m.legL.rotation.x = 1.15; m.legR.rotation.x = 1.15;
+    return;
+  }
+  if (f.dead || f.downT > 0) {
     m.body.rotation.x += (-1.5 - m.body.rotation.x) * Math.min(1, dt * 5);
     m.legL.rotation.x = .25; m.legR.rotation.x = -.25; m.armL.rotation.x = .4; m.armR.rotation.x = -.4;
   }
@@ -577,13 +922,17 @@ function bindBtn(id, fn) {
   el.addEventListener('touchstart', e => { e.preventDefault(); fn(); }, { passive: false });
   el.addEventListener('mousedown', fn);
 }
-bindBtn('btnLight', () => tryLight(player));
-bindBtn('btnHeavy', () => tryHeavy(player));
+bindBtn('btnAttack', () => tryAttack(player));
+bindBtn('btnAction', () => tryAction(player));
+bindBtn('btnJump', () => tryJump(player));
+bindBtn('btnFusion', () => tryFusionDrop(player));
 addEventListener('keydown', e => {
   keys.add(e.code);
-  if (e.code === 'KeyF') tryLight(player);
-  if (e.code === 'KeyG') tryHeavy(player);
+  if (e.code === 'KeyF') tryAttack(player);
+  if (e.code === 'KeyG') tryAction(player);
+  if (e.code === 'KeyH') tryFusionDrop(player);
   if (e.code === 'KeyR' && state.over) resetMatch();
+  if (e.code === 'Space') { e.preventDefault(); tryJump(player); }
 });
 addEventListener('keyup', e => keys.delete(e.code));
 renderer.domElement.addEventListener('touchstart', e => { if (state.over) { e.preventDefault(); resetMatch(); } }, { passive: false });
@@ -597,7 +946,7 @@ function updateHud() {
     el('hp' + i).style.width = (f.hp / f.maxHp * 100) + '%';
     el('hp' + i).style.background = f.hp > 150 ? '#42d35a' : (f.hp > 60 ? '#ffc740' : '#ff5347');
     el('meta' + i).textContent = f.transformed > 0 ? '★ TRANSFORMED ' + Math.ceil(f.transformed) + 's ★' : 'Gems: ' + '★'.repeat(f.gems) + '☆'.repeat(3 - f.gems);
-    el('item' + i).textContent = 'Item: ' + (f.item ? f.item.name + (f.item.arch !== 'throw' && f.item.arch !== 'food' ? ' ×' + f.itemUses : '') : '—');
+    el('item' + i).textContent = 'Item: ' + (f.item ? f.item.name + (f.item.arch !== 'throw' && f.item.arch !== 'food' ? ' ×' + f.itemUses : '') : '—') + ' · G' + f.gold + (f.transformed > 0 ? ' · GAUGE ' + Math.round(f.gauge) : '');
   });
   const t = Math.max(0, Math.ceil(state.timeLeft));
   el('timer').textContent = Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0');
@@ -605,10 +954,13 @@ function updateHud() {
 
 // ============ MATCH SETUP / LOOP ============
 function resetMatch() {
-  [...gems, ...groundItems, ...shots, ...throwns, ...parts, ...rings].forEach(o => scene.remove(o.mesh));
+  [...gems, ...groundItems, ...shots, ...throwns, ...parts, ...rings, ...boxes, ...coins].forEach(o => scene.remove(o.mesh));
   gems.length = groundItems.length = shots.length = throwns.length = parts.length = rings.length = 0;
+  boxes.length = 0; coins.length = 0; pendingBooms.length = 0; boxTimer = 7;
+  turret.user = null; turret.cd = 0;
   fighters.forEach((f, i) => {
-    f.hp = f.maxHp; f.gems = 0; f.transformed = 0; f.item = null; f.dead = false; f.vx = f.vz = 0;
+    f.hp = f.maxHp; f.gems = 0; f.transformed = 0; f.gauge = 0; f.gold = 0; f.item = null; f.dead = false; f.vx = f.vz = 0;
+    f.jumpT = 0; f.downT = 0; f.rollT = 0; f.combo = 0; f.comboT = 0; f.boarded = null;
     f.x = i === 0 ? -4.5 : 4.5; f.z = 0; f.face = { x: i === 0 ? 1 : -1, z: 0 };
     setGold(f, false); refreshHeld(f);
     f.mesh.body.rotation.x = 0; f.mesh.body.scale.setScalar(1);
@@ -620,6 +972,7 @@ function resetMatch() {
     const a = i / 8 * TAU + .4;
     spawnGroundItem(findItem(n), Math.cos(a) * 6.2, Math.sin(a) * 6.2, false);
   });
+  [[-4.2, -3.6], [4.2, 3.6]].forEach(p => { const bm = buildBoxMesh(); bm.position.set(p[0], .45, p[1]); scene.add(bm); boxes.push({ mesh: bm, x: p[0], z: p[1], hp: 2, ph: Math.random() * 6 }); });
 }
 resetMatch();
 let last = performance.now();
@@ -630,7 +983,9 @@ function loop(t) {
   // Camera: gentle follow + hit shake
   shake = Math.max(0, shake - dt * 1.4);
   const mx = (player.x + bot.x) / 2, mz = (player.z + bot.z) / 2;
-  camera.position.set(mx * .22 + (Math.random() - .5) * shake, 17, 13.5 + mz * .18 + (Math.random() - .5) * shake);
+  const sep = Math.hypot(player.x - bot.x, player.z - bot.z);
+  const zoom = clamp(11 + sep * .95, 13, 27);
+  camera.position.set(mx * .22 + (Math.random() - .5) * shake, 15.5 + (zoom - 13) * .62, 12.2 + (zoom - 13) * .8 + mz * .18 + (Math.random() - .5) * shake);
   camera.lookAt(mx * .3, 0, mz * .3 - .5);
   updateHud();
   renderer.render(scene, camera);
