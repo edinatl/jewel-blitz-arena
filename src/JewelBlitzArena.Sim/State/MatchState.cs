@@ -5,6 +5,7 @@ namespace JewelBlitzArena.Sim
     /// <summary>
     /// Single blittable match snapshot. Pack=1 so hashing bytes never sees padding.
     /// Pool caps match <c>docs/tech/architecture.md</c> §2.3.
+    /// Integrated S1 (placements/respawn schedule) + S2 (loose-item stride 56).
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
     public unsafe struct MatchState
@@ -41,14 +42,21 @@ namespace JewelBlitzArena.Sim
         public int ActiveProjectileCount;
         public int JewelCap;
         public int NextJewelSpawnFrame;
+        public int HouseRulesBits;
+        public int MatchEndFrame;
+        public int NextPlacementFromBottom;
+        public fixed int PlacementBySlot[PoolCaps.Actors];
+        public fixed int JewelRespawnFrame[PoolCaps.Jewels];
 
         public const int JewelStride = 52;
-        public const int LooseItemStride = 56;
+        public const int LooseItemStride = 56; // S2: includes velocities
         public const int ProjectileStride = 56;
         public const int GenericStride = 36;
         public const int CpuBrainStride = 16;
 
         public static int SizeOf => sizeof(MatchState);
+
+        public bool MatchOver => MatchEndFrame > 0;
     }
 
     public static class MatchStateAccess
@@ -118,6 +126,38 @@ namespace JewelBlitzArena.Sim
                 {
                     ((LooseItemSlot*)p)[index] = item;
                 }
+            }
+        }
+
+        public static int GetJewelRespawnFrame(ref MatchState state, int index)
+        {
+            unsafe
+            {
+                return state.JewelRespawnFrame[index];
+            }
+        }
+
+        public static void SetJewelRespawnFrame(ref MatchState state, int index, int frame)
+        {
+            unsafe
+            {
+                state.JewelRespawnFrame[index] = frame;
+            }
+        }
+
+        public static void SetPlacement(ref MatchState state, int slot, int place)
+        {
+            unsafe
+            {
+                state.PlacementBySlot[slot] = place;
+            }
+        }
+
+        public static int GetPlacement(ref MatchState state, int slot)
+        {
+            unsafe
+            {
+                return state.PlacementBySlot[slot];
             }
         }
     }

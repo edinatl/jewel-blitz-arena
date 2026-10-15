@@ -6,12 +6,13 @@ namespace JewelBlitzArena.Sim
     /// <summary>
     /// Deterministic match simulation. Presentation reads snapshots and writes inputs;
     /// only this type mutates <see cref="MatchState"/>.
+    /// Integrated S1 combat rules + S2 physics/jewels/items.
     /// </summary>
     public sealed class Simulation
     {
         public const int TickRateHz = 60;
         public const int DefaultLife = 1000;
-        public const int DefaultLusterMax = 1200;
+        public const int DefaultLusterMax = MatchRules.LusterMax;
 
         private static readonly Fix DefaultSpeedWalk = Fix.FromInt(3);
         private static readonly Fix DefaultSpeedRun = Fix.FromInt(5);
@@ -20,6 +21,7 @@ namespace JewelBlitzArena.Sim
         private MatchState _state;
         private ContentCatalog? _catalog;
         private SimContactBuffer _contacts;
+        private readonly KitRuntime[] _kits = new KitRuntime[PoolCaps.Actors];
         private readonly Fix[] _dtWalk = new Fix[PoolCaps.Actors];
         private readonly Fix[] _dtRun = new Fix[PoolCaps.Actors];
         private readonly Fix[] _dtFull = new Fix[PoolCaps.Actors];
@@ -29,11 +31,13 @@ namespace JewelBlitzArena.Sim
 
         public int ActorCount => _state.ActorCount;
 
+        public bool MatchOver => _state.MatchOver;
+
         public ContentCatalog? Catalog => _catalog;
 
         public ref readonly MatchState State => ref _state;
 
-        /// <summary>Events from the last <see cref="Step"/> (not hashed / not snapshotted). S1 reads these.</summary>
+        /// <summary>Events from the last <see cref="Step"/> (not hashed). S1 consumes via CombatSystem.</summary>
         public ref readonly SimContactBuffer Contacts => ref _contacts;
 
         public void Reset(in MatchConfig config) => Reset(config, catalog: null);
@@ -49,6 +53,16 @@ namespace JewelBlitzArena.Sim
                 ? 1
                 : (config.ActorCount > PoolCaps.Actors ? PoolCaps.Actors : config.ActorCount);
             _state.Frame = 0;
+            _state.HouseRulesBits = config.HouseRulesBits != 0
+                ? config.HouseRulesBits
+                : MatchRules.HouseLusterTimer;
+            _state.NextPlacementFromBottom = _state.ActorCount;
+            _state.MatchEndFrame = 0;
+
+            for (int i = 0; i < PoolCaps.Actors; i++)
+            {
+                MatchStateAccess.SetPlacement(ref _state, i, 0);
+            }
 
             _state.GameplayRng.Seed(config.Seed);
             for (int i = 0; i < PoolCaps.CpuBrains; i++)
@@ -57,16 +71,17 @@ namespace JewelBlitzArena.Sim
                     config.Seed ^ (0xC0FFEEUL + (ulong)(i + 1) * 0x9E3779B97F4A7C15UL));
             }
 
+            for (int i = 0; i < PoolCaps.Actors; i++)
+            {
+                _kits[i] = KitRuntime.FromDefaults(i);
+                _dtWalk[i] = DefaultSpeedWalk / TickRateHz;
+                _dtRun[i] = DefaultSpeedRun / TickRateHz;
+                _dtFull[i] = DefaultSpeedFull / TickRateHz;
+                _lastInputs[i] = InputFrame.Neutral;
+            }
+
             unsafe
             {
-                for (int i = 0; i < PoolCaps.Actors; i++)
-                {
-                    _dtWalk[i] = DefaultSpeedWalk / TickRateHz;
-                    _dtRun[i] = DefaultSpeedRun / TickRateHz;
-                    _dtFull[i] = DefaultSpeedFull / TickRateHz;
-                    _lastInputs[i] = InputFrame.Neutral;
-                }
-
                 for (int i = 0; i < _state.ActorCount; i++)
                 {
                     ref ActorSlot actor = ref MatchStateAccess.Actor(ref _state, i);
@@ -74,61 +89,88 @@ namespace JewelBlitzArena.Sim
                     actor.FighterId = config.FighterIds[i];
                     actor.HeldItemSlot = ActorSlot.NoHeldItem;
 
+                    KitRuntime kit;
+                    if (catalog != null && catalog.TryGetFighter(actor.FighterId, out FighterKitRecord record))
+                    {
+                        kit = KitRuntime.FromRecord(record);
+                    }
+                    else
+                    {
+                        kit = KitRuntime.FromDefaults(actor.FighterId);
+                    }
+
+                    _kits[i] = kit;
+                    _dtWalk[i] = new Fix(kit.WalkSpeedRaw) / TickRateHz;
+                    _dtRun[i] = new Fix(kit.RunSpeedRaw) / TickRateHz;
+                    _dtFull[i] = new Fix(kit.FullSpeedRaw) / TickRateHz;
+
                     int life = config.StartingLife[i];
-                    if (life <= 0 && catalog != null
-                        && catalog.TryGetFighter(actor.FighterId, out FighterKitRecord kit))
+                    if (life <= 0)
                     {
                         life = kit.MaxLife;
-                        _dtWalk[i] = new Fix(kit.WalkSpeedRaw) / TickRateHz;
-                        _dtRun[i] = new Fix(kit.RunSpeedRaw) / TickRateHz;
-                        _dtFull[i] = new Fix(kit.FullSpeedRaw) / TickRateHz;
                     }
 
                     actor.Life = life > 0 ? life : DefaultLife;
+                    actor.MaxLife = actor.Life;
                     actor.Luster = 0;
                     actor.IsAlive = true;
-                    actor.Team = (byte)i;
+                    actor.Team = config.Teams[i];
+                    actor.ReachRating = (byte)kit.ReachRating;
+                    actor.KitBehavior = (byte)kit.Behavior;
                     actor.PosX = Fix.FromInt(i * 2 - 1);
                     actor.PosY = Fix.Zero;
                     actor.PosZ = Fix.Zero;
+                    actor.Facing = i == 0 ? (byte)0 : (byte)1;
                 }
             }
 
             ItemRuntime.InitializeMatch(ref _state);
-            JewelRuntime.InitializeMatch(ref _state, config.JewelCap);
+            int jewelCap = config.JewelCap > 0
+                ? config.JewelCap
+                : MatchRules.DefaultJewelCap(_state.ActorCount);
+            JewelRuntime.InitializeMatch(ref _state, jewelCap);
         }
 
         public void Step(InputFrame i0, InputFrame i1, InputFrame i2, InputFrame i3)
         {
+            if (_state.MatchOver)
+            {
+                _state.Frame++;
+                return;
+            }
+
             _contacts.Clear();
             _lastInputs[0] = i0;
             _lastInputs[1] = i1;
             _lastInputs[2] = i2;
             _lastInputs[3] = i3;
 
-            ApplyActorInput(0, i0);
-            ApplyActorInput(1, i1);
-            ApplyActorInput(2, i2);
-            ApplyActorInput(3, i3);
+            // S1 combat input (skips Attack when holding an item).
+            CombatSystem.ApplyInput(ref _state, 0, i0, _kits[0], _dtWalk[0], _dtRun[0], _dtFull[0]);
+            CombatSystem.ApplyInput(ref _state, 1, i1, _kits[1], _dtWalk[1], _dtRun[1], _dtFull[1]);
+            CombatSystem.ApplyInput(ref _state, 2, i2, _kits[2], _dtWalk[2], _dtRun[2], _dtFull[2]);
+            CombatSystem.ApplyInput(ref _state, 3, i3, _kits[3], _dtWalk[3], _dtRun[3], _dtFull[3]);
 
+            // S2 item pickup/throw/catch.
             for (int a = 0; a < _state.ActorCount; a++)
             {
                 ItemRuntime.ProcessActorButtons(ref _state, a, _lastInputs[a], ref _contacts);
             }
 
-            // Horizontal actor integrate (input velocity).
             IntegrateActorsHorizontal();
-
             PhysicsWorld.StepActorsJewelsItems(ref _state, ref _contacts);
             ItemRuntime.TickThrownHits(ref _state, ref _contacts);
             JewelRuntime.TickPickups(ref _state, ref _contacts);
             JewelRuntime.TickSpawns(ref _state);
+            JewelSystem.TickScheduledRespawns(ref _state);
 
-            // Keep Active* counts honest for snapshots.
+            // S1 consumes S2 contacts (Blitz, thrown-item damage), then ticks combat.
+            CombatSystem.ConsumeContacts(ref _state, ref _contacts);
+            CombatSystem.TickActors(ref _state, _kits);
+
             _state.ActiveJewelCount = JewelRuntime.CountTowardCap(ref _state);
             _state.ActiveLooseItemCount = CrateSpawner.CountActiveItems(ref _state);
 
-            // Gameplay RNG touch remains part of the hashed surface.
             _ = _state.GameplayRng.NextUInt64();
             _state.Frame++;
         }
@@ -142,15 +184,37 @@ namespace JewelBlitzArena.Sim
             Step(i0, i1, i2, i3);
         }
 
-        /// <summary>S1 helper: drop one jewel (knockdown). Returns false if none held.</summary>
+        public void DebugGrantJewels(int actorIndex, int count)
+        {
+            if (actorIndex < 0 || actorIndex >= _state.ActorCount)
+            {
+                return;
+            }
+
+            ref ActorSlot actor = ref MatchStateAccess.Actor(ref _state, actorIndex);
+            for (int n = 0; n < count; n++)
+            {
+                if (actor.IsBlitzed)
+                {
+                    break;
+                }
+
+                actor.JewelsHeld++;
+                actor.JewelsCollectedTotal++;
+                if (actor.JewelsHeld >= MatchRules.BlitzJewelCount)
+                {
+                    JewelSystem.BeginBlitz(ref _state, actorIndex);
+                    break;
+                }
+            }
+        }
+
         public bool DebugDropOneJewel(int actorIndex) =>
             JewelRuntime.TryDropOneHeldJewel(ref _state, actorIndex);
 
-        /// <summary>S2/test helper: spawn a loose item at a position.</summary>
         public int SpawnLooseItem(int itemId, Fix x, Fix y, Fix z) =>
             CrateSpawner.TrySpawnLooseItem(ref _state, itemId, new FixVec3(x, y, z));
 
-        /// <summary>S2/test helper: roll + spawn an always-eligible crate item.</summary>
         public int SpawnCrateItemAt(Fix x, Fix z)
         {
             int id = CrateSpawner.RollAlwaysEligible(ref _state, _catalog);
@@ -186,31 +250,52 @@ namespace JewelBlitzArena.Sim
                 {
                     result.Placements[i] = 0;
                     result.Kos[i] = 0;
-                    result.JewelsCollected[i] = MatchStateAccess.Actor(ref _state, i).JewelsHeld;
+                    result.JewelsCollected[i] = 0;
                 }
 
-                for (int place = 1; place <= _state.ActorCount; place++)
+                for (int i = 0; i < _state.ActorCount; i++)
                 {
-                    int best = -1;
-                    int bestLife = int.MinValue;
-                    for (int i = 0; i < _state.ActorCount; i++)
-                    {
-                        if (result.Placements[i] != 0)
-                        {
-                            continue;
-                        }
+                    ref ActorSlot actor = ref MatchStateAccess.Actor(ref _state, i);
+                    result.Kos[i] = actor.KosDealt;
+                    result.JewelsCollected[i] = actor.JewelsCollectedTotal;
+                    result.Placements[i] = MatchStateAccess.GetPlacement(ref _state, i);
+                }
 
-                        int life = MatchStateAccess.Actor(ref _state, i).Life;
-                        if (life > bestLife)
-                        {
-                            bestLife = life;
-                            best = i;
-                        }
+                bool anyPlacement = false;
+                for (int i = 0; i < _state.ActorCount; i++)
+                {
+                    if (result.Placements[i] != 0)
+                    {
+                        anyPlacement = true;
+                        break;
                     }
+                }
 
-                    if (best >= 0)
+                if (!anyPlacement)
+                {
+                    for (int place = 1; place <= _state.ActorCount; place++)
                     {
-                        result.Placements[best] = place;
+                        int best = -1;
+                        int bestLife = int.MinValue;
+                        for (int i = 0; i < _state.ActorCount; i++)
+                        {
+                            if (result.Placements[i] != 0)
+                            {
+                                continue;
+                            }
+
+                            int life = MatchStateAccess.Actor(ref _state, i).Life;
+                            if (life > bestLife)
+                            {
+                                bestLife = life;
+                                best = i;
+                            }
+                        }
+
+                        if (best >= 0)
+                        {
+                            result.Placements[best] = place;
+                        }
                     }
                 }
             }
@@ -218,58 +303,18 @@ namespace JewelBlitzArena.Sim
             return result;
         }
 
-        private void ApplyActorInput(int index, InputFrame input)
-        {
-            if (index >= _state.ActorCount)
-            {
-                return;
-            }
-
-            ref ActorSlot actor = ref MatchStateAccess.Actor(ref _state, index);
-            if (!actor.IsAlive)
-            {
-                actor.VelX = Fix.Zero;
-                actor.VelY = Fix.Zero;
-                actor.VelZ = Fix.Zero;
-                return;
-            }
-
-            Fix stepSpeed = MagnitudeToStepSpeed(index, input.Magnitude);
-            if (stepSpeed.Raw == 0)
-            {
-                actor.VelX = Fix.Zero;
-                actor.VelZ = Fix.Zero;
-                return;
-            }
-
-            FixVec2 dir = DirectionLut.GetUnit(input.Direction);
-            actor.VelX = dir.X * stepSpeed;
-            actor.VelZ = dir.Y * stepSpeed;
-        }
-
         private void IntegrateActorsHorizontal()
         {
             for (int i = 0; i < _state.ActorCount; i++)
             {
                 ref ActorSlot actor = ref MatchStateAccess.Actor(ref _state, i);
-                if (!actor.IsAlive)
+                if (!actor.IsAlive || actor.IsEliminated)
                 {
                     continue;
                 }
 
                 actor.PosX += actor.VelX;
                 actor.PosZ += actor.VelZ;
-            }
-        }
-
-        private Fix MagnitudeToStepSpeed(int actorIndex, int magnitude)
-        {
-            switch (magnitude)
-            {
-                case 1: return _dtWalk[actorIndex];
-                case 2: return _dtRun[actorIndex];
-                case 3: return _dtFull[actorIndex];
-                default: return Fix.Zero;
             }
         }
     }

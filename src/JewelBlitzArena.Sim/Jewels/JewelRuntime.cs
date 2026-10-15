@@ -102,7 +102,8 @@ namespace JewelBlitzArena.Sim
             for (int a = 0; a < state.ActorCount; a++)
             {
                 ref ActorSlot actor = ref MatchStateAccess.Actor(ref state, a);
-                if (!actor.IsAlive || actor.IsBlitzed || actor.DrossFrames > 0 || actor.JewelsHeld >= 3)
+                if (!actor.IsAlive || actor.IsEliminated || actor.IsBlitzed
+                    || actor.DrossFrames > 0 || actor.JewelsHeld >= MatchRules.BlitzJewelCount)
                 {
                     continue;
                 }
@@ -127,14 +128,7 @@ namespace JewelBlitzArena.Sim
                 }
             }
 
-            for (int a = 0; a < state.ActorCount; a++)
-            {
-                ref ActorSlot actor = ref MatchStateAccess.Actor(ref state, a);
-                if (actor.DrossFrames > 0)
-                {
-                    actor.DrossFrames--;
-                }
-            }
+            // Dross countdown is owned by S1 CombatSystem.TickTimers.
         }
 
         /// <summary>S1 knockdown hook: drop one held jewel onto the field.</summary>
@@ -183,12 +177,31 @@ namespace JewelBlitzArena.Sim
             MatchStateAccess.SetJewel(ref state, jewelIndex, j);
 
             actor.JewelsHeld++;
+            actor.JewelsCollectedTotal++;
             contacts.Add(SimEventKind.ActorJewelPickup, (byte)actorIndex, (byte)jewelIndex);
-            if (actor.JewelsHeld >= 3)
+            if (actor.JewelsHeld >= MatchRules.BlitzJewelCount)
             {
+                // S1 applies Blitz via ConsumeContacts — S2 only signals.
                 contacts.Add(SimEventKind.JewelReadyToBlitz, (byte)actorIndex, (byte)jewelIndex);
             }
         }
+
+        /// <summary>Deactivate jewels owned by an actor (consumed into Blitz).</summary>
+        public static void ConsumeOwnedJewels(ref MatchState state, int actorIndex)
+        {
+            for (int i = 0; i < PoolCaps.Jewels; i++)
+            {
+                JewelSlot j = MatchStateAccess.GetJewel(ref state, i);
+                if (j.IsActive && j.OwnerSlot == actorIndex)
+                {
+                    MatchStateAccess.SetJewel(ref state, i, default);
+                }
+            }
+
+            state.ActiveJewelCount = CountTowardCap(ref state);
+        }
+
+        public static FixVec3 PickSpawnPointPublic(ref MatchState state) => PickSpawnPoint(ref state);
 
         private static void GiveJewelToActorSilent(ref MatchState state, int actorIndex)
         {
@@ -214,6 +227,7 @@ namespace JewelBlitzArena.Sim
             jewel.IsActive = true;
             MatchStateAccess.SetJewel(ref state, slot, jewel);
             actor.JewelsHeld++;
+            actor.JewelsCollectedTotal++;
             state.ActiveJewelCount = CountTowardCap(ref state);
         }
 
