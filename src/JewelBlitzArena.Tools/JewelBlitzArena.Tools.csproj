@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>JewelBlitzArena.Tools</RootNamespace>
+    <AssemblyName>JewelBlitzArena.Tools</AssemblyName>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\JewelBlitzArena.Sim\JewelBlitzArena.Sim.csproj" />
+  </ItemGroup>
+
+</Project>
