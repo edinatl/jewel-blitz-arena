@@ -38,6 +38,9 @@ namespace JewelBlitzArena.Sim
         ThrownItemHitActor = 5,
         ItemCaught = 6,
         ActorActorOverlap = 7,
+        PhaseChanged = 8,
+        PhaseTransitionStarted = 9,
+        HazardHitActor = 10,
     }
 
     /// <summary>Ephemeral per-step event (not part of <see cref="MatchState"/> hash).</summary>

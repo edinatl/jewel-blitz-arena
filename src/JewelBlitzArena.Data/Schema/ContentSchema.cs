@@ -2,16 +2,40 @@ namespace JewelBlitzArena.Data
 {
     public static class ContentSchema
     {
-        public const uint Version = 1;
+        /// <summary>v2 adds stage graph phase transitions, hazards, kinematics, camera volumes.</summary>
+        public const uint Version = 2;
         public const string BlobExtension = ".jba";
         public static readonly byte[] Magic = { (byte)'J', (byte)'B', (byte)'A', (byte)'D' };
 
         public const int MaxNameLength = 48;
         public const int MaxMovesPerKit = 16;
         public const int MaxPhasesPerStage = 8;
+        public const int MaxHazardsPerPhase = 8;
+        public const int MaxKinematicsPerPhase = 8;
         public const int MaxItems = 256;
         public const int MaxFighters = 32;
         public const int MaxStages = 32;
+    }
+
+    public enum CarryItemsMode : byte
+    {
+        All = 0,
+        HeldOnly = 1,
+        None = 2,
+    }
+
+    public enum CarryJewelsMode : byte
+    {
+        All = 0,
+        DropChance = 1,
+        None = 2,
+    }
+
+    public enum HazardTriggerKind : byte
+    {
+        PhaseEnter = 0,
+        Timer = 1,
+        Proximity = 2,
     }
 
     public enum ItemCategory : byte

@@ -60,12 +60,70 @@ namespace JewelBlitzArena.Data
                 var phases = new List<StagePhaseRecord>(src.Phases.Count);
                 foreach (AuthoredPhase p in src.Phases)
                 {
-                    long secondsRaw = DecimalFixParser.ParseToRaw(p.DurationSeconds);
-                    int durationFrames = SecondsRawToFrames(secondsRaw);
+                    ContentValidator.TryParseCarryItems(p.CarryItems, out CarryItemsMode carryItems);
+                    ContentValidator.TryParseCarryJewels(p.CarryJewels, out CarryJewelsMode carryJewels);
+                    long dropRaw = DecimalFixParser.ParseToRaw(p.CarryJewelsDropChance);
+                    int dropPermille = (int)((dropRaw * 1000) >> DecimalFixParser.FractionBits);
+                    if (dropPermille < 0)
+                    {
+                        dropPermille = 0;
+                    }
+
+                    if (dropPermille > 1000)
+                    {
+                        dropPermille = 1000;
+                    }
+
+                    var hazards = new List<StageHazardRecord>(p.Hazards.Count);
+                    foreach (AuthoredHazard h in p.Hazards)
+                    {
+                        ContentValidator.TryParseHazardTrigger(h.Trigger, out HazardTriggerKind trigger);
+                        hazards.Add(new StageHazardRecord
+                        {
+                            HazardId = h.HazardId,
+                            Name = h.Name,
+                            Trigger = trigger,
+                            PeriodFrames = SecondsRawToFrames(DecimalFixParser.ParseToRaw(h.PeriodSeconds)),
+                            TelegraphFrames = h.TelegraphFrames < 0 ? 0 : h.TelegraphFrames,
+                            Damage = h.Damage,
+                            CenterXRaw = DecimalFixParser.ParseToRaw(h.CenterX),
+                            CenterYRaw = DecimalFixParser.ParseToRaw(h.CenterY),
+                            CenterZRaw = DecimalFixParser.ParseToRaw(h.CenterZ),
+                            RadiusRaw = DecimalFixParser.ParseToRaw(h.Radius),
+                        });
+                    }
+
+                    var kinematics = new List<StageKinematicRecord>(p.Kinematics.Count);
+                    foreach (AuthoredKinematic k in p.Kinematics)
+                    {
+                        kinematics.Add(new StageKinematicRecord
+                        {
+                            TrackId = k.TrackId,
+                            Name = k.Name,
+                            PeriodFrames = SecondsRawToFrames(DecimalFixParser.ParseToRaw(k.PeriodSeconds)),
+                            AmplitudeRaw = DecimalFixParser.ParseToRaw(k.Amplitude),
+                            OriginXRaw = DecimalFixParser.ParseToRaw(k.OriginX),
+                            OriginYRaw = DecimalFixParser.ParseToRaw(k.OriginY),
+                            OriginZRaw = DecimalFixParser.ParseToRaw(k.OriginZ),
+                        });
+                    }
+
                     phases.Add(new StagePhaseRecord
                     {
                         Name = p.Name,
-                        DurationFrames = durationFrames,
+                        DurationFrames = SecondsRawToFrames(DecimalFixParser.ParseToRaw(p.DurationSeconds)),
+                        GeometrySetId = p.GeometrySetId,
+                        BlitzSuppressed = p.BlitzSuppressed,
+                        TransitionFrames = SecondsRawToFrames(DecimalFixParser.ParseToRaw(p.TransitionSeconds)),
+                        CarryItems = carryItems,
+                        CarryJewels = carryJewels,
+                        CarryJewelsDropPermille = dropPermille,
+                        CameraCenterXRaw = DecimalFixParser.ParseToRaw(p.CameraCenterX),
+                        CameraCenterYRaw = DecimalFixParser.ParseToRaw(p.CameraCenterY),
+                        CameraCenterZRaw = DecimalFixParser.ParseToRaw(p.CameraCenterZ),
+                        CameraRadiusRaw = DecimalFixParser.ParseToRaw(p.CameraRadius),
+                        Hazards = hazards.ToArray(),
+                        Kinematics = kinematics.ToArray(),
                     });
                 }
 
@@ -74,6 +132,8 @@ namespace JewelBlitzArena.Data
                     StageId = src.StageId,
                     Name = src.Name,
                     JewelCrateChancePercent = src.JewelCrateChancePercent,
+                    FallIsKo = src.FallIsKo,
+                    JewelCapOverride = src.JewelCapOverride,
                     Phases = phases.ToArray(),
                 });
             }

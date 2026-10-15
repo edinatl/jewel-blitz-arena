@@ -121,12 +121,83 @@ namespace JewelBlitzArena.Data
                     try
                     {
                         _ = DecimalFixParser.ParseToRaw(phase.DurationSeconds);
+                        _ = DecimalFixParser.ParseToRaw(phase.TransitionSeconds);
+                        _ = DecimalFixParser.ParseToRaw(phase.CarryJewelsDropChance);
+                        _ = DecimalFixParser.ParseToRaw(phase.CameraCenterX);
+                        _ = DecimalFixParser.ParseToRaw(phase.CameraCenterY);
+                        _ = DecimalFixParser.ParseToRaw(phase.CameraCenterZ);
+                        _ = DecimalFixParser.ParseToRaw(phase.CameraRadius);
                     }
                     catch (FormatException ex)
                     {
                         result.Errors.Add(new ValidationIssue(
                             "phase_duration",
                             $"Stage '{stage.Name}' phase '{phase.Name}': {ex.Message}"));
+                    }
+
+                    if (!TryParseCarryItems(phase.CarryItems, out _))
+                    {
+                        result.Errors.Add(new ValidationIssue(
+                            "carry_items",
+                            $"Stage '{stage.Name}' phase '{phase.Name}' carryItems '{phase.CarryItems}' invalid."));
+                    }
+
+                    if (!TryParseCarryJewels(phase.CarryJewels, out _))
+                    {
+                        result.Errors.Add(new ValidationIssue(
+                            "carry_jewels",
+                            $"Stage '{stage.Name}' phase '{phase.Name}' carryJewels '{phase.CarryJewels}' invalid."));
+                    }
+
+                    if (phase.Hazards.Count > ContentSchema.MaxHazardsPerPhase)
+                    {
+                        result.Errors.Add(new ValidationIssue(
+                            "phase_hazards",
+                            $"Stage '{stage.Name}' phase '{phase.Name}' exceeds hazard cap."));
+                    }
+
+                    if (phase.Kinematics.Count > ContentSchema.MaxKinematicsPerPhase)
+                    {
+                        result.Errors.Add(new ValidationIssue(
+                            "phase_kinematics",
+                            $"Stage '{stage.Name}' phase '{phase.Name}' exceeds kinematic cap."));
+                    }
+
+                    foreach (AuthoredHazard hazard in phase.Hazards)
+                    {
+                        if (!TryParseHazardTrigger(hazard.Trigger, out _))
+                        {
+                            result.Errors.Add(new ValidationIssue(
+                                "hazard_trigger",
+                                $"Hazard '{hazard.Name}' trigger '{hazard.Trigger}' invalid."));
+                        }
+
+                        try
+                        {
+                            _ = DecimalFixParser.ParseToRaw(hazard.PeriodSeconds);
+                            _ = DecimalFixParser.ParseToRaw(hazard.Radius);
+                        }
+                        catch (FormatException ex)
+                        {
+                            result.Errors.Add(new ValidationIssue(
+                                "hazard_fix",
+                                $"Hazard '{hazard.Name}': {ex.Message}"));
+                        }
+                    }
+
+                    foreach (AuthoredKinematic track in phase.Kinematics)
+                    {
+                        try
+                        {
+                            _ = DecimalFixParser.ParseToRaw(track.PeriodSeconds);
+                            _ = DecimalFixParser.ParseToRaw(track.Amplitude);
+                        }
+                        catch (FormatException ex)
+                        {
+                            result.Errors.Add(new ValidationIssue(
+                                "kinematic_fix",
+                                $"Kinematic '{track.Name}': {ex.Message}"));
+                        }
                     }
                 }
             }
@@ -204,6 +275,81 @@ namespace JewelBlitzArena.Data
         public static bool TryParseEligibility(string text, out CrateEligibility value)
         {
             return Enum.TryParse(text, ignoreCase: true, out value);
+        }
+
+        public static bool TryParseCarryItems(string text, out CarryItemsMode value)
+        {
+            value = CarryItemsMode.All;
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return true;
+            }
+
+            switch (text.Trim().ToLowerInvariant())
+            {
+                case "all":
+                    value = CarryItemsMode.All;
+                    return true;
+                case "held_only":
+                case "heldonly":
+                    value = CarryItemsMode.HeldOnly;
+                    return true;
+                case "none":
+                    value = CarryItemsMode.None;
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        public static bool TryParseCarryJewels(string text, out CarryJewelsMode value)
+        {
+            value = CarryJewelsMode.All;
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return true;
+            }
+
+            switch (text.Trim().ToLowerInvariant())
+            {
+                case "all":
+                    value = CarryJewelsMode.All;
+                    return true;
+                case "drop_chance":
+                case "dropchance":
+                    value = CarryJewelsMode.DropChance;
+                    return true;
+                case "none":
+                    value = CarryJewelsMode.None;
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        public static bool TryParseHazardTrigger(string text, out HazardTriggerKind value)
+        {
+            value = HazardTriggerKind.Timer;
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return true;
+            }
+
+            switch (text.Trim().ToLowerInvariant())
+            {
+                case "phase_enter":
+                case "phaseenter":
+                    value = HazardTriggerKind.PhaseEnter;
+                    return true;
+                case "timer":
+                    value = HazardTriggerKind.Timer;
+                    return true;
+                case "proximity":
+                    value = HazardTriggerKind.Proximity;
+                    return true;
+                default:
+                    return false;
+            }
         }
     }
 }
