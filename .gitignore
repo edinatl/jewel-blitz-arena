@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 # Unity generated (prototype / future Unity host under unity/)
-=======
-# Unity generated (under the prototype / future Unity host)
->>>>>>> cursor/post-s3-integration-d7b9
 [Ll]ibrary/
 [Tt]emp/
 [Oo]bj/
@@ -30,7 +26,6 @@ Thumbs.db
 *.user
 *.DotSettings.user
 .vs/
-<<<<<<< HEAD
 
 # ---------------------------------------------------------------------------
 # Power Arena feel-lab quarantine (@benrapsis parallel track)
@@ -44,5 +39,3 @@ Thumbs.db
 /PowerArenaExtract/
 **/Power\ Arena\ Unity\ Prototype/
 *.feel-lab.tmp
-=======
->>>>>>> cursor/post-s3-integration-d7b9
