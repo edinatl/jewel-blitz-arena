@@ -1,7 +1,13 @@
-# Power Arena — Prototype v0.3
+# Power Arena — Prototype v0.4
 
 An original arena brawler inspired by Power Stone 2's formula.
 2 fighters, 1 arena, local play + a solo bot. No Capcom assets, names, or characters.
+
+## What changed in v0.4 (3D animation + health x4)
+- **Real 3D animated fighters.** The invisible-capsule fighters are now comic characters built from primitives at runtime (`CharacterVisual.cs`) — Soldier vs Samurai in the arena, with Warrior, Gladiator, Knight, Ninja, Pirate and Robot also defined with signature gear (katana, shield + gladius, axe, sword + cape, nunchucks, cutlass + eyepatch, boxing-glove robot).
+- **Procedural animation for everything** (`FighterAnimator.cs`): idle breathing, run cycle with swinging arms/legs, jump tuck, punch and weapon-swing attacks, both-arms-forward catch pose, hurt flinch, transform gold tint + aura pulse, and a fall-over KO. Gems and items spin/bob, projectiles leave trails, the hazard orb pulses.
+- **Health x4:** fighters now have 400 HP (was 100), so fights last longer.
+- Re-run **Prototype → Build Arena Scene** once after updating to v0.4 so the scene picks up the character visuals.
 
 ## What changed in v0.3 (art update)
 - **Comic art pack** in `Assets/Art/`: an 8-fighter character roster (Soldier, Samurai, Warrior, Gladiator, Knight, Ninja, Pirate, Robot — plus individual portraits in `Assets/Art/Characters/`), a desert arena illustration, a cactus throwable, and an item icon sheet.
