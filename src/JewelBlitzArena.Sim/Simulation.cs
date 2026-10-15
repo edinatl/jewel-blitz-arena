@@ -1,4 +1,5 @@
 using System;
+using JewelBlitzArena.Data;
 
 namespace JewelBlitzArena.Sim
 {
@@ -12,26 +13,33 @@ namespace JewelBlitzArena.Sim
         public const int DefaultLife = 1000;
         public const int DefaultLusterMax = 1200;
 
-        /// <summary>Walk / run / full stick speeds (metres per second as Q48.16).</summary>
-        private static readonly Fix SpeedWalk = Fix.FromInt(3);
-        private static readonly Fix SpeedRun = Fix.FromInt(5);
-        private static readonly Fix SpeedFull = Fix.FromInt(7);
-
-        /// <summary>Per-frame scale: speed / TickRateHz.</summary>
-        private static readonly Fix DtWalk = SpeedWalk / TickRateHz;
-        private static readonly Fix DtRun = SpeedRun / TickRateHz;
-        private static readonly Fix DtFull = SpeedFull / TickRateHz;
+        private static readonly Fix DefaultSpeedWalk = Fix.FromInt(3);
+        private static readonly Fix DefaultSpeedRun = Fix.FromInt(5);
+        private static readonly Fix DefaultSpeedFull = Fix.FromInt(7);
 
         private MatchState _state;
+        private ContentCatalog? _catalog;
+        private readonly Fix[] _dtWalk = new Fix[PoolCaps.Actors];
+        private readonly Fix[] _dtRun = new Fix[PoolCaps.Actors];
+        private readonly Fix[] _dtFull = new Fix[PoolCaps.Actors];
 
         public int Frame => _state.Frame;
 
         public int ActorCount => _state.ActorCount;
 
+        public ContentCatalog? Catalog => _catalog;
+
         public ref readonly MatchState State => ref _state;
 
-        public void Reset(in MatchConfig config)
+        public void Reset(in MatchConfig config) => Reset(config, catalog: null);
+
+        /// <summary>
+        /// Reset from match config. When <paramref name="catalog"/> is provided, Life and
+        /// movement speeds resolve from fighter kits (S5). Modes still never let Sim read a profile.
+        /// </summary>
+        public void Reset(in MatchConfig config, ContentCatalog? catalog)
         {
+            _catalog = catalog;
             _state = default;
             _state.Seed = config.Seed;
             _state.StageId = config.StageId;
@@ -43,24 +51,39 @@ namespace JewelBlitzArena.Sim
             _state.GameplayRng.Seed(config.Seed);
             for (int i = 0; i < PoolCaps.CpuBrains; i++)
             {
-                // Distinct streams so CPU brain changes cannot shift gameplay RNG.
                 MatchStateAccess.CpuRng(ref _state, i).Seed(
                     config.Seed ^ (0xC0FFEEUL + (ulong)(i + 1) * 0x9E3779B97F4A7C15UL));
             }
 
             unsafe
             {
+                for (int i = 0; i < PoolCaps.Actors; i++)
+                {
+                    _dtWalk[i] = DefaultSpeedWalk / TickRateHz;
+                    _dtRun[i] = DefaultSpeedRun / TickRateHz;
+                    _dtFull[i] = DefaultSpeedFull / TickRateHz;
+                }
+
                 for (int i = 0; i < _state.ActorCount; i++)
                 {
                     ref ActorSlot actor = ref MatchStateAccess.Actor(ref _state, i);
                     actor = default;
                     actor.FighterId = config.FighterIds[i];
+
                     int life = config.StartingLife[i];
+                    if (life <= 0 && catalog != null
+                        && catalog.TryGetFighter(actor.FighterId, out FighterKitRecord kit))
+                    {
+                        life = kit.MaxLife;
+                        _dtWalk[i] = new Fix(kit.WalkSpeedRaw) / TickRateHz;
+                        _dtRun[i] = new Fix(kit.RunSpeedRaw) / TickRateHz;
+                        _dtFull[i] = new Fix(kit.FullSpeedRaw) / TickRateHz;
+                    }
+
                     actor.Life = life > 0 ? life : DefaultLife;
                     actor.Luster = 0;
                     actor.IsAlive = true;
                     actor.Team = (byte)i;
-                    // Spread actors along X so a neutral match is not fully degenerate.
                     actor.PosX = Fix.FromInt(i * 2 - 1);
                     actor.PosY = Fix.Zero;
                     actor.PosZ = Fix.Zero;
@@ -68,7 +91,6 @@ namespace JewelBlitzArena.Sim
             }
         }
 
-        /// <summary>Advance one 60 Hz tick. Exactly four inputs (unused slots should be neutral).</summary>
         public void Step(InputFrame i0, InputFrame i1, InputFrame i2, InputFrame i3)
         {
             ApplyActorInput(0, i0);
@@ -77,11 +99,7 @@ namespace JewelBlitzArena.Sim
             ApplyActorInput(3, i3);
 
             IntegrateActors();
-
-            // Touch gameplay RNG once per frame so the stream is part of the hashed surface
-            // even before crates/items consume it (S2).
             _ = _state.GameplayRng.NextUInt64();
-
             _state.Frame++;
         }
 
@@ -126,7 +144,6 @@ namespace JewelBlitzArena.Sim
                     result.JewelsCollected[i] = 0;
                 }
 
-                // S0 stub: living actors share place 1 by Life descending (stable by slot).
                 for (int place = 1; place <= _state.ActorCount; place++)
                 {
                     int best = -1;
@@ -172,7 +189,7 @@ namespace JewelBlitzArena.Sim
                 return;
             }
 
-            Fix stepSpeed = MagnitudeToStepSpeed(input.Magnitude);
+            Fix stepSpeed = MagnitudeToStepSpeed(index, input.Magnitude);
             if (stepSpeed.Raw == 0)
             {
                 actor.VelX = Fix.Zero;
@@ -183,7 +200,6 @@ namespace JewelBlitzArena.Sim
             FixVec2 dir = DirectionLut.GetUnit(input.Direction);
             actor.VelX = dir.X * stepSpeed;
             actor.VelZ = dir.Y * stepSpeed;
-            // Jump is recorded on the input surface for later slices; S0 does not leave ground.
             _ = input.Jump;
         }
 
@@ -203,13 +219,13 @@ namespace JewelBlitzArena.Sim
             }
         }
 
-        private static Fix MagnitudeToStepSpeed(int magnitude)
+        private Fix MagnitudeToStepSpeed(int actorIndex, int magnitude)
         {
             switch (magnitude)
             {
-                case 1: return DtWalk;
-                case 2: return DtRun;
-                case 3: return DtFull;
+                case 1: return _dtWalk[actorIndex];
+                case 2: return _dtRun[actorIndex];
+                case 3: return _dtFull[actorIndex];
                 default: return Fix.Zero;
             }
         }

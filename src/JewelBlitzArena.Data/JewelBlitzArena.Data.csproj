@@ -4,10 +4,15 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Deterministic>true</Deterministic>
     <RootNamespace>JewelBlitzArena.Data</RootNamespace>
     <AssemblyName>JewelBlitzArena.Data</AssemblyName>
-    <!-- Content tables (S5). Stub assembly for the dependency graph. -->
+    <!-- Content tables + blob pipeline. No UnityEngine. No float at export. -->
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+  </ItemGroup>
 
 </Project>

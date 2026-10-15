@@ -11,4 +11,8 @@
     <!-- Sim must stay engine-agnostic: no UnityEngine references. -->
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\JewelBlitzArena.Data\JewelBlitzArena.Data.csproj" />
+  </ItemGroup>
+
 </Project>
