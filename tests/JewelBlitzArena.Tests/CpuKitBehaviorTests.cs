@@ -78,6 +78,87 @@ public sealed class CpuKitBehaviorTests
         Assert.That(hStrafe, Is.Not.EqualTo(hInvoice));
     }
 
+    [Test]
+    public void Stub_cast_fighters_compile_named_kit_behaviors()
+    {
+        ContentCatalog catalog = ContentCompiler.Compile(SampleContentFactory.CreateS5StubPack());
+        Assert.That(catalog.Fighters.Length, Is.EqualTo(14));
+
+        AssertBehavior(catalog, SampleContentFactory.RookFighterId, KitBehavior.None);
+        AssertBehavior(catalog, SampleContentFactory.SableFighterId, KitBehavior.VanishStrong);
+        AssertBehavior(catalog, SampleContentFactory.BulwarkFighterId, KitBehavior.CommandGrabCarry);
+        AssertBehavior(catalog, SampleContentFactory.LuneFighterId, KitBehavior.RiposteStrong);
+        AssertBehavior(catalog, SampleContentFactory.TeoFighterId, KitBehavior.ExtendedDodge);
+        AssertBehavior(catalog, SampleContentFactory.WrenFighterId, KitBehavior.TripleJumpGlide);
+        AssertBehavior(catalog, SampleContentFactory.ClankFighterId, KitBehavior.DoubleHold);
+        AssertBehavior(catalog, SampleContentFactory.PipPepperFighterId, KitBehavior.SwapPartners);
+        AssertBehavior(catalog, SampleContentFactory.TillyFighterId, KitBehavior.InvoiceRepeatable);
+
+        MatchConfig config = MatchConfig.CreateDefault(0x434153543148UL, actorCount: 2);
+        unsafe
+        {
+            config.FighterIds[0] = SampleContentFactory.SableFighterId;
+            config.FighterIds[1] = SampleContentFactory.TillyFighterId;
+        }
+
+        var sim = new Simulation();
+        sim.Reset(config, catalog);
+        Assert.That(sim.State.Actor0.KitBehavior, Is.EqualTo((byte)KitBehavior.VanishStrong));
+        Assert.That(sim.State.Actor1.KitBehavior, Is.EqualTo((byte)KitBehavior.InvoiceRepeatable));
+        Assert.That(sim.State.Actor0.Life, Is.EqualTo(850));
+        Assert.That(sim.State.Actor1.Life, Is.EqualTo(850));
+    }
+
+    [Test]
+    public void Blitzed_cpu_may_press_Surge_or_Flare_Attack()
+    {
+        MatchConfig config = MatchConfig.CreateDefault(0x424C545A31UL, actorCount: 2);
+        config.SetCpuLevel(1, 8);
+        var sim = new Simulation();
+        sim.Reset(config);
+        MatchState snap = sim.Snapshot();
+        snap.Actor1.KitBehavior = (byte)KitBehavior.InvoiceRepeatable;
+        snap.Actor1.ReachRating = 3;
+        snap.Actor1.PosX = Fix.Zero;
+        snap.Actor1.PosZ = Fix.Zero;
+        snap.Actor0.PosX = Fix.FromInt(1);
+        snap.Actor0.PosZ = Fix.Zero;
+        snap.Actor1.IsBlitzed = true;
+        snap.Actor1.Luster = MatchRules.LusterMax;
+        snap.Actor1.TransformFrames = 0;
+        sim.Restore(snap);
+        sim.SetCpuControlled(1, true, 8);
+
+        bool sawSurgeOrFlare = false;
+        for (int i = 0; i < 64; i++)
+        {
+            sim.Step(InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral);
+            MatchState after = sim.Snapshot();
+            if (!after.Actor1.IsBlitzed)
+            {
+                break;
+            }
+
+            var frame = new InputFrame
+            {
+                Bits = (ushort)MatchStateAccess.GetCpuBrain(ref after, 1).LastDecision,
+            };
+            if (frame.SurgeA || frame.SurgeB || frame.Attack)
+            {
+                sawSurgeOrFlare = true;
+                break;
+            }
+        }
+
+        Assert.That(sawSurgeOrFlare, Is.True);
+    }
+
+    private static void AssertBehavior(ContentCatalog catalog, int fighterId, KitBehavior expected)
+    {
+        Assert.That(catalog.TryGetFighter(fighterId, out FighterKitRecord kit), Is.True);
+        Assert.That(kit.KitBehavior, Is.EqualTo((byte)expected), kit.Name);
+    }
+
     private static InputFrame RunCpuNearFoe(KitBehavior behavior, int level, Fix foeOffset)
     {
         MatchConfig config = MatchConfig.CreateDefault(0x4E45415231UL, actorCount: 2);

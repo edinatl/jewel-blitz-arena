@@ -14,7 +14,7 @@ public sealed class DataPipelineTests
         ValidationResult result = ContentValidator.Validate(pack);
         Assert.That(result.IsOk, Is.True, string.Join("; ", result.Errors));
         Assert.That(pack.Items.Count, Is.EqualTo(25));
-        Assert.That(pack.Fighters.Count, Is.EqualTo(1));
+        Assert.That(pack.Fighters.Count, Is.EqualTo(14));
         Assert.That(pack.Stages.Count, Is.EqualTo(1));
         Assert.That(pack.Stages[0].Phases.Count, Is.EqualTo(3));
     }
@@ -28,10 +28,15 @@ public sealed class DataPipelineTests
         ContentCatalog loaded = ContentBlobReader.Read(blob);
 
         Assert.That(loaded.ContentHash, Is.EqualTo(compiled.ContentHash));
-        Assert.That(loaded.Fighters.Length, Is.EqualTo(1));
+        Assert.That(loaded.Fighters.Length, Is.EqualTo(14));
         Assert.That(loaded.Fighters[0].Name, Is.EqualTo("Rook Citrine"));
         Assert.That(loaded.Fighters[0].MaxLife, Is.EqualTo(1000));
         Assert.That(loaded.Fighters[0].WalkSpeedRaw, Is.EqualTo(Fix.FromInt(3).Raw));
+        Assert.That(loaded.Fighters[0].KitBehavior, Is.EqualTo((byte)KitBehavior.None));
+        Assert.That(loaded.Fighters[1].Name, Is.EqualTo("Sable"));
+        Assert.That(loaded.Fighters[1].KitBehavior, Is.EqualTo((byte)KitBehavior.VanishStrong));
+        Assert.That(loaded.Fighters[13].Name, Is.EqualTo("Tilly Setter"));
+        Assert.That(loaded.Fighters[13].KitBehavior, Is.EqualTo((byte)KitBehavior.InvoiceRepeatable));
         Assert.That(loaded.Stages[0].Name, Is.EqualTo("Citrine Bazaar"));
         Assert.That(loaded.Stages[0].Phases[0].DurationFrames, Is.EqualTo(25 * 60));
         Assert.That(loaded.Stages[0].Phases[1].DurationFrames, Is.EqualTo(25 * 60));

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 4,
   "fighters": [
     {
       "fighterId": 1,
@@ -12,6 +12,7 @@
       "walkSpeed": "3",
       "runSpeed": "5",
       "fullSpeed": "7",
+      "kitBehavior": "None",
       "moves": [
         {
           "name": "Jab",
@@ -50,6 +51,15 @@
           "utilityExempt": false
         },
         {
+          "name": "Boost Slash",
+          "class": "Flare",
+          "damage": 45,
+          "startupFrames": 6,
+          "activeFrames": 3,
+          "recoveryFrames": 10,
+          "utilityExempt": false
+        },
+        {
           "name": "Thermal Dive",
           "class": "Surge",
           "damage": 300,
@@ -62,6 +72,1020 @@
           "name": "Windlass",
           "class": "Surge",
           "damage": 170,
+          "startupFrames": 14,
+          "activeFrames": 8,
+          "recoveryFrames": 28,
+          "utilityExempt": false
+        }
+      ]
+    },
+    {
+      "fighterId": 2,
+      "name": "Sable",
+      "speedRating": 5,
+      "lifeRating": 1,
+      "reachRating": 2,
+      "airRating": 3,
+      "powerRating": 2,
+      "walkSpeed": "5",
+      "runSpeed": "7",
+      "fullSpeed": "9",
+      "kitBehavior": "VanishStrong",
+      "moves": [
+        {
+          "name": "Flick",
+          "class": "Attack",
+          "damage": 32,
+          "startupFrames": 4,
+          "activeFrames": 2,
+          "recoveryFrames": 8,
+          "utilityExempt": false
+        },
+        {
+          "name": "Vanish",
+          "class": "Strong",
+          "damage": 85,
+          "startupFrames": 10,
+          "activeFrames": 3,
+          "recoveryFrames": 18,
+          "utilityExempt": false
+        },
+        {
+          "name": "Air Flick",
+          "class": "AirAttack",
+          "damage": 42,
+          "startupFrames": 6,
+          "activeFrames": 3,
+          "recoveryFrames": 12,
+          "utilityExempt": false
+        },
+        {
+          "name": "Throw",
+          "class": "Throw",
+          "damage": 100,
+          "startupFrames": 5,
+          "activeFrames": 2,
+          "recoveryFrames": 20,
+          "utilityExempt": false
+        },
+        {
+          "name": "Blink Strike",
+          "class": "Flare",
+          "damage": 40,
+          "startupFrames": 6,
+          "activeFrames": 3,
+          "recoveryFrames": 10,
+          "utilityExempt": false
+        },
+        {
+          "name": "Curtain Call",
+          "class": "Surge",
+          "damage": 320,
+          "startupFrames": 12,
+          "activeFrames": 6,
+          "recoveryFrames": 24,
+          "utilityExempt": false
+        },
+        {
+          "name": "Smoke Vault",
+          "class": "Surge",
+          "damage": 0,
+          "startupFrames": 14,
+          "activeFrames": 8,
+          "recoveryFrames": 28,
+          "utilityExempt": false
+        }
+      ]
+    },
+    {
+      "fighterId": 3,
+      "name": "Bulwark Oyo",
+      "speedRating": 1,
+      "lifeRating": 5,
+      "reachRating": 2,
+      "airRating": 1,
+      "powerRating": 5,
+      "walkSpeed": "1",
+      "runSpeed": "3",
+      "fullSpeed": "5",
+      "kitBehavior": "CommandGrabCarry",
+      "moves": [
+        {
+          "name": "Slam String",
+          "class": "Attack",
+          "damage": 38,
+          "startupFrames": 4,
+          "activeFrames": 2,
+          "recoveryFrames": 8,
+          "utilityExempt": false
+        },
+        {
+          "name": "Command Grab",
+          "class": "Strong",
+          "damage": 100,
+          "startupFrames": 10,
+          "activeFrames": 3,
+          "recoveryFrames": 18,
+          "utilityExempt": false
+        },
+        {
+          "name": "Air Slam",
+          "class": "AirAttack",
+          "damage": 48,
+          "startupFrames": 6,
+          "activeFrames": 3,
+          "recoveryFrames": 12,
+          "utilityExempt": false
+        },
+        {
+          "name": "Carry Throw",
+          "class": "Throw",
+          "damage": 100,
+          "startupFrames": 5,
+          "activeFrames": 2,
+          "recoveryFrames": 20,
+          "utilityExempt": false
+        },
+        {
+          "name": "Ground Pound",
+          "class": "Flare",
+          "damage": 50,
+          "startupFrames": 6,
+          "activeFrames": 3,
+          "recoveryFrames": 10,
+          "utilityExempt": false
+        },
+        {
+          "name": "Beacon",
+          "class": "Surge",
+          "damage": 200,
+          "startupFrames": 12,
+          "activeFrames": 6,
+          "recoveryFrames": 24,
+          "utilityExempt": false
+        },
+        {
+          "name": "Groundswell",
+          "class": "Surge",
+          "damage": 160,
+          "startupFrames": 14,
+          "activeFrames": 8,
+          "recoveryFrames": 28,
+          "utilityExempt": false
+        }
+      ]
+    },
+    {
+      "fighterId": 4,
+      "name": "Lune Varga",
+      "speedRating": 3,
+      "lifeRating": 2,
+      "reachRating": 5,
+      "airRating": 2,
+      "powerRating": 2,
+      "walkSpeed": "3",
+      "runSpeed": "5",
+      "fullSpeed": "7",
+      "kitBehavior": "RiposteStrong",
+      "moves": [
+        {
+          "name": "Lunge",
+          "class": "Attack",
+          "damage": 34,
+          "startupFrames": 4,
+          "activeFrames": 2,
+          "recoveryFrames": 8,
+          "utilityExempt": false
+        },
+        {
+          "name": "Riposte",
+          "class": "Strong",
+          "damage": 90,
+          "startupFrames": 10,
+          "activeFrames": 3,
+          "recoveryFrames": 18,
+          "utilityExempt": false
+        },
+        {
+          "name": "Air Lunge",
+          "class": "AirAttack",
+          "damage": 44,
+          "startupFrames": 6,
+          "activeFrames": 3,
+          "recoveryFrames": 12,
+          "utilityExempt": false
+        },
+        {
+          "name": "Throw",
+          "class": "Throw",
+          "damage": 100,
+          "startupFrames": 5,
+          "activeFrames": 2,
+          "recoveryFrames": 20,
+          "utilityExempt": false
+        },
+        {
+          "name": "Through-Lunge",
+          "class": "Flare",
+          "damage": 48,
+          "startupFrames": 6,
+          "activeFrames": 3,
+          "recoveryFrames": 10,
+          "utilityExempt": false
+        },
+        {
+          "name": "Measure",
+          "class": "Surge",
+          "damage": 200,
+          "startupFrames": 12,
+          "activeFrames": 6,
+          "recoveryFrames": 24,
+          "utilityExempt": false
+        },
+        {
+          "name": "Coronet",
+          "class": "Surge",
+          "damage": 320,
+          "startupFrames": 14,
+          "activeFrames": 8,
+          "recoveryFrames": 28,
+          "utilityExempt": false
+        }
+      ]
+    },
+    {
+      "fighterId": 5,
+      "name": "Teo Cruz",
+      "speedRating": 4,
+      "lifeRating": 2,
+      "reachRating": 3,
+      "airRating": 3,
+      "powerRating": 2,
+      "walkSpeed": "4",
+      "runSpeed": "6",
+      "fullSpeed": "8",
+      "kitBehavior": "ExtendedDodge",
+      "moves": [
+        {
+          "name": "Ginga",
+          "class": "Attack",
+          "damage": 33,
+          "startupFrames": 4,
+          "activeFrames": 2,
+          "recoveryFrames": 8,
+          "utilityExempt": false
+        },
+        {
+          "name": "Cartwheel",
+          "class": "Strong",
+          "damage": 88,
+          "startupFrames": 10,
+          "activeFrames": 3,
+          "recoveryFrames": 18,
+          "utilityExempt": false
+        },
+        {
+          "name": "Air Kick",
+          "class": "AirAttack",
+          "damage": 43,
+          "startupFrames": 6,
+          "activeFrames": 3,
+          "recoveryFrames": 12,
+          "utilityExempt": false
+        },
+        {
+          "name": "Throw",
+          "class": "Throw",
+          "damage": 100,
+          "startupFrames": 5,
+          "activeFrames": 2,
+          "recoveryFrames": 20,
+          "utilityExempt": false
+        },
+        {
+          "name": "Somersault",
+          "class": "Flare",
+          "damage": 46,
+          "startupFrames": 6,
+          "activeFrames": 3,
+          "recoveryFrames": 10,
+          "utilityExempt": false
+        },
+        {
+          "name": "Roda",
+          "class": "Surge",
+          "damage": 180,
+          "startupFrames": 12,
+          "activeFrames": 6,
+          "recoveryFrames": 24,
+          "utilityExempt": false
+        },
+        {
+          "name": "Bateria",
+          "class": "Surge",
+          "damage": 60,
+          "startupFrames": 14,
+          "activeFrames": 8,
+          "recoveryFrames": 28,
+          "utilityExempt": false
+        }
+      ]
+    },
+    {
+      "fighterId": 6,
+      "name": "Wren Ashfall",
+      "speedRating": 3,
+      "lifeRating": 1,
+      "reachRating": 2,
+      "airRating": 5,
+      "powerRating": 2,
+      "walkSpeed": "3",
+      "runSpeed": "5",
+      "fullSpeed": "7",
+      "kitBehavior": "TripleJumpGlide",
+      "moves": [
+        {
+          "name": "Wing Clip",
+          "class": "Attack",
+          "damage": 31,
+          "startupFrames": 4,
+          "activeFrames": 2,
+          "recoveryFrames": 8,
+          "utilityExempt": false
+        },
+        {
+          "name": "Dive Kick",
+          "class": "Strong",
+          "damage": 92,
+          "startupFrames": 10,
+          "activeFrames": 3,
+          "recoveryFrames": 18,
+          "utilityExempt": false
+        },
+        {
+          "name": "Air Clip",
+          "class": "AirAttack",
+          "damage": 41,
+          "startupFrames": 6,
+          "activeFrames": 3,
+          "recoveryFrames": 12,
+          "utilityExempt": false
+        },
+        {
+          "name": "Throw",
+          "class": "Throw",
+          "damage": 100,
+          "startupFrames": 5,
+          "activeFrames": 2,
+          "recoveryFrames": 20,
+          "utilityExempt": false
+        },
+        {
+          "name": "Static Dash",
+          "class": "Flare",
+          "damage": 42,
+          "startupFrames": 6,
+          "activeFrames": 3,
+          "recoveryFrames": 10,
+          "utilityExempt": false
+        },
+        {
+          "name": "Downdraft",
+          "class": "Surge",
+          "damage": 150,
+          "startupFrames": 12,
+          "activeFrames": 6,
+          "recoveryFrames": 24,
+          "utilityExempt": false
+        },
+        {
+          "name": "Updraft",
+          "class": "Surge",
+          "damage": 180,
+          "startupFrames": 14,
+          "activeFrames": 8,
+          "recoveryFrames": 28,
+          "utilityExempt": false
+        }
+      ]
+    },
+    {
+      "fighterId": 7,
+      "name": "Delphine",
+      "speedRating": 2,
+      "lifeRating": 2,
+      "reachRating": 4,
+      "airRating": 4,
+      "powerRating": 2,
+      "walkSpeed": "2",
+      "runSpeed": "4",
+      "fullSpeed": "6",
+      "kitBehavior": "None",
+      "moves": [
+        {
+          "name": "Motif",
+          "class": "Attack",
+          "damage": 32,
+          "startupFrames": 5,
+          "activeFrames": 2,
+          "recoveryFrames": 9,
+          "utilityExempt": false
+        },
+        {
+          "name": "Sonic Cone",
+          "class": "UtilityStrong",
+          "damage": 0,
+          "startupFrames": 8,
+          "activeFrames": 4,
+          "recoveryFrames": 16,
+          "utilityExempt": false
+        },
+        {
+          "name": "Air Motif",
+          "class": "AirAttack",
+          "damage": 42,
+          "startupFrames": 6,
+          "activeFrames": 3,
+          "recoveryFrames": 12,
+          "utilityExempt": false
+        },
+        {
+          "name": "Throw",
+          "class": "Throw",
+          "damage": 100,
+          "startupFrames": 5,
+          "activeFrames": 2,
+          "recoveryFrames": 20,
+          "utilityExempt": false
+        },
+        {
+          "name": "Note",
+          "class": "Flare",
+          "damage": 40,
+          "startupFrames": 6,
+          "activeFrames": 3,
+          "recoveryFrames": 10,
+          "utilityExempt": false
+        },
+        {
+          "name": "Aria",
+          "class": "Surge",
+          "damage": 200,
+          "startupFrames": 10,
+          "activeFrames": 120,
+          "recoveryFrames": 20,
+          "utilityExempt": false
+        },
+        {
+          "name": "Crescendo",
+          "class": "Surge",
+          "damage": 160,
+          "startupFrames": 14,
+          "activeFrames": 8,
+          "recoveryFrames": 28,
+          "utilityExempt": false
+        }
+      ]
+    },
+    {
+      "fighterId": 8,
+      "name": "Clank",
+      "speedRating": 2,
+      "lifeRating": 4,
+      "reachRating": 4,
+      "airRating": 1,
+      "powerRating": 3,
+      "walkSpeed": "2",
+      "runSpeed": "4",
+      "fullSpeed": "6",
+      "kitBehavior": "DoubleHold",
+      "moves": [
+        {
+          "name": "Clank Hit",
+          "class": "Attack",
+          "damage": 36,
+          "startupFrames": 4,
+          "activeFrames": 2,
+          "recoveryFrames": 8,
+          "utilityExempt": false
+        },
+        {
+          "name": "Spring Grab",
+          "class": "Strong",
+          "damage": 95,
+          "startupFrames": 10,
+          "activeFrames": 3,
+          "recoveryFrames": 18,
+          "utilityExempt": false
+        },
+        {
+          "name": "Air Clank",
+          "class": "AirAttack",
+          "damage": 46,
+          "startupFrames": 6,
+          "activeFrames": 3,
+          "recoveryFrames": 12,
+          "utilityExempt": false
+        },
+        {
+          "name": "Throw",
+          "class": "Throw",
+          "damage": 100,
+          "startupFrames": 5,
+          "activeFrames": 2,
+          "recoveryFrames": 20,
+          "utilityExempt": false
+        },
+        {
+          "name": "Shoulder Battery",
+          "class": "Flare",
+          "damage": 45,
+          "startupFrames": 6,
+          "activeFrames": 3,
+          "recoveryFrames": 10,
+          "utilityExempt": false
+        },
+        {
+          "name": "Toolbox",
+          "class": "Surge",
+          "damage": 280,
+          "startupFrames": 12,
+          "activeFrames": 6,
+          "recoveryFrames": 24,
+          "utilityExempt": false
+        },
+        {
+          "name": "Spare Parts",
+          "class": "Surge",
+          "damage": 200,
+          "startupFrames": 14,
+          "activeFrames": 8,
+          "recoveryFrames": 28,
+          "utilityExempt": false
+        }
+      ]
+    },
+    {
+      "fighterId": 9,
+      "name": "Ferro Dusk",
+      "speedRating": 3,
+      "lifeRating": 3,
+      "reachRating": 4,
+      "airRating": 2,
+      "powerRating": 2,
+      "walkSpeed": "3",
+      "runSpeed": "5",
+      "fullSpeed": "7",
+      "kitBehavior": "None",
+      "moves": [
+        {
+          "name": "Stock",
+          "class": "Attack",
+          "damage": 34,
+          "startupFrames": 5,
+          "activeFrames": 2,
+          "recoveryFrames": 9,
+          "utilityExempt": false
+        },
+        {
+          "name": "Lever Shot",
+          "class": "Strong",
+          "damage": 60,
+          "startupFrames": 12,
+          "activeFrames": 2,
+          "recoveryFrames": 20,
+          "utilityExempt": true
+        },
+        {
+          "name": "Air Stock",
+          "class": "AirAttack",
+          "damage": 44,
+          "startupFrames": 6,
+          "activeFrames": 3,
+          "recoveryFrames": 12,
+          "utilityExempt": false
+        },
+        {
+          "name": "Throw",
+          "class": "Throw",
+          "damage": 100,
+          "startupFrames": 5,
+          "activeFrames": 2,
+          "recoveryFrames": 20,
+          "utilityExempt": false
+        },
+        {
+          "name": "Piston Punch",
+          "class": "Flare",
+          "damage": 48,
+          "startupFrames": 7,
+          "activeFrames": 3,
+          "recoveryFrames": 12,
+          "utilityExempt": false
+        },
+        {
+          "name": "Full Steam",
+          "class": "Surge",
+          "damage": 280,
+          "startupFrames": 12,
+          "activeFrames": 6,
+          "recoveryFrames": 24,
+          "utilityExempt": false
+        },
+        {
+          "name": "Signal Fire",
+          "class": "Surge",
+          "damage": 150,
+          "startupFrames": 14,
+          "activeFrames": 8,
+          "recoveryFrames": 28,
+          "utilityExempt": false
+        }
+      ]
+    },
+    {
+      "fighterId": 10,
+      "name": "Pip \u0026 Pepper",
+      "speedRating": 4,
+      "lifeRating": 2,
+      "reachRating": 2,
+      "airRating": 3,
+      "powerRating": 2,
+      "walkSpeed": "4",
+      "runSpeed": "6",
+      "fullSpeed": "8",
+      "kitBehavior": "SwapPartners",
+      "moves": [
+        {
+          "name": "Twin Jab",
+          "class": "Attack",
+          "damage": 33,
+          "startupFrames": 4,
+          "activeFrames": 2,
+          "recoveryFrames": 8,
+          "utilityExempt": false
+        },
+        {
+          "name": "Swap In",
+          "class": "Strong",
+          "damage": 86,
+          "startupFrames": 10,
+          "activeFrames": 3,
+          "recoveryFrames": 18,
+          "utilityExempt": false
+        },
+        {
+          "name": "Air Twin",
+          "class": "AirAttack",
+          "damage": 43,
+          "startupFrames": 6,
+          "activeFrames": 3,
+          "recoveryFrames": 12,
+          "utilityExempt": false
+        },
+        {
+          "name": "Throw",
+          "class": "Throw",
+          "damage": 100,
+          "startupFrames": 5,
+          "activeFrames": 2,
+          "recoveryFrames": 20,
+          "utilityExempt": false
+        },
+        {
+          "name": "Wave Dash",
+          "class": "Flare",
+          "damage": 44,
+          "startupFrames": 6,
+          "activeFrames": 3,
+          "recoveryFrames": 10,
+          "utilityExempt": false
+        },
+        {
+          "name": "Undertow",
+          "class": "Surge",
+          "damage": 140,
+          "startupFrames": 12,
+          "activeFrames": 6,
+          "recoveryFrames": 24,
+          "utilityExempt": false
+        },
+        {
+          "name": "Breaker",
+          "class": "Surge",
+          "damage": 200,
+          "startupFrames": 14,
+          "activeFrames": 8,
+          "recoveryFrames": 28,
+          "utilityExempt": false
+        }
+      ]
+    },
+    {
+      "fighterId": 11,
+      "name": "Hob",
+      "speedRating": 3,
+      "lifeRating": 3,
+      "reachRating": 3,
+      "airRating": 2,
+      "powerRating": 3,
+      "walkSpeed": "3",
+      "runSpeed": "5",
+      "fullSpeed": "7",
+      "kitBehavior": "None",
+      "moves": [
+        {
+          "name": "Cleaver",
+          "class": "Attack",
+          "damage": 35,
+          "startupFrames": 4,
+          "activeFrames": 2,
+          "recoveryFrames": 8,
+          "utilityExempt": false
+        },
+        {
+          "name": "Pan Swing",
+          "class": "Strong",
+          "damage": 80,
+          "startupFrames": 10,
+          "activeFrames": 3,
+          "recoveryFrames": 18,
+          "utilityExempt": false
+        },
+        {
+          "name": "Air Cleaver",
+          "class": "AirAttack",
+          "damage": 45,
+          "startupFrames": 6,
+          "activeFrames": 3,
+          "recoveryFrames": 12,
+          "utilityExempt": false
+        },
+        {
+          "name": "Throw",
+          "class": "Throw",
+          "damage": 100,
+          "startupFrames": 5,
+          "activeFrames": 2,
+          "recoveryFrames": 20,
+          "utilityExempt": false
+        },
+        {
+          "name": "Steam Vent",
+          "class": "Flare",
+          "damage": 46,
+          "startupFrames": 6,
+          "activeFrames": 3,
+          "recoveryFrames": 10,
+          "utilityExempt": false
+        },
+        {
+          "name": "Boil Over",
+          "class": "Surge",
+          "damage": 200,
+          "startupFrames": 12,
+          "activeFrames": 6,
+          "recoveryFrames": 24,
+          "utilityExempt": false
+        },
+        {
+          "name": "Pincer",
+          "class": "Surge",
+          "damage": 300,
+          "startupFrames": 14,
+          "activeFrames": 8,
+          "recoveryFrames": 28,
+          "utilityExempt": false
+        }
+      ]
+    },
+    {
+      "fighterId": 12,
+      "name": "La Cumbre",
+      "speedRating": 1,
+      "lifeRating": 4,
+      "reachRating": 2,
+      "airRating": 2,
+      "powerRating": 5,
+      "walkSpeed": "1",
+      "runSpeed": "3",
+      "fullSpeed": "5",
+      "kitBehavior": "None",
+      "moves": [
+        {
+          "name": "Lariat",
+          "class": "Attack",
+          "damage": 38,
+          "startupFrames": 4,
+          "activeFrames": 2,
+          "recoveryFrames": 8,
+          "utilityExempt": false
+        },
+        {
+          "name": "Body Splash",
+          "class": "Strong",
+          "damage": 100,
+          "startupFrames": 10,
+          "activeFrames": 3,
+          "recoveryFrames": 18,
+          "utilityExempt": false
+        },
+        {
+          "name": "Air Splash",
+          "class": "AirAttack",
+          "damage": 50,
+          "startupFrames": 6,
+          "activeFrames": 3,
+          "recoveryFrames": 12,
+          "utilityExempt": false
+        },
+        {
+          "name": "Throw",
+          "class": "Throw",
+          "damage": 100,
+          "startupFrames": 5,
+          "activeFrames": 2,
+          "recoveryFrames": 20,
+          "utilityExempt": false
+        },
+        {
+          "name": "Lava Fist",
+          "class": "Flare",
+          "damage": 50,
+          "startupFrames": 6,
+          "activeFrames": 3,
+          "recoveryFrames": 10,
+          "utilityExempt": false
+        },
+        {
+          "name": "Eruption",
+          "class": "Surge",
+          "damage": 200,
+          "startupFrames": 12,
+          "activeFrames": 6,
+          "recoveryFrames": 24,
+          "utilityExempt": false
+        },
+        {
+          "name": "Caldera",
+          "class": "Surge",
+          "damage": 220,
+          "startupFrames": 14,
+          "activeFrames": 8,
+          "recoveryFrames": 28,
+          "utilityExempt": false
+        }
+      ]
+    },
+    {
+      "fighterId": 13,
+      "name": "Captain Citrine",
+      "speedRating": 2,
+      "lifeRating": 4,
+      "reachRating": 4,
+      "airRating": 1,
+      "powerRating": 3,
+      "walkSpeed": "2",
+      "runSpeed": "4",
+      "fullSpeed": "6",
+      "kitBehavior": "None",
+      "moves": [
+        {
+          "name": "Saber",
+          "class": "Attack",
+          "damage": 36,
+          "startupFrames": 4,
+          "activeFrames": 2,
+          "recoveryFrames": 8,
+          "utilityExempt": false
+        },
+        {
+          "name": "Hook Pull",
+          "class": "Strong",
+          "damage": 92,
+          "startupFrames": 10,
+          "activeFrames": 3,
+          "recoveryFrames": 18,
+          "utilityExempt": false
+        },
+        {
+          "name": "Air Saber",
+          "class": "AirAttack",
+          "damage": 46,
+          "startupFrames": 6,
+          "activeFrames": 3,
+          "recoveryFrames": 12,
+          "utilityExempt": false
+        },
+        {
+          "name": "Throw",
+          "class": "Throw",
+          "damage": 100,
+          "startupFrames": 5,
+          "activeFrames": 2,
+          "recoveryFrames": 20,
+          "utilityExempt": false
+        },
+        {
+          "name": "Prism Volley",
+          "class": "Flare",
+          "damage": 44,
+          "startupFrames": 6,
+          "activeFrames": 3,
+          "recoveryFrames": 10,
+          "utilityExempt": false
+        },
+        {
+          "name": "Grapple Line",
+          "class": "Surge",
+          "damage": 310,
+          "startupFrames": 12,
+          "activeFrames": 6,
+          "recoveryFrames": 24,
+          "utilityExempt": false
+        },
+        {
+          "name": "Holdfast",
+          "class": "Surge",
+          "damage": 60,
+          "startupFrames": 14,
+          "activeFrames": 8,
+          "recoveryFrames": 28,
+          "utilityExempt": false
+        }
+      ]
+    },
+    {
+      "fighterId": 14,
+      "name": "Tilly Setter",
+      "speedRating": 2,
+      "lifeRating": 1,
+      "reachRating": 5,
+      "airRating": 4,
+      "powerRating": 1,
+      "walkSpeed": "2",
+      "runSpeed": "4",
+      "fullSpeed": "6",
+      "kitBehavior": "InvoiceRepeatable",
+      "moves": [
+        {
+          "name": "Setter Pick",
+          "class": "Attack",
+          "damage": 30,
+          "startupFrames": 4,
+          "activeFrames": 2,
+          "recoveryFrames": 8,
+          "utilityExempt": false
+        },
+        {
+          "name": "Item Hook",
+          "class": "Strong",
+          "damage": 82,
+          "startupFrames": 10,
+          "activeFrames": 3,
+          "recoveryFrames": 18,
+          "utilityExempt": false
+        },
+        {
+          "name": "Air Pick",
+          "class": "AirAttack",
+          "damage": 40,
+          "startupFrames": 6,
+          "activeFrames": 3,
+          "recoveryFrames": 12,
+          "utilityExempt": false
+        },
+        {
+          "name": "Throw",
+          "class": "Throw",
+          "damage": 100,
+          "startupFrames": 5,
+          "activeFrames": 2,
+          "recoveryFrames": 20,
+          "utilityExempt": false
+        },
+        {
+          "name": "Cast and Reel",
+          "class": "Flare",
+          "damage": 38,
+          "startupFrames": 6,
+          "activeFrames": 3,
+          "recoveryFrames": 10,
+          "utilityExempt": false
+        },
+        {
+          "name": "Invoice",
+          "class": "Surge",
+          "damage": 135,
+          "startupFrames": 12,
+          "activeFrames": 6,
+          "recoveryFrames": 24,
+          "utilityExempt": false
+        },
+        {
+          "name": "Closing Time",
+          "class": "Surge",
+          "damage": 150,
           "startupFrames": 14,
           "activeFrames": 8,
           "recoveryFrames": 28,
@@ -120,6 +1144,11 @@
           "cameraCenterY": "8",
           "cameraCenterZ": "0",
           "cameraRadius": "14",
+          "scriptedCamera": {
+            "enabled": true,
+            "endCenterY": "10",
+            "endRadius": "16"
+          },
           "hazards": [
             {
               "hazardId": 2,
@@ -159,6 +1188,12 @@
           "cameraCenterY": "8",
           "cameraCenterZ": "0",
           "cameraRadius": "16",
+          "scriptedCamera": {
+            "enabled": true,
+            "startRadius": "14",
+            "endCenterY": "9",
+            "endRadius": "18"
+          },
           "hazards": [
             {
               "hazardId": 3,

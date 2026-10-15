@@ -182,7 +182,7 @@ namespace JewelBlitzArena.Sim
 
             ref Xoshiro256StarStar rng = ref MatchStateAccess.CpuRng(ref state, slot);
             var behavior = (KitBehavior)self.KitBehavior;
-            return behavior switch
+            InputFrame frame = behavior switch
             {
                 KitBehavior.VanishStrong => DecideVanishStrong(chaseDir, mag, distSq, reachSq, midSq, level, ref rng),
                 KitBehavior.CommandGrabCarry => DecideCommandGrab(
@@ -195,6 +195,57 @@ namespace JewelBlitzArena.Sim
                 KitBehavior.InvoiceRepeatable => DecideInvoice(chaseDir, mag, distSq, reachSq, level, ref rng),
                 _ => DecideDefaultPressure(chaseDir, mag, distSq, reachSq, level, ref rng),
             };
+
+            // Blitzed: Attack → Flare; spend Luster on Surge A/B when affordable.
+            ApplyBlitzPressure(ref frame, ref self, behavior, distSq, reachSq, level, ref rng);
+            return frame;
+        }
+
+        /// <summary>
+        /// When Blitzed, prefer Flare (Attack) in reach and occasionally fire Surge A/B.
+        /// Invoice kits gate Surge A at the repeatable 180 Luster cost (balance.md §3.3).
+        /// Only consumes CPU RNG while Blitzed so non-Blitz paths stay hash-stable.
+        /// </summary>
+        private static void ApplyBlitzPressure(
+            ref InputFrame frame,
+            ref ActorSlot self,
+            KitBehavior behavior,
+            long distSq,
+            long reachSq,
+            int level,
+            ref Xoshiro256StarStar rng)
+        {
+            if (!self.IsBlitzed || level < 3 || distSq > reachSq * 4)
+            {
+                return;
+            }
+
+            int surgeCost = behavior == KitBehavior.InvoiceRepeatable
+                ? 180
+                : MatchRules.SurgeLusterCost;
+            uint roll = (uint)(rng.NextUInt64() & 0xFF);
+
+            if (self.Luster >= surgeCost && roll < (uint)(24 + level * 10))
+            {
+                if (behavior == KitBehavior.InvoiceRepeatable || (roll & 1) == 0)
+                {
+                    frame.SurgeA = true;
+                }
+                else
+                {
+                    frame.SurgeB = true;
+                }
+
+                return;
+            }
+
+            if (distSq <= reachSq && !frame.Strong && !frame.Action && !frame.Jump)
+            {
+                if (roll < (uint)(90 + level * 12))
+                {
+                    frame.Attack = true;
+                }
+            }
         }
 
         private static InputFrame DecideDefaultPressure(
