@@ -60,6 +60,16 @@ Keyboard (demo): F = □, G = ○, Space = ✕, H = △, R = rematch.
   crashes into throwable rocks, plus a halftime GEM RUSH event.
 - **4-fighter free-for-all:** ✅ (3D web demo v0.9) — Blaze/Ronin sprites
   vs Bruno and Aegis bots, last fighter standing, character select.
+- **Item pads:** ✅ gold floor circles pop up random items; take one and
+  a new item respawns on the pad after 1 second (all three builds).
+- **Passive bots (test mode):** ✅ Ben asked for non-attacking bots while
+  testing (they roam and collect only) — one flag re-arms them.
+- **Hazard orb:** ❌ removed from all builds at Ben's direction (falling
+  debris remains the stage hazard in the web demos).
+- **Unique item abilities:** ✅ Mega Buster (charge every 4th shot),
+  Spring Punch Glove (huge launch), Golden Club (coins on hit), Flame
+  Thrower (3-jet cone), Freeze Ray (slow), Lightning Gun (chain arc).
+  Catalog is now **114 items**.
 
 ## 4. Fighters — roster of 12 (+4 unlockable) 🛠 data / ✅ 8 modeled in Unity
 Each fighter: unique speed / power / defense, two Power Drives, one Fusion.
