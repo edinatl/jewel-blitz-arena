@@ -1,7 +1,13 @@
-# Power Arena — Prototype v0.2
+# Power Arena — Prototype v0.3
 
 An original arena brawler inspired by Power Stone 2's formula.
 2 fighters, 1 arena, local play + a solo bot. No Capcom assets, names, or characters.
+
+## What changed in v0.3 (art update)
+- **Comic art pack** in `Assets/Art/`: an 8-fighter character roster (Soldier, Samurai, Warrior, Gladiator, Knight, Ninja, Pirate, Robot — plus individual portraits in `Assets/Art/Characters/`), a desert arena illustration, a cactus throwable, and an item icon sheet.
+- **Desert stage:** the arena floor now uses the desert art as its texture (the builder loads `Assets/Art/desert_arena.png` automatically).
+- **Cactus throwable:** new item in the catalog (111 total) and the stage now starts with cacti among its throwable props.
+- The mobile demo (repo `docs/index.html`) uses the same art: desert map, Soldier vs Samurai portraits, cactus props, and per-category item icons.
 
 ## What changed in v0.2 (Ben's rules)
 
@@ -50,7 +56,7 @@ An original arena brawler inspired by Power Stone 2's formula.
 - **Stage Hazard (purple orb):** patrols the arena; it damages and knocks gems loose too.
 - **HUD:** health, gem pips, held item name, and a CAUGHT! flash when a catch lands.
 
-## The 110-item catalog (`ItemCatalog.cs`)
+## The 111-item catalog (`ItemCatalog.cs`)
 
 Every item has its own name, damage, uses, throw damage/speed, knockback,
 size, shape, and color — stats drive the behavior, so items play differently.
