@@ -1,7 +1,15 @@
-# Power Arena — Prototype v0.7
+# Power Arena — Prototype v0.8
 
 An original arena brawler inspired by Power Stone 2's formula.
 2 fighters, 1 arena, local play + a solo bot. No Capcom assets, names, or characters.
+
+## What changed in v0.8 (Ben's test-mode pass)
+- **The bot doesn't attack** (`PlayerController.BotAttacksEnabled = false`): it roams and collects, but never swings, throws, grabs, or fusions — a test dummy while you learn the systems. Flip the flag to re-arm it.
+- **Catch is on the ○ Action button now**, same as the manual throw: a Heavy press that doesn't pick up or grab opens the catch window. Light/□ no longer catches.
+- **The bouncing hazard orb is removed** from the arena.
+- **Item pads:** four gold circles on the floor pop up random items; pick one up and a fresh random item respawns on that pad **1 second** later (`ItemPad.cs`).
+- **3 new items with unique abilities (catalog now 114):** **Mega Buster** (rapid pellets, every 4th shot is a charged blast), **Spring Punch Glove** (huge BOING launch), **Golden Club** (every landed hit shakes a gold coin loose). Plus unique twists for classics: **Flame Thrower** fires a 3-jet cone, **Freeze Ray** slows victims, **Lightning Gun** arcs to a second nearby fighter, **Rocket Launcher** keeps its explosive shells.
+- Re-run **Prototype → Build Arena Scene** once after updating to v0.8 (pads replace the hazard; item count changed).
 
 ## What changed in v0.7 (Action-button controls + HD sprite fighters)
 - **○ Action is now PICK UP / manual throw:** items are no longer picked up by walking over them — stand next to one with empty hands and press **Heavy (G / ○)** to pick it up (it takes priority over grabbing). Heavy with an item in hand **throws it in the direction you're facing** — no aim assist.
