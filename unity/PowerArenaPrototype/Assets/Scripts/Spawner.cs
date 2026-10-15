@@ -22,7 +22,7 @@ public class Spawner : MonoBehaviour
 
     // Stage furniture placed at match start — all throwable/catchable.
     private static readonly string[] StageProps =
-        { "Chair", "Crate", "Wooden Barrel", "Small Table", "Plant Pot", "Bench", "Rock", "Toolbox" };
+        { "Cactus", "Cactus", "Crate", "Wooden Barrel", "Cactus", "Rock", "Bench", "Toolbox" };
     private static readonly Vector3[] PropSpots =
     {
         new Vector3(-6f, 0.9f, -5f), new Vector3(6f, 0.9f, -5f),

@@ -3,7 +3,7 @@ using UnityEngine;
 public enum ItemArchetype { Melee, Gun, Throwable, Explosive, Food, Special }
 public enum ItemShape { Box, Sphere, Cylinder, Capsule }
 
-// One item definition. 110 distinct items live in ItemCatalog below —
+// One item definition. 111 distinct items live in ItemCatalog below —
 // each with its own name, damage, uses, throw stats, heal, knockback,
 // size, shape, and color. Behavior is driven by these stats, so a
 // Revolver, a Chair, and a Roast Chicken all genuinely play differently.
@@ -82,7 +82,7 @@ public static class ItemCatalog
 
         string[] throwables = {
             "Chair","Stool","Crate","Wooden Barrel","Metal Barrel","Rock","Brick","Book",
-            "Vase","Plant Pot","Table Lamp","Bench","Small Table","Tire","Bowling Ball",
+            "Vase","Plant Pot","Cactus","Table Lamp","Bench","Small Table","Tire","Bowling Ball",
             "Dumbbell","Kettle","Bucket","Toolbox","Backpack","Globe","Television",
             "Microwave","Safe","Anvil","Treasure Chest","Ale Barrel","Statue Head"
         };
