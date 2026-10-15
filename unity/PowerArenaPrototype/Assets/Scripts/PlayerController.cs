@@ -26,6 +26,7 @@ public class PlayerController : MonoBehaviour
 
     [Header("AI (Player 2 solo mode)")]
     public bool aiEnabled = false;
+    public static bool BotAttacksEnabled = false; // Ben (2026-10-15): bot is a test dummy for now — flip to true to re-arm it
     private bool aiTakenOver = false;
     private float aiAttackTimer = 0f;
     private float aiJumpTimer = 0f;
@@ -106,13 +107,7 @@ public class PlayerController : MonoBehaviour
 
         if (Input.GetKeyDown(jumpKey)) HandleJumpKey();
         if (Input.GetKeyDown(fusionKey) && combat != null) combat.TryFusion();
-        if (Input.GetKeyDown(attackKey) && combat != null)
-        {
-            // Empty hands + light attack = CATCH window (also swings, harmless).
-            // Time it as a thrown item reaches you and it's yours.
-            if (!combat.HasItem) combat.StartCatchWindow();
-            combat.TryLightAttack();
-        }
+        if (Input.GetKeyDown(attackKey) && combat != null) combat.TryLightAttack();
         if (Input.GetKeyDown(heavyKey) && combat != null) combat.TryHeavyAttack();
     }
 
@@ -134,6 +129,7 @@ public class PlayerController : MonoBehaviour
 
         float speed = moveSpeed;
         if (combat != null && combat.IsTransformed) speed *= 1.25f;
+        if (combat != null && combat.IsSlowed) speed *= 0.55f;
 
         Vector3 vel = rb.velocity;
         Vector3 desired = moveInput.normalized * speed;
@@ -289,7 +285,7 @@ public class PlayerController : MonoBehaviour
         moveInput = dist > targetStopDist ? to.normalized : Vector3.zero;
 
         // Transformed with gauge to burn: let the Fusion fly sometimes.
-        if (combat != null && combat.IsTransformed && combat.PowerGauge >= 50f &&
+        if (BotAttacksEnabled && combat != null && combat.IsTransformed && combat.PowerGauge >= 50f &&
             aiAttackTimer <= 0f && Random.value < 0.3f)
         {
             aiAttackTimer = 1.4f;
@@ -298,7 +294,7 @@ public class PlayerController : MonoBehaviour
         }
 
         // Ranged behavior: holding a throwable/explosive/gun at distance.
-        if (combat != null && combat.HasItem && aiAttackTimer <= 0f)
+        if (BotAttacksEnabled && combat != null && combat.HasItem && aiAttackTimer <= 0f)
         {
             var opp = FindOpponent();
             if (opp != null)
@@ -325,7 +321,7 @@ public class PlayerController : MonoBehaviour
         if (dist <= 1.9f && target.CompareTag("Player"))
         {
             FaceDirection(to);
-            if (aiAttackTimer <= 0f && combat != null)
+            if (BotAttacksEnabled && aiAttackTimer <= 0f && combat != null)
             {
                 aiAttackTimer = 0.55f;
                 // Holding a throwable point-blank: lob it anyway sometimes,
