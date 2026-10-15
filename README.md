@@ -34,5 +34,12 @@ dotnet run --project tools/JewelBlitzArena.GreyboxCli -c Release -- --frames 180
 
 Phase timers/transitions/hazards/kinematics step inside Sim (`Stages/StageRuntime`). Content schema v2; Citrine Bazaar three-phase stub in `content/authored/s5_stub.json`.
 
-Design index: `PLAN.md`. Architecture: `docs/tech/architecture.md`.
+## Meta skeleton (S6)
 
+Profile / Ledger / Custom+Sparring mode orchestrators live in `src/JewelBlitzArena.Meta` (no UnityEngine; never mutates Sim state).
+
+```bash
+dotnet test JewelBlitzArena.sln -c Release --filter MetaSkeleton
+```
+
+Design index: `PLAN.md`. Architecture: `docs/tech/architecture.md`.
