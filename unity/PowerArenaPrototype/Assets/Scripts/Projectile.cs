@@ -46,6 +46,24 @@ public class Projectile : MonoBehaviour
             {
                 combat.ApplyKnockback(dir, 6f);
                 combat.RegisterHitTaken(damage); // any hit knocks a gem loose
+                var ownerCombat = owner != null ? owner.GetComponent<PlayerCombat>() : null;
+                if (ownerCombat != null && ownerCombat.LastWeaponName == "Freeze Ray")
+                    combat.ApplySlow(1.2f); // UNIQUE: Freeze Ray slows its victim
+                if (ownerCombat != null && ownerCombat.LastWeaponName == "Lightning Gun")
+                {
+                    // UNIQUE: Lightning Gun arcs to another nearby fighter.
+                    var others = FindObjectsOfType<Health>();
+                    for (int i = 0; i < others.Length; i++)
+                    {
+                        if (others[i].gameObject == collision.gameObject || others[i].gameObject == owner) continue;
+                        if (Vector3.Distance(others[i].transform.position, collision.transform.position) < 3.2f)
+                        {
+                            others[i].TakeDamage(6f);
+                            var oc2 = others[i].GetComponent<PlayerCombat>();
+                            if (oc2 != null) oc2.RegisterHitTaken(6f);
+                        }
+                    }
+                }
             }
         }
         Destroy(gameObject);
