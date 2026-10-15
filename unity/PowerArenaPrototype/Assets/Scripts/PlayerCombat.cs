@@ -19,8 +19,12 @@ public class PlayerCombat : MonoBehaviour
 
     [Header("State (read-only in play)")]
     public int gems = 0;
+    public int gold = 0;
     public bool IsTransformed { get; private set; }
-    public float TransformTimeLeft { get; private set; }
+    // v0.5: transformation runs on a Power Gauge (0-100) that drains over
+    // ~transformDuration seconds. Power Drive costs 25, Power Fusion 50.
+    public float PowerGauge { get; private set; }
+    public float TransformTimeLeft { get { return PowerGauge * transformDuration / 100f; } }
     public ItemDefinition HeldItem { get; private set; }
     public bool HasItem { get { return HeldItem != null; } }
     public string HeldItemName { get { return HeldItem != null ? HeldItem.Name : ""; } }
@@ -35,6 +39,23 @@ public class PlayerCombat : MonoBehaviour
     private GameObject heldVisual;
     private float nextAttackTime = 0f;
     private float catchWindowUntil = -1f;
+
+    // v0.5 mechanics: combo knockdown, dodge roll, per-character Power Drive.
+    private int hitStreak = 0;
+    private float lastStreakTime = -10f;
+    private float knockdownUntil = -1f;
+    private float rollUntil = -1f;
+    private string characterName = "Soldier";
+    public const float RollDuration = 0.38f;
+    public float RollStartTime { get; private set; }
+    public bool IsRolling { get { return Time.time < rollUntil; } }
+    public bool IsKnockedDown { get { return Time.time < knockdownUntil; } }
+
+    public void StartRoll()
+    {
+        rollUntil = Time.time + RollDuration;
+        RollStartTime = Time.time;
+    }
 
     private Health health;
     private Rigidbody rb;
@@ -52,6 +73,9 @@ public class PlayerCombat : MonoBehaviour
         bodyRenderer = GetComponent<Renderer>();
         if (bodyRenderer != null) baseColor = bodyRenderer.material.color;
         baseScale = transform.localScale;
+        var vis = GetComponent<CharacterVisual>();
+        if (vis != null) characterName = vis.character;
+        RollStartTime = -10f;
         LastCatchTime = -10f;
         LastAttackTime = -10f;
         LastHitTime = -10f;
@@ -61,8 +85,8 @@ public class PlayerCombat : MonoBehaviour
     {
         if (IsTransformed)
         {
-            TransformTimeLeft -= Time.deltaTime;
-            if (TransformTimeLeft <= 0f) EndTransform();
+            PowerGauge -= Time.deltaTime * (100f / transformDuration);
+            if (PowerGauge <= 0f) EndTransform();
         }
     }
 
@@ -82,17 +106,142 @@ public class PlayerCombat : MonoBehaviour
 
     public void TryLightAttack()
     {
-        if (health.IsKO || Time.time < nextAttackTime) return;
+        if (health.IsKO || IsKnockedDown || Time.time < nextAttackTime) return;
         LastAttackTime = Time.time;
+
+        // Transformed: light attack is your POWER DRIVE (costs 25 gauge).
+        if (IsTransformed) { PowerDrive(); return; }
+
         if (HasItem) { UseItem(); return; }
+
+        // Air attack: a diving strike while airborne.
+        if (!IsGrounded())
+        {
+            nextAttackTime = Time.time + 0.35f;
+            if (rb != null)
+            {
+                Vector3 v = rb.velocity;
+                rb.velocity = new Vector3(v.x + transform.forward.x * 3.5f, v.y, v.z + transform.forward.z * 3.5f);
+            }
+            MeleeHit(10f, attackRange + 0.2f, 8f);
+            return;
+        }
+
         nextAttackTime = Time.time + lightCooldown;
-        MeleeHit(IsTransformed ? lightDamage * 2f : lightDamage,
-                 IsTransformed ? attackRange + 0.6f : attackRange, 6f);
+        MeleeHit(lightDamage, attackRange, 6f);
+    }
+
+    bool IsGrounded()
+    {
+        return Physics.Raycast(transform.position, Vector3.down, 1.25f);
+    }
+
+    // Power Drive — your transformed special, per character. Costs 25 gauge.
+    void PowerDrive()
+    {
+        nextAttackTime = Time.time + 0.55f;
+        PowerGauge = Mathf.Max(0f, PowerGauge - 25f);
+        Vector3 origin = transform.position + Vector3.up * 1.1f + transform.forward * 0.9f;
+        if (characterName == "Samurai")
+        {
+            // Blade Wave: one big, fast slash projectile.
+            Projectile.Fire(gameObject, origin, transform.forward, 17f, 22f, 0.55f,
+                            new Color(0.66f, 0.9f, 1f), false, 0f);
+        }
+        else
+        {
+            // Rocket Salvo (Soldier / default): a fan of 3 explosive shells.
+            for (int i = -1; i <= 1; i++)
+            {
+                Vector3 dir = Quaternion.Euler(0f, i * 10f, 0f) * transform.forward;
+                Projectile.Fire(gameObject, origin, dir, 15f, 13f, 0.32f,
+                                new Color(1f, 0.63f, 0.15f), true, 0f);
+            }
+        }
+        if (PowerGauge <= 0f) EndTransform();
+    }
+
+    // TRIANGLE button. Transformed: POWER FUSION (50 gauge) — three
+    // telegraphed explosions rain on the opponent's position. Not
+    // transformed: DISCARD your held item onto the ground instead.
+    public void TryFusion()
+    {
+        if (health.IsKO || IsKnockedDown) return;
+        if (IsTransformed)
+        {
+            if (PowerGauge < 50f || Time.time < nextAttackTime) return;
+            PowerGauge -= 50f;
+            nextAttackTime = Time.time + 0.9f;
+            LastAttackTime = Time.time;
+            GameObject opp = FindOpponent();
+            if (opp != null) StartCoroutine(FusionRoutine(opp.transform.position));
+            if (PowerGauge <= 0f) EndTransform();
+            return;
+        }
+        if (HasItem)
+        {
+            ItemDefinition def = HeldItem;
+            ClearItem();
+            Vector3 drop = transform.position + transform.forward * 1.1f;
+            drop.y = 0.9f;
+            ItemPickup.Spawn(drop, def);
+        }
+    }
+
+    GameObject FindOpponent()
+    {
+        var players = GameObject.FindGameObjectsWithTag("Player");
+        for (int i = 0; i < players.Length; i++)
+            if (players[i] != gameObject) return players[i];
+        return null;
+    }
+
+    System.Collections.IEnumerator FusionRoutine(Vector3 targetPos)
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            yield return new WaitForSeconds(i == 0 ? 0.35f : 0.22f);
+            Vector3 at = targetPos + new Vector3(Random.Range(-1.3f, 1.3f), 0f, Random.Range(-1.3f, 1.3f));
+            at.y = 1.0f;
+            ExplodeAt(at, 16f, 2.4f);
+        }
+    }
+
+    // Shared explosion: damages everyone in radius except the owner;
+    // rolling and knocked-down fighters come through untouched.
+    void ExplodeAt(Vector3 at, float dmg, float radius)
+    {
+        var all = FindObjectsOfType<Health>();
+        for (int i = 0; i < all.Length; i++)
+        {
+            if (all[i].gameObject == gameObject) continue;
+            var oc = all[i].GetComponent<PlayerCombat>();
+            if (oc != null && (oc.IsRolling || oc.IsKnockedDown)) continue;
+            float dist = Vector3.Distance(at, all[i].transform.position);
+            if (dist <= radius)
+            {
+                all[i].TakeDamage(dmg);
+                if (oc != null)
+                {
+                    Vector3 dir = (all[i].transform.position - at).normalized;
+                    dir.y = 0.4f;
+                    oc.ApplyKnockback(dir, 10f);
+                    oc.RegisterHitTaken(dmg);
+                }
+            }
+        }
+        var flash = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        flash.transform.position = at;
+        flash.transform.localScale = Vector3.one * radius * 2f;
+        ItemVisual.StripCollider(flash);
+        var rend = flash.GetComponent<Renderer>();
+        if (rend != null) rend.material.color = new Color(1f, 0.55f, 0.1f);
+        Destroy(flash, 0.15f);
     }
 
     public void TryHeavyAttack()
     {
-        if (health.IsKO || Time.time < nextAttackTime) return;
+        if (health.IsKO || IsKnockedDown || Time.time < nextAttackTime) return;
         LastAttackTime = Time.time;
 
         // Holding anything? Heavy = THROW it. This is the heart of the game.
@@ -130,6 +279,8 @@ public class PlayerCombat : MonoBehaviour
 
             var otherHealth = players[i].GetComponent<Health>();
             var otherCombat = players[i].GetComponent<PlayerCombat>();
+            // A dodge roll beats any melee swing; a knocked-down fighter is safe.
+            if (otherCombat != null && (otherCombat.IsRolling || otherCombat.IsKnockedDown)) continue;
             if (otherHealth != null) otherHealth.TakeDamage(damage);
             if (otherCombat != null)
             {
@@ -152,17 +303,38 @@ public class PlayerCombat : MonoBehaviour
     // instantly re-grab it, and gems have a pickup delay (see PowerGem).
     public void RegisterHitTaken(float damage)
     {
+        // Dodge roll = clean miss. Knocked down = can't be juggled.
+        if (IsRolling || IsKnockedDown) return;
         LastHitTime = Time.time;
-        if (gems > 0 && !IsTransformed)
+        if (gems > 0 && !IsTransformed) DropOneGem();
+
+        // Combo rule: the 3rd hit inside 1.2s is a KNOCKDOWN — you hit the
+        // floor for 0.85s and lose another gem, or spill gold coins if
+        // you're carrying none.
+        if (!IsTransformed)
         {
-            gems--;
-            Vector2 rand = Random.insideUnitCircle.normalized * 1.9f;
-            Vector3 dropPos = transform.position + new Vector3(rand.x, 0f, rand.y);
-            dropPos.x = Mathf.Clamp(dropPos.x, -8f, 8f);
-            dropPos.z = Mathf.Clamp(dropPos.z, -8f, 8f);
-            dropPos.y = 1.0f;
-            PowerGem.Spawn(dropPos);
+            if (Time.time - lastStreakTime < 1.2f) hitStreak++; else hitStreak = 1;
+            lastStreakTime = Time.time;
+            if (hitStreak >= 3)
+            {
+                hitStreak = 0;
+                knockdownUntil = Time.time + 0.85f;
+                if (gems > 0) DropOneGem();
+                else for (int i = 0; i < 3; i++)
+                    GoldCoin.Spawn(transform.position + new Vector3(Random.Range(-0.7f, 0.7f), 0f, Random.Range(-0.7f, 0.7f)));
+            }
         }
+    }
+
+    void DropOneGem()
+    {
+        gems--;
+        Vector2 rand = Random.insideUnitCircle.normalized * 1.9f;
+        Vector3 dropPos = transform.position + new Vector3(rand.x, 0f, rand.y);
+        dropPos.x = Mathf.Clamp(dropPos.x, -8f, 8f);
+        dropPos.z = Mathf.Clamp(dropPos.z, -8f, 8f);
+        dropPos.y = 1.0f;
+        PowerGem.Spawn(dropPos);
     }
 
     // --- Gems + transformation ---------------------------------------------------
@@ -178,7 +350,7 @@ public class PlayerCombat : MonoBehaviour
     {
         gems = 0;
         IsTransformed = true;
-        TransformTimeLeft = transformDuration;
+        PowerGauge = 100f;
         transform.localScale = baseScale * 1.3f;
         if (bodyRenderer != null) bodyRenderer.material.color = new Color(1f, 0.8f, 0.15f);
         transformLight = gameObject.AddComponent<Light>();
@@ -191,7 +363,7 @@ public class PlayerCombat : MonoBehaviour
     void EndTransform()
     {
         IsTransformed = false;
-        TransformTimeLeft = 0f;
+        PowerGauge = 0f;
         transform.localScale = baseScale;
         if (bodyRenderer != null) bodyRenderer.material.color = baseColor;
         if (transformLight != null) Destroy(transformLight);

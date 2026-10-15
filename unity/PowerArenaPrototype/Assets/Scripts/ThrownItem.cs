@@ -55,6 +55,8 @@ public class ThrownItem : MonoBehaviour
             var combat = other.GetComponent<PlayerCombat>();
             var health = other.GetComponent<Health>();
             if (combat == null || health == null || health.IsKO) continue;
+            // Rolling fighters duck clean under it; knocked-down are safe.
+            if (combat.IsRolling || combat.IsKnockedDown) continue;
 
             // CATCH
             if (!combat.HasItem && combat.CatchWindowActive)

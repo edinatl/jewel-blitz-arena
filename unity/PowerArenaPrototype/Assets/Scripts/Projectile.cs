@@ -34,6 +34,7 @@ public class Projectile : MonoBehaviour
 
         var health = collision.gameObject.GetComponent<Health>();
         var combat = collision.gameObject.GetComponent<PlayerCombat>();
+        if (combat != null && combat.IsRolling) { Destroy(gameObject); return; }
         if (health != null)
         {
             Vector3 dir = collision.contacts.Length > 0
@@ -63,8 +64,9 @@ public class Projectile : MonoBehaviour
             float dist = Vector3.Distance(transform.position, all[i].transform.position);
             if (dist <= explosionRadius)
             {
-                all[i].TakeDamage(damage);
                 var combat = all[i].GetComponent<PlayerCombat>();
+                if (combat != null && (combat.IsRolling || combat.IsKnockedDown)) continue;
+                all[i].TakeDamage(damage);
                 if (combat != null)
                 {
                     Vector3 dir = (all[i].transform.position - transform.position).normalized;

@@ -49,6 +49,7 @@ public class StageHazard : MonoBehaviour
             {
                 var health = players[i].GetComponent<Health>();
                 var combat = players[i].GetComponent<PlayerCombat>();
+                if (combat != null && (combat.IsRolling || combat.IsKnockedDown)) continue;
                 if (health != null) health.TakeDamage(damage);
                 if (combat != null)
                 {

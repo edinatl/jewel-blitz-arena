@@ -37,6 +37,10 @@ public class CharacterVisual : MonoBehaviour
             case "Ninja":     return new Palette(new Color(0.09f, 0.09f, 0.11f), new Color(0.16f, 0.16f, 0.20f), skin, new Color(0.85f, 0.16f, 0.16f), new Color(0.05f, 0.05f, 0.06f));
             case "Pirate":    return new Palette(new Color(0.52f, 0.17f, 0.13f), new Color(0.32f, 0.20f, 0.13f), skin, new Color(0.95f, 0.75f, 0.25f), new Color(0.10f, 0.08f, 0.08f));
             case "Robot":     return new Palette(new Color(0.96f, 0.66f, 0.16f), new Color(0.45f, 0.47f, 0.52f), new Color(0.96f, 0.66f, 0.16f), new Color(0.90f, 0.20f, 0.16f), new Color(0.30f, 0.31f, 0.35f));
+            case "Jester":    return new Palette(new Color(0.58f, 0.20f, 0.72f), new Color(0.85f, 0.22f, 0.28f), skin, new Color(1f, 0.80f, 0.25f), new Color(0.22f, 0.10f, 0.28f));
+            case "Pyra":      return new Palette(new Color(0.72f, 0.16f, 0.30f), new Color(0.45f, 0.10f, 0.35f), skin, new Color(1f, 0.55f, 0.15f), new Color(0.25f, 0.08f, 0.12f));
+            case "Gusto":     return new Palette(new Color(0.92f, 0.92f, 0.90f), new Color(0.35f, 0.35f, 0.38f), skin, new Color(0.85f, 0.20f, 0.18f), new Color(0.30f, 0.25f, 0.22f));
+            case "Dusty":     return new Palette(new Color(0.45f, 0.32f, 0.20f), new Color(0.30f, 0.22f, 0.14f), skin, new Color(0.85f, 0.65f, 0.25f), new Color(0.15f, 0.12f, 0.10f));
             default: // Soldier
                 return new Palette(new Color(0.33f, 0.43f, 0.26f), new Color(0.24f, 0.32f, 0.19f), skin, new Color(0.20f, 0.22f, 0.16f), new Color(0.16f, 0.15f, 0.12f));
         }
@@ -67,6 +71,49 @@ public class CharacterVisual : MonoBehaviour
         go.transform.localScale = scale;
         var rend = go.GetComponent<Renderer>();
         if (rend != null) rend.material = Mat(color);
+        return go;
+    }
+
+    // Unity has no Cone primitive — build one tiny mesh and reuse it.
+    private static Mesh coneMesh;
+    static Mesh ConeMesh()
+    {
+        if (coneMesh != null) return coneMesh;
+        int seg = 12;
+        var verts = new System.Collections.Generic.List<Vector3>();
+        var tris = new System.Collections.Generic.List<int>();
+        verts.Add(new Vector3(0f, 0.5f, 0f));
+        for (int i = 0; i < seg; i++)
+        {
+            float a = i / (float)seg * Mathf.PI * 2f;
+            verts.Add(new Vector3(Mathf.Cos(a) * 0.5f, -0.5f, Mathf.Sin(a) * 0.5f));
+        }
+        int center = verts.Count;
+        verts.Add(new Vector3(0f, -0.5f, 0f));
+        for (int i = 0; i < seg; i++)
+        {
+            int cur = 1 + i, nxt = 1 + (i + 1) % seg;
+            tris.Add(0); tris.Add(nxt); tris.Add(cur);
+            tris.Add(center); tris.Add(cur); tris.Add(nxt);
+        }
+        var mesh = new Mesh();
+        mesh.vertices = verts.ToArray();
+        mesh.triangles = tris.ToArray();
+        mesh.RecalculateNormals();
+        coneMesh = mesh;
+        return mesh;
+    }
+
+    GameObject PartCone(Transform parent, Vector3 pos, Vector3 scale, Color color, string name)
+    {
+        var go = new GameObject(name);
+        go.transform.SetParent(parent, false);
+        go.transform.localPosition = pos;
+        go.transform.localScale = scale;
+        var mf = go.AddComponent<MeshFilter>();
+        mf.sharedMesh = ConeMesh();
+        var mr = go.AddComponent<MeshRenderer>();
+        mr.material = Mat(color);
         return go;
     }
 
@@ -159,9 +206,9 @@ public class CharacterVisual : MonoBehaviour
                 break; }
             case "Samurai": {
                 Part(PrimitiveType.Sphere, Head, new Vector3(0f, 0.10f, 0f), new Vector3(0.55f, 0.36f, 0.55f), pal.Main, "Kabuto");
-                var hornL = Part(PrimitiveType.Cone, Head, new Vector3(-0.20f, 0.34f, 0.10f), new Vector3(0.09f, 0.34f, 0.09f), pal.Accent, "HornL");
+                var hornL = PartCone(Head, new Vector3(-0.20f, 0.34f, 0.10f), new Vector3(0.09f, 0.34f, 0.09f), pal.Accent, "HornL");
                 hornL.transform.localRotation = Quaternion.Euler(18f, 0f, 24f);
-                var hornR = Part(PrimitiveType.Cone, Head, new Vector3(0.20f, 0.34f, 0.10f), new Vector3(0.09f, 0.34f, 0.09f), pal.Accent, "HornR");
+                var hornR = PartCone(Head, new Vector3(0.20f, 0.34f, 0.10f), new Vector3(0.09f, 0.34f, 0.09f), pal.Accent, "HornR");
                 hornR.transform.localRotation = Quaternion.Euler(18f, 0f, -24f);
                 var katana = Part(PrimitiveType.Cube, Body, new Vector3(-0.10f, 1.50f, -0.32f), new Vector3(0.05f, 0.95f, 0.05f), new Color(0.80f, 0.82f, 0.86f), "Katana");
                 katana.transform.localRotation = Quaternion.Euler(0f, 0f, -32f);
@@ -206,6 +253,48 @@ public class CharacterVisual : MonoBehaviour
                 Part(PrimitiveType.Cylinder, Head, new Vector3(0f, 0.38f, 0f), new Vector3(0.05f, 0.30f, 0.05f), pal.Secondary, "Antenna");
                 Part(PrimitiveType.Sphere, Head, new Vector3(0f, 0.56f, 0f), new Vector3(0.13f, 0.13f, 0.13f), pal.Accent, "AntennaTip");
                 Part(PrimitiveType.Cube, Torso, new Vector3(0f, 0.05f, 0.20f), new Vector3(0.40f, 0.30f, 0.05f), new Color(0.30f, 0.95f, 1f), "ChestScreen");
+                break; }
+            case "Jester": {
+                // Three-pronged fool's cap with gold bells, ruff collar, chest star.
+                var j1 = PartCone(Head, new Vector3(-0.20f, 0.30f, 0f), new Vector3(0.14f, 0.36f, 0.14f), pal.Main, "FoolL");
+                j1.transform.localRotation = Quaternion.Euler(0f, 0f, 32f);
+                PartCone(Head, new Vector3(0f, 0.36f, 0f), new Vector3(0.14f, 0.40f, 0.14f), pal.Secondary, "FoolC");
+                var j3 = PartCone(Head, new Vector3(0.20f, 0.30f, 0f), new Vector3(0.14f, 0.36f, 0.14f), pal.Main, "FoolR");
+                j3.transform.localRotation = Quaternion.Euler(0f, 0f, -32f);
+                Part(PrimitiveType.Sphere, Head, new Vector3(-0.32f, 0.44f, 0f), new Vector3(0.10f, 0.10f, 0.10f), pal.Accent, "BellL");
+                Part(PrimitiveType.Sphere, Head, new Vector3(0f, 0.60f, 0f), new Vector3(0.10f, 0.10f, 0.10f), pal.Accent, "BellC");
+                Part(PrimitiveType.Sphere, Head, new Vector3(0.32f, 0.44f, 0f), new Vector3(0.10f, 0.10f, 0.10f), pal.Accent, "BellR");
+                Part(PrimitiveType.Cylinder, Body, new Vector3(0f, 1.86f, 0f), new Vector3(0.56f, 0.12f, 0.56f), Color.white, "Ruff");
+                var star = Part(PrimitiveType.Cube, Torso, new Vector3(0f, 0.05f, 0.21f), new Vector3(0.20f, 0.20f, 0.04f), pal.Accent, "Star");
+                star.transform.localRotation = Quaternion.Euler(0f, 0f, 45f);
+                break; }
+            case "Pyra": {
+                // Flame hair (three cones) and a fire staff with a glowing orb.
+                var f1 = PartCone(Head, new Vector3(-0.14f, 0.30f, -0.04f), new Vector3(0.16f, 0.38f, 0.16f), new Color(1f, 0.45f, 0.10f), "FlameL");
+                f1.transform.localRotation = Quaternion.Euler(-10f, 0f, 14f);
+                PartCone(Head, new Vector3(0.05f, 0.36f, -0.02f), new Vector3(0.18f, 0.48f, 0.18f), new Color(1f, 0.62f, 0.12f), "FlameC");
+                var f3 = PartCone(Head, new Vector3(0.20f, 0.28f, -0.04f), new Vector3(0.14f, 0.32f, 0.14f), new Color(0.95f, 0.30f, 0.08f), "FlameR");
+                f3.transform.localRotation = Quaternion.Euler(-8f, 0f, -16f);
+                Part(PrimitiveType.Cylinder, ArmR, new Vector3(0f, -0.55f, 0.06f), new Vector3(0.06f, 1.15f, 0.06f), pal.Dark, "Staff");
+                Part(PrimitiveType.Sphere, ArmR, new Vector3(0f, -1.18f, 0.06f), new Vector3(0.20f, 0.20f, 0.20f), pal.Accent, "FireOrb");
+                break; }
+            case "Gusto": {
+                // Tall chef hat, neckerchief, apron, and a trusty frying pan.
+                Part(PrimitiveType.Cylinder, Head, new Vector3(0f, 0.30f, 0f), new Vector3(0.40f, 0.30f, 0.40f), Color.white, "Toque");
+                Part(PrimitiveType.Sphere, Head, new Vector3(0f, 0.50f, 0f), new Vector3(0.46f, 0.26f, 0.46f), Color.white, "ToqueTop");
+                Part(PrimitiveType.Cube, Body, new Vector3(0f, 1.80f, 0.16f), new Vector3(0.30f, 0.16f, 0.10f), pal.Accent, "Scarf");
+                Part(PrimitiveType.Cube, Torso, new Vector3(0f, -0.05f, 0.20f), new Vector3(0.50f, 0.55f, 0.04f), Color.white, "Apron");
+                Part(PrimitiveType.Cylinder, ArmR, new Vector3(0f, -0.80f, 0.08f), new Vector3(0.34f, 0.05f, 0.34f), pal.Dark, "Pan");
+                Part(PrimitiveType.Cube, ArmR, new Vector3(0f, -0.66f, 0.02f), new Vector3(0.05f, 0.22f, 0.05f), pal.Dark, "PanHandle");
+                break; }
+            case "Dusty": {
+                // Cowboy hat and band, bandana, poncho, six-shooter.
+                Part(PrimitiveType.Cylinder, Head, new Vector3(0f, 0.22f, 0f), new Vector3(0.68f, 0.05f, 0.68f), pal.Main, "Brim");
+                Part(PrimitiveType.Cylinder, Head, new Vector3(0f, 0.34f, 0f), new Vector3(0.40f, 0.24f, 0.40f), pal.Main, "Crown");
+                Part(PrimitiveType.Cube, Head, new Vector3(0f, 0.24f, 0f), new Vector3(0.42f, 0.07f, 0.42f), pal.Accent, "HatBand");
+                Part(PrimitiveType.Cube, Body, new Vector3(0f, 1.78f, 0.14f), new Vector3(0.34f, 0.20f, 0.12f), pal.Accent, "Bandana");
+                Part(PrimitiveType.Cube, Torso, new Vector3(0f, 0.10f, 0f), new Vector3(0.70f, 0.30f, 0.44f), pal.Secondary, "Poncho");
+                Part(PrimitiveType.Cube, ArmR, new Vector3(0f, -0.74f, 0.10f), new Vector3(0.07f, 0.16f, 0.30f), pal.Dark, "SixShooter");
                 break; }
         }
     }

@@ -159,46 +159,5 @@ public static class ItemCatalog
     }
 }
 
-// Builds the in-world visual for an item definition (ground, held, or thrown).
-public static class ItemVisual
-{
-    public static GameObject Build(ItemDefinition def, string goName)
-    {
-        PrimitiveType prim;
-        switch (def.Shape)
-        {
-            case ItemShape.Sphere: prim = PrimitiveType.Sphere; break;
-            case ItemShape.Cylinder: prim = PrimitiveType.Cylinder; break;
-            case ItemShape.Capsule: prim = PrimitiveType.Capsule; break;
-            default: prim = PrimitiveType.Cube; break;
-        }
-        var go = GameObject.CreatePrimitive(prim);
-        go.name = goName;
-        var rend = go.GetComponent<Renderer>();
-        if (rend != null) rend.material.color = def.Color;
-
-        float s = def.Scale;
-        switch (def.Archetype)
-        {
-            case ItemArchetype.Melee:
-                go.transform.localScale = new Vector3(0.18f * s + 0.08f, 1.0f * s, 0.18f * s + 0.08f);
-                break;
-            case ItemArchetype.Gun:
-                go.transform.localScale = new Vector3(0.28f, 0.28f, 0.85f * s + 0.2f);
-                break;
-            case ItemArchetype.Special:
-                go.transform.localScale = new Vector3(0.35f, 0.8f * s, 0.35f);
-                break;
-            default: // Throwable / Explosive / Food: chunky, readable, catchable size
-                go.transform.localScale = Vector3.one * (0.55f * s + 0.25f);
-                break;
-        }
-        return go;
-    }
-
-    public static void StripCollider(GameObject go)
-    {
-        var col = go.GetComponent<Collider>();
-        if (col != null) Object.Destroy(col);
-    }
-}
+// Item visuals moved to ItemVisual.cs (v0.5): every item gets its own
+// multi-part 3D model with idle animation, in Power Stone item families.

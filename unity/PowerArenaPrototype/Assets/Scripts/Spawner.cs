@@ -12,7 +12,7 @@ public class Spawner : MonoBehaviour
     public float gemInterval = 6f;
     public int maxGems = 2;
 
-    [Header("Items (from the 110-item catalog)")]
+    [Header("Items (from the 111-item catalog)")]
     public float itemFirstDelay = 3f;
     public float itemInterval = 5f;
     public int maxGroundItems = 10; // includes the starting stage props

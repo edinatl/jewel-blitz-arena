@@ -17,6 +17,7 @@ public class PlayerController : MonoBehaviour
     public KeyCode jumpKey = KeyCode.Space;
     public KeyCode attackKey = KeyCode.F;
     public KeyCode heavyKey = KeyCode.G;
+    public KeyCode fusionKey = KeyCode.H;
 
     [Header("Movement")]
     public float moveSpeed = 6f;
@@ -49,6 +50,11 @@ public class PlayerController : MonoBehaviour
             moveInput = Vector3.zero;
             return;
         }
+        if (combat != null && combat.IsKnockedDown)
+        {
+            moveInput = Vector3.zero;
+            return;
+        }
 
         // Human takeover: any P2 key press disables AI for this match.
         if (aiEnabled && !aiTakenOver && playerIndex == 1)
@@ -56,7 +62,7 @@ public class PlayerController : MonoBehaviour
             if (Input.GetKeyDown(upKey) || Input.GetKeyDown(downKey) ||
                 Input.GetKeyDown(leftKey) || Input.GetKeyDown(rightKey) ||
                 Input.GetKeyDown(attackKey) || Input.GetKeyDown(heavyKey) ||
-                Input.GetKeyDown(jumpKey))
+                Input.GetKeyDown(fusionKey) || Input.GetKeyDown(jumpKey))
             {
                 aiTakenOver = true;
                 aiEnabled = false;
@@ -76,7 +82,8 @@ public class PlayerController : MonoBehaviour
         if (Input.GetKey(rightKey)) x += 1f;
         moveInput = new Vector3(x, 0f, z);
 
-        if (Input.GetKeyDown(jumpKey) && IsGrounded()) Jump();
+        if (Input.GetKeyDown(jumpKey)) HandleJumpKey();
+        if (Input.GetKeyDown(fusionKey) && combat != null) combat.TryFusion();
         if (Input.GetKeyDown(attackKey) && combat != null)
         {
             // Empty hands + light attack = CATCH window (also swings, harmless).
@@ -91,6 +98,16 @@ public class PlayerController : MonoBehaviour
     {
         if (rb == null) return;
         if (health != null && health.IsKO) return;
+
+        if (rollTimeLeft > 0f)
+        {
+            rollTimeLeft -= Time.fixedDeltaTime;
+            Vector3 rv = rb.velocity;
+            rb.velocity = new Vector3(rollDir.x * 10.5f, rv.y, rollDir.z * 10.5f);
+            FaceDirection(rollDir);
+            return;
+        }
+        if (IsGrounded()) wallJumped = false;
 
         float speed = moveSpeed;
         if (combat != null && combat.IsTransformed) speed *= 1.25f;
@@ -146,10 +163,47 @@ public class PlayerController : MonoBehaviour
         rb.velocity = new Vector3(v.x, jumpForce, v.z);
     }
 
+    // CROSS button (v0.5): grounded + moving = DODGE ROLL (invincible for
+    // 0.38s), grounded + standing = jump, airborne near a wall = WALL JUMP
+    // back toward the arena center (once per airtime).
+    private float rollTimeLeft = 0f;
+    private Vector3 rollDir = Vector3.forward;
+    private bool wallJumped = false;
+
+    void HandleJumpKey()
+    {
+        if (IsGrounded())
+        {
+            wallJumped = false;
+            if (moveInput.sqrMagnitude > 0.05f) StartRoll(moveInput);
+            else Jump();
+        }
+        else if (!wallJumped)
+        {
+            Vector3 p = transform.position;
+            if (Mathf.Abs(p.x) > 7.2f || Mathf.Abs(p.z) > 7.2f)
+            {
+                wallJumped = true;
+                Vector3 toCenter = new Vector3(-p.x, 0f, -p.z).normalized;
+                if (rb != null)
+                    rb.velocity = new Vector3(toCenter.x * 5f, jumpForce * 0.9f, toCenter.z * 5f);
+            }
+        }
+    }
+
+    public void StartRoll(Vector3 dir)
+    {
+        if (combat != null) combat.StartRoll();
+        rollTimeLeft = PlayerCombat.RollDuration;
+        dir.y = 0f;
+        rollDir = dir.sqrMagnitude > 0.01f ? dir.normalized : transform.forward;
+    }
+
     // --- Very simple bot: chase gems, otherwise chase + hit the opponent ------
 
     void UpdateAI()
     {
+        if (combat != null && combat.IsKnockedDown) { moveInput = Vector3.zero; return; }
         aiAttackTimer -= Time.deltaTime;
         aiJumpTimer -= Time.deltaTime;
         aiCatchCooldown -= Time.deltaTime;
@@ -169,7 +223,10 @@ public class PlayerController : MonoBehaviour
                 {
                     aiCatchCooldown = 1f;
                     FaceDirection(-thrown[i].Velocity);
-                    if (Random.value < 0.75f) combat.StartCatchWindow();
+                    float roll = Random.value;
+                    if (roll < 0.65f) combat.StartCatchWindow();
+                    else if (roll < 0.85f)
+                        StartRoll(new Vector3(-thrown[i].Velocity.x, 0f, -thrown[i].Velocity.z));
                     break;
                 }
             }
@@ -207,6 +264,15 @@ public class PlayerController : MonoBehaviour
         float dist = to.magnitude;
 
         moveInput = dist > targetStopDist ? to.normalized : Vector3.zero;
+
+        // Transformed with gauge to burn: let the Fusion fly sometimes.
+        if (combat != null && combat.IsTransformed && combat.PowerGauge >= 50f &&
+            aiAttackTimer <= 0f && Random.value < 0.3f)
+        {
+            aiAttackTimer = 1.4f;
+            combat.TryFusion();
+            return;
+        }
 
         // Ranged behavior: holding a throwable/explosive/gun at distance.
         if (combat != null && combat.HasItem && aiAttackTimer <= 0f)

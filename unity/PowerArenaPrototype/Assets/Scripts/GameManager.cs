@@ -162,13 +162,14 @@ public class GameManager : MonoBehaviour
             string pips = "Gems: ";
             for (int g = 0; g < 3; g++) pips += (g < gems) ? "[X] " : "[ ] ";
             if (combat != null && combat.IsTransformed)
-                pips = "Transformed: " + Mathf.CeilToInt(combat.TransformTimeLeft) + "s";
+                pips = "POWER GAUGE: " + Mathf.RoundToInt(combat.PowerGauge) + "%  (Drive 25 / Fusion 50)";
             GUI.Label(new Rect(x, y + 46f, w, 20f), pips);
 
             // Held item + catch flash
             if (combat != null)
             {
                 string held = combat.HasItem ? ("Item: " + combat.HeldItemName) : "Item: -";
+                held += "   Gold: " + combat.gold;
                 if (Time.time - combat.LastCatchTime < 1.5f) held += "   CAUGHT!";
                 GUI.Label(new Rect(x, y + 66f, w, 20f), held);
             }
@@ -189,6 +190,6 @@ public class GameManager : MonoBehaviour
 
         // Controls footer
         GUI.Label(new Rect(20f, Screen.height - 28f, Screen.width - 40f, 22f),
-            "P1: WASD, SPACE jump, F light/use (empty hands = CATCH), G heavy/THROW item   |   P2 (AI on — any P2 key takes over): Arrows, RightShift jump, . light/catch, / heavy/throw   |   R restart");
+            "P1: WASD move, SPACE jump (moving = DODGE ROLL, near wall = wall jump), F attack/Drive, G throw/catch, H Fusion/drop   |   P2 (AI on — any P2 key takes over): Arrows, RightShift, . attack, / throw, , Fusion   |   R restart");
     }
 }

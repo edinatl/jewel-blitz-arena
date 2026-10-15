@@ -37,10 +37,12 @@ public class FighterAnimator : MonoBehaviour
         float dt = Time.deltaTime;
         float t = Time.time;
 
-        // --- KO: tip the whole figure over and stay down -------------------
-        if (health != null && health.IsKO)
+        // --- KO / KNOCKDOWN: tip the whole figure over ----------------------
+        // Knockdown uses the same fall but blends back up when it ends.
+        bool down = (health != null && health.IsKO) || (combat != null && combat.IsKnockedDown);
+        if (down || koBlend > 0.01f)
         {
-            koBlend = Mathf.Min(1f, koBlend + dt * 2.2f);
+            koBlend = Mathf.Clamp01(koBlend + (down ? dt * 2.2f : -dt * 3f));
             float fall = Mathf.Sin(koBlend * Mathf.PI * 0.5f);
             visual.Body.localRotation = Quaternion.Euler(-88f * fall, 0f, 0f);
             visual.Body.localPosition = new Vector3(0f, -1.02f + 0.55f * fall, -0.35f * fall);
@@ -48,7 +50,6 @@ public class FighterAnimator : MonoBehaviour
             visual.ArmR.localRotation = Quaternion.Euler(-0.5f * fall, 0f, -0.7f * fall);
             return;
         }
-        koBlend = 0f;
 
         Vector3 flatVel = rb != null ? new Vector3(rb.velocity.x, 0f, rb.velocity.z) : Vector3.zero;
         float speed = flatVel.magnitude;
@@ -119,6 +120,12 @@ public class FighterAnimator : MonoBehaviour
         float bob = grounded ? Mathf.Abs(Mathf.Sin(runPhase)) * 0.07f * speedF : 0f;
         float lean = 0.14f * speedF - 0.30f * flinchBlend;
         visual.Body.localRotation = Quaternion.Euler(lean, 0f, 0f);
+        // Dodge roll: tuck and spin the whole figure forward.
+        if (combat != null && combat.IsRolling)
+        {
+            float rp = Mathf.Clamp01((t - combat.RollStartTime) / PlayerCombat.RollDuration);
+            visual.Body.localRotation = Quaternion.Euler(-360f * rp, 0f, 0f);
+        }
         Vector3 bp = new Vector3(0f, -1.02f + bob, 0f);
 
         // Transform: gold tint + pulsing aura scale.
