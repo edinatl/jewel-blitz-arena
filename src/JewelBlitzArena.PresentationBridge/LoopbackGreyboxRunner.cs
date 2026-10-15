@@ -45,6 +45,12 @@ namespace JewelBlitzArena.PresentationBridge
         public bool ShowDisconnectWarning =>
             _harness.Player0.ShowDisconnectWarning || _harness.Player1.ShowDisconnectWarning;
 
+        public bool DisconnectReplaceReady =>
+            _harness.Player0.DisconnectReplaceReady || _harness.Player1.DisconnectReplaceReady;
+
+        public int CpuReplacedMask =>
+            _harness.Player0.CpuReplacedMask | _harness.Player1.CpuReplacedMask;
+
         public void Reset(ulong seed, ContentCatalog? catalog = null)
         {
             _harness.Reset(seed, catalog);

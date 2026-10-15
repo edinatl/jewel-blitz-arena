@@ -27,6 +27,7 @@ namespace JewelBlitzArena.Net
         private bool _isStalling;
         private int _stallFrames;
         private int _stalledRemotePlayer = -1;
+        private int _cpuReplacedMask;
 
         public RollbackSession(SessionConfig config, INetTransport transport)
         {
@@ -70,8 +71,16 @@ namespace JewelBlitzArena.Net
         /// <summary>True once stall has lasted ~3 s — lobby should show disconnect timer.</summary>
         public bool ShowDisconnectWarning => _stallFrames >= SessionConfig.StallDisconnectWarnFrames;
 
-        /// <summary>True once stall has lasted ~10 s — peer should be replaced by CPU (later).</summary>
+        /// <summary>True once stall has lasted ~10 s — peer is auto-replaced by CPU.</summary>
         public bool DisconnectReplaceReady => _stallFrames >= SessionConfig.StallDisconnectReplaceFrames;
+
+        /// <summary>Bitmask of player indices handed to a CPU after disconnect.</summary>
+        public int CpuReplacedMask => _cpuReplacedMask;
+
+        public bool IsCpuReplaced(int playerIndex) =>
+            playerIndex >= 0
+            && playerIndex < SessionConfig.MaxPlayers
+            && (_cpuReplacedMask & (1 << playerIndex)) != 0;
 
         public void Reset(in MatchConfig matchConfig, ContentCatalog? catalog = null)
         {
@@ -85,6 +94,7 @@ namespace JewelBlitzArena.Net
             _isStalling = false;
             _stallFrames = 0;
             _stalledRemotePlayer = -1;
+            _cpuReplacedMask = 0;
             _snapshots.Reset();
             _snapshots.Store(0, _sim.Snapshot());
             for (int i = 0; i < _rings.Length; i++)
@@ -101,6 +111,11 @@ namespace JewelBlitzArena.Net
         public bool Advance(InputFrame localInput)
         {
             PollRemote();
+
+            if (DisconnectReplaceReady)
+            {
+                TryReplaceStalledPeerWithCpu();
+            }
 
             int assignFrame = _simFrame + _config.InputDelay;
             _rings[_config.LocalPlayerIndex].SetLocalScheduled(assignFrame, localInput);
@@ -121,13 +136,41 @@ namespace JewelBlitzArena.Net
             return true;
         }
 
+        /// <summary>
+        /// Hand the stalled remote peer to a Sim CPU brain (modes §7 / architecture §3).
+        /// Clears the stall so the match can continue; CPU inputs need no network traffic.
+        /// </summary>
+        public bool TryReplaceStalledPeerWithCpu()
+        {
+            if (!DisconnectReplaceReady)
+            {
+                return false;
+            }
+
+            int peer = _stalledRemotePlayer;
+            if (peer < 0 || peer >= _config.PlayerCount || peer == _config.LocalPlayerIndex)
+            {
+                return false;
+            }
+
+            if (IsCpuReplaced(peer))
+            {
+                return false;
+            }
+
+            _cpuReplacedMask |= 1 << peer;
+            _sim.SetCpuControlled(peer, controlled: true);
+            ClearStall();
+            return true;
+        }
+
         private bool TryBeginStall()
         {
             // Before any remote input is confirmed, allow prediction through the input-delay
             // fill window; stall only once a peer has gone silent past the rollback window.
             for (int p = 0; p < _config.PlayerCount; p++)
             {
-                if (p == _config.LocalPlayerIndex)
+                if (p == _config.LocalPlayerIndex || IsCpuReplaced(p))
                 {
                     continue;
                 }
@@ -246,6 +289,7 @@ namespace JewelBlitzArena.Net
             }
 
             _sim.Restore(snap);
+            ReapplyCpuReplacements();
             _rollbackCount++;
 
             int target = _simFrame;
@@ -255,6 +299,17 @@ namespace JewelBlitzArena.Net
                 StepConfirmedOrPredicted(f);
                 _simFrame = _sim.Frame;
                 _snapshots.Store(_simFrame, _sim.Snapshot());
+            }
+        }
+
+        private void ReapplyCpuReplacements()
+        {
+            for (int p = 0; p < _config.PlayerCount; p++)
+            {
+                if (IsCpuReplaced(p))
+                {
+                    _sim.SetCpuControlled(p, controlled: true);
+                }
             }
         }
 

@@ -215,5 +215,27 @@ namespace JewelBlitzArena.Sim
                 }
             }
         }
+
+        public static CpuBrainSlot GetCpuBrain(ref MatchState state, int index)
+        {
+            unsafe
+            {
+                fixed (byte* p = state.CpuBrains)
+                {
+                    return ((CpuBrainSlot*)p)[index];
+                }
+            }
+        }
+
+        public static void SetCpuBrain(ref MatchState state, int index, in CpuBrainSlot brain)
+        {
+            unsafe
+            {
+                fixed (byte* p = state.CpuBrains)
+                {
+                    ((CpuBrainSlot*)p)[index] = brain;
+                }
+            }
+        }
     }
 }

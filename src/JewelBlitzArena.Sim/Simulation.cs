@@ -151,16 +151,16 @@ namespace JewelBlitzArena.Sim
             }
 
             _contacts.Clear();
-            _lastInputs[0] = i0;
-            _lastInputs[1] = i1;
-            _lastInputs[2] = i2;
-            _lastInputs[3] = i3;
+            _lastInputs[0] = ResolveSlotInput(0, i0);
+            _lastInputs[1] = ResolveSlotInput(1, i1);
+            _lastInputs[2] = ResolveSlotInput(2, i2);
+            _lastInputs[3] = ResolveSlotInput(3, i3);
 
             // S1 combat input (skips Attack when holding an item).
-            CombatSystem.ApplyInput(ref _state, 0, i0, _kits[0], _dtWalk[0], _dtRun[0], _dtFull[0]);
-            CombatSystem.ApplyInput(ref _state, 1, i1, _kits[1], _dtWalk[1], _dtRun[1], _dtFull[1]);
-            CombatSystem.ApplyInput(ref _state, 2, i2, _kits[2], _dtWalk[2], _dtRun[2], _dtFull[2]);
-            CombatSystem.ApplyInput(ref _state, 3, i3, _kits[3], _dtWalk[3], _dtRun[3], _dtFull[3]);
+            CombatSystem.ApplyInput(ref _state, 0, _lastInputs[0], _kits[0], _dtWalk[0], _dtRun[0], _dtFull[0]);
+            CombatSystem.ApplyInput(ref _state, 1, _lastInputs[1], _kits[1], _dtWalk[1], _dtRun[1], _dtFull[1]);
+            CombatSystem.ApplyInput(ref _state, 2, _lastInputs[2], _kits[2], _dtWalk[2], _dtRun[2], _dtFull[2]);
+            CombatSystem.ApplyInput(ref _state, 3, _lastInputs[3], _kits[3], _dtWalk[3], _dtRun[3], _dtFull[3]);
 
             // S2 item pickup/throw/catch.
             for (int a = 0; a < _state.ActorCount; a++)
@@ -250,6 +250,21 @@ namespace JewelBlitzArena.Sim
 
         public void Restore(in MatchState snapshot) => _state = snapshot;
 
+        /// <summary>Hand a fighter slot to a deterministic CPU brain (online disconnect / fill).</summary>
+        public void SetCpuControlled(int slot, bool controlled)
+        {
+            if (controlled)
+            {
+                CpuBrainRuntime.Activate(ref _state, slot);
+            }
+            else
+            {
+                CpuBrainRuntime.Deactivate(ref _state, slot);
+            }
+        }
+
+        public bool IsCpuControlled(int slot) => CpuBrainRuntime.IsActive(ref _state, slot);
+
         public MatchResult BuildResult()
         {
             var result = new MatchResult
@@ -315,6 +330,16 @@ namespace JewelBlitzArena.Sim
             }
 
             return result;
+        }
+
+        private InputFrame ResolveSlotInput(int slot, InputFrame provided)
+        {
+            if (slot < _state.ActorCount && CpuBrainRuntime.IsActive(ref _state, slot))
+            {
+                return CpuBrainRuntime.Think(ref _state, slot);
+            }
+
+            return provided;
         }
 
         private void IntegrateActorsHorizontal()

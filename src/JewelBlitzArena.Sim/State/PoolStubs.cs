@@ -123,7 +123,11 @@ namespace JewelBlitzArena.Sim
     {
         public int ThinkCooldown;
         public int TargetSlot;
+
+        /// <summary>Packed <see cref="InputFrame.Bits"/> from the last think.</summary>
         public int LastDecision;
+
+        /// <summary>Bit 0 = active CPU control (<see cref="CpuBrainRuntime.FlagActive"/>).</summary>
         public uint Reserved;
     }
 }

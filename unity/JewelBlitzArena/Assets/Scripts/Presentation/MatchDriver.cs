@@ -76,6 +76,10 @@ namespace JewelBlitzArena.Presentation
 
         public bool ShowDisconnectWarning => _loopback?.ShowDisconnectWarning ?? false;
 
+        public bool DisconnectReplaceReady => _loopback?.DisconnectReplaceReady ?? false;
+
+        public int CpuReplacedMask => _loopback?.CpuReplacedMask ?? 0;
+
         private void Awake()
         {
             if (contentBlob != null && contentBlob.bytes != null && contentBlob.bytes.Length > 0)

@@ -46,14 +46,13 @@ namespace JewelBlitzArena.Presentation
 
             driver.GetDisplayStates(out _, out MatchState state);
             ContentCatalog? catalog = driver.Catalog;
-            CameraVolume volume = StageCameraVolumes.Resolve(catalog, in state);
-            CameraFrame frame = StageCameraVolumes.FrameActors(ref state, in volume, padding);
+            CameraFrame frame = StageCameraVolumes.FrameFromCatalog(catalog, ref state, padding);
 
-            // Snap look height on phase change; otherwise critically-damped-ish follow.
+            // Snap on phase change / scripted transition path; otherwise critically-damped-ish follow.
             float lerp = followLerp;
-            if (frame.PhaseIndex != _lastPhase)
+            if (frame.PhaseIndex != _lastPhase || frame.InScriptedPath)
             {
-                lerp = 40f;
+                lerp = frame.InScriptedPath ? 60f : 40f;
                 _lastPhase = frame.PhaseIndex;
             }
 

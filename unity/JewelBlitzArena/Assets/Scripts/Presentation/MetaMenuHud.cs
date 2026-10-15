@@ -1,4 +1,5 @@
 using JewelBlitzArena.Meta;
+using JewelBlitzArena.PresentationBridge;
 using JewelBlitzArena.Sim;
 using UnityEngine;
 
@@ -10,6 +11,8 @@ namespace JewelBlitzArena.Presentation
     public sealed class MetaMenuHud : MonoBehaviour
     {
         [SerializeField] private MatchDriver? driver;
+
+        private CameraFrame _lastFrame;
 
         private void Start()
         {
@@ -34,6 +37,7 @@ namespace JewelBlitzArena.Presentation
             }
 
             DrawMatchHud(pad);
+            DrawEdgeBubbles();
         }
 
         private void DrawMenu(int pad)
@@ -90,21 +94,41 @@ namespace JewelBlitzArena.Presentation
         private void DrawMatchHud(int pad)
         {
             driver!.GetDisplayStates(out _, out MatchState state);
-            var volume = JewelBlitzArena.PresentationBridge.StageCameraVolumes.Resolve(driver.Catalog, in state);
-            GUILayout.BeginArea(new Rect(pad, pad, 480, 280));
+            _lastFrame = StageCameraVolumes.FrameFromCatalog(driver.Catalog, ref state);
+            CameraVolume volume = StageCameraVolumes.Resolve(driver.Catalog, in state);
+            GUILayout.BeginArea(new Rect(pad, pad, 520, 320));
             string mode = driver.SimMode == GreyboxSimMode.LoopbackNet ? "LoopbackNet" : "OfflineMeta";
             GUILayout.Label($"Jewel Blitz Arena — {mode}");
             GUILayout.Label(
                 $"frame {state.Frame}  phase {state.PhaseIndex}  hash 0x{driver.LastHash:X16}");
             GUILayout.Label(
                 $"camera vol r={volume.Radius:0.#}  center=({volume.CenterX:0.#},{volume.CenterY:0.#},{volume.CenterZ:0.#})");
+            if (_lastFrame.InScriptedPath)
+            {
+                GUILayout.Label($"scripted cam path t={_lastFrame.PathT:0.00}");
+            }
+
+            if (_lastFrame.FitFailed)
+            {
+                GUILayout.Label($"edge bubbles={_lastFrame.EdgeBubbleCount} (fit failed)");
+            }
+
             if (driver.SimMode == GreyboxSimMode.LoopbackNet)
             {
                 GUILayout.Label($"rollbacks={driver.RollbackCount}  desync={driver.DesyncFlagged}");
-                if (driver.IsStalling)
+                if (driver.CpuReplacedMask != 0)
+                {
+                    GUILayout.Label($"CPU replace mask=0x{driver.CpuReplacedMask:X}");
+                }
+                else if (driver.IsStalling)
                 {
                     string warn = driver.ShowDisconnectWarning ? "  DISCONNECT TIMER" : string.Empty;
-                    GUILayout.Label($"⏳ waiting for peer… stallFrames={driver.StallFrames}{warn}");
+                    if (driver.DisconnectReplaceReady)
+                    {
+                        warn += "  REPLACE READY";
+                    }
+
+                    GUILayout.Label($"waiting for peer… stallFrames={driver.StallFrames}{warn}");
                 }
             }
 
@@ -137,6 +161,34 @@ namespace JewelBlitzArena.Presentation
                 {
                     driver.FinishMatchToMenu();
                 }
+            }
+        }
+
+        private void DrawEdgeBubbles()
+        {
+            if (!_lastFrame.FitFailed || _lastFrame.EdgeBubbleCount <= 0)
+            {
+                return;
+            }
+
+            float cx = Screen.width * 0.5f;
+            float cy = Screen.height * 0.5f;
+            float rx = Screen.width * 0.42f;
+            float ry = Screen.height * 0.38f;
+            const float size = 56f;
+
+            for (int i = 0; i < _lastFrame.EdgeBubbleCount; i++)
+            {
+                EdgeBubble b = _lastFrame.GetEdgeBubble(i);
+                float x = cx + (b.EdgeU * rx) - (size * 0.5f);
+                float y = cy - (b.EdgeV * ry) - (size * 0.5f);
+                var rect = new Rect(x, y, size, size);
+                Color prev = GUI.color;
+                GUI.color = new Color(0.12f, 0.14f, 0.18f, 0.85f);
+                GUI.Box(rect, string.Empty);
+                GUI.color = Color.white;
+                GUI.Label(rect, $"P{b.ActorIndex + 1}");
+                GUI.color = prev;
             }
         }
     }
