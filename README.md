@@ -30,5 +30,14 @@ dotnet run --project tools/JewelBlitzArena.GreyboxCli -c Release -- --frames 180
 
 `unity/PowerArenaPrototype` remains quarantined feel-lab — do not grow it into the ship host.
 
+## Netcode scaffold (S7)
+
+GGPO-style session shell in `src/JewelBlitzArena.Net` (input delay, rollback window 8, 2-byte inputs via PresentationBridge quantize). Headless dual-peer loopback:
+
+```bash
+dotnet test JewelBlitzArena.sln -c Release --filter NetcodeScaffold
+dotnet run --project tools/JewelBlitzArena.NetSmoke -c Release -- --frames 180 --delivery-delay 3
+```
+
 Design index: `PLAN.md`. Architecture: `docs/tech/architecture.md`.
 
