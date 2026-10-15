@@ -20,3 +20,8 @@ jobs:
         run: dotnet build JewelBlitzArena.sln --configuration Release --no-restore
       - name: Test
         run: dotnet test JewelBlitzArena.sln --configuration Release --no-build --verbosity normal
+      # S8 gates — keep after S0 unit tests so a red corpus/ban never hides a compile break.
+      - name: Determinism corpus
+        run: dotnet run --project tools/JewelBlitzArena.CorpusRunner -c Release --no-build -- run --corpus corpus
+      - name: Sim ban check (float / nondeterminism)
+        run: python3 tools/scripts/check-sim-bans.py

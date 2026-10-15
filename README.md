@@ -14,5 +14,20 @@ Headless match simulation lives in `src/JewelBlitzArena.Sim` (no Unity reference
 dotnet test JewelBlitzArena.sln -c Release
 ```
 
+## Determinism CI (S8)
+
+```bash
+# Unit tests + corpus-loaded NUnit cases
+dotnet test JewelBlitzArena.sln -c Release
+
+# Recorded match corpus (hash gate)
+dotnet run --project tools/JewelBlitzArena.CorpusRunner -c Release -- run --corpus corpus
+
+# Fail on float / banned APIs in Sim and Data
+python3 tools/scripts/check-sim-bans.py
+```
+
+Corpus files live in `corpus/`. Tools library: `src/JewelBlitzArena.Tools`.
+
 Design index: `PLAN.md`. Architecture: `docs/tech/architecture.md`.
 
