@@ -13,7 +13,7 @@ public sealed class DataPipelineTests
         AuthoredContentPack pack = SampleContentFactory.CreateS5StubPack();
         ValidationResult result = ContentValidator.Validate(pack);
         Assert.That(result.IsOk, Is.True, string.Join("; ", result.Errors));
-        Assert.That(pack.Items.Count, Is.EqualTo(54));
+        Assert.That(pack.Items.Count, Is.EqualTo(79));
         Assert.That(pack.Fighters.Count, Is.EqualTo(14));
         Assert.That(pack.Stages.Count, Is.EqualTo(11));
         Assert.That(pack.Stages[0].Phases.Count, Is.EqualTo(3));

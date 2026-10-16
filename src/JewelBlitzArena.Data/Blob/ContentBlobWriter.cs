@@ -186,6 +186,7 @@ namespace JewelBlitzArena.Data
             bw.Write(i.DamagePerUse);
             bw.Write(i.HealPerUse);
             bw.Write((ushort)i.Tags);
+            bw.Write((byte)i.CosmeticSocket);
         }
 
         private static void WriteString(BinaryWriter bw, string value)

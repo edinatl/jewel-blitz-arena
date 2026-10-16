@@ -173,5 +173,7 @@ namespace JewelBlitzArena.Data
         public int HealPerUse { get; set; }
         /// <summary>Tinker affinity tags (items-and-economy.md §1).</summary>
         public ItemTag Tags { get; set; }
+        /// <summary>Fitting Room socket; <see cref="CosmeticSocket.None"/> unless Cosmetic.</summary>
+        public CosmeticSocket CosmeticSocket { get; set; }
     }
 }

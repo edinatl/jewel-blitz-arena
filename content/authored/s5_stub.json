@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 10,
+  "schemaVersion": 12,
   "fighters": [
     {
       "fighterId": 1,
@@ -2184,6 +2184,358 @@
           "creatures": []
         }
       ]
+    },
+    {
+      "stageId": 101,
+      "name": "Terraces (no boss)",
+      "jewelCrateChancePercent": 8,
+      "fallIsKo": false,
+      "jewelCapOverride": 0,
+      "phases": [
+        {
+          "name": "Open terrace",
+          "durationSeconds": "0",
+          "geometrySetId": 0,
+          "blitzSuppressed": false,
+          "transitionSeconds": "0",
+          "carryItems": "all",
+          "carryJewels": "all",
+          "carryJewelsDropChance": "0",
+          "cameraCenterX": "0",
+          "cameraCenterY": "8",
+          "cameraCenterZ": "0",
+          "cameraRadius": "16",
+          "hazards": [
+            {
+              "hazardId": 101,
+              "name": "SpineCrystalN",
+              "trigger": "proximity",
+              "periodSeconds": "0",
+              "telegraphFrames": 0,
+              "damage": 25,
+              "centerX": "0",
+              "centerY": "0",
+              "centerZ": "6",
+              "radius": "1.2"
+            },
+            {
+              "hazardId": 102,
+              "name": "SpineCrystalS",
+              "trigger": "proximity",
+              "periodSeconds": "0",
+              "telegraphFrames": 0,
+              "damage": 25,
+              "centerX": "0",
+              "centerY": "0",
+              "centerZ": "-6",
+              "radius": "1.2"
+            },
+            {
+              "hazardId": 103,
+              "name": "SpineCrystalE",
+              "trigger": "proximity",
+              "periodSeconds": "0",
+              "telegraphFrames": 0,
+              "damage": 25,
+              "centerX": "6",
+              "centerY": "0",
+              "centerZ": "0",
+              "radius": "1.2"
+            },
+            {
+              "hazardId": 104,
+              "name": "SpineCrystalW",
+              "trigger": "proximity",
+              "periodSeconds": "0",
+              "telegraphFrames": 0,
+              "damage": 25,
+              "centerX": "-6",
+              "centerY": "0",
+              "centerZ": "0",
+              "radius": "1.2"
+            }
+          ],
+          "kinematics": [],
+          "cratePoints": [
+            {
+              "x": "5",
+              "z": "5"
+            },
+            {
+              "x": "-5",
+              "z": "5"
+            },
+            {
+              "x": "5",
+              "z": "-5"
+            },
+            {
+              "x": "-5",
+              "z": "-5"
+            },
+            {
+              "x": "0",
+              "z": "0"
+            },
+            {
+              "x": "8",
+              "z": "0"
+            },
+            {
+              "x": "-8",
+              "z": "0"
+            }
+          ],
+          "waterVolumes": [],
+          "creatures": []
+        }
+      ]
+    },
+    {
+      "stageId": 102,
+      "name": "Behind the Counter",
+      "jewelCrateChancePercent": 8,
+      "fallIsKo": false,
+      "jewelCapOverride": 0,
+      "phases": [
+        {
+          "name": "Shop floor",
+          "durationSeconds": "0",
+          "geometrySetId": 0,
+          "blitzSuppressed": false,
+          "transitionSeconds": "0",
+          "carryItems": "all",
+          "carryJewels": "all",
+          "carryJewelsDropChance": "0",
+          "cameraCenterX": "0",
+          "cameraCenterY": "8",
+          "cameraCenterZ": "0",
+          "cameraRadius": "8",
+          "hazards": [
+            {
+              "hazardId": 110,
+              "name": "ShelfDropN",
+              "trigger": "proximity",
+              "periodSeconds": "0",
+              "telegraphFrames": 10,
+              "damage": 40,
+              "centerX": "0",
+              "centerY": "0",
+              "centerZ": "3",
+              "radius": "1"
+            },
+            {
+              "hazardId": 111,
+              "name": "ShelfDropE",
+              "trigger": "proximity",
+              "periodSeconds": "0",
+              "telegraphFrames": 10,
+              "damage": 40,
+              "centerX": "3",
+              "centerY": "0",
+              "centerZ": "0",
+              "radius": "1"
+            },
+            {
+              "hazardId": 112,
+              "name": "ShelfDropW",
+              "trigger": "proximity",
+              "periodSeconds": "0",
+              "telegraphFrames": 10,
+              "damage": 40,
+              "centerX": "-3",
+              "centerY": "0",
+              "centerZ": "0",
+              "radius": "1"
+            }
+          ],
+          "kinematics": [
+            {
+              "trackId": 110,
+              "name": "LampStandard",
+              "periodSeconds": "0",
+              "amplitude": "0",
+              "originX": "0",
+              "originY": "0",
+              "originZ": "0"
+            }
+          ],
+          "cratePoints": [
+            {
+              "x": "2",
+              "z": "2"
+            },
+            {
+              "x": "-2",
+              "z": "2"
+            },
+            {
+              "x": "2",
+              "z": "-2"
+            },
+            {
+              "x": "-2",
+              "z": "-2"
+            }
+          ],
+          "waterVolumes": [],
+          "creatures": []
+        }
+      ]
+    },
+    {
+      "stageId": 103,
+      "name": "Spirewalk",
+      "jewelCrateChancePercent": 8,
+      "fallIsKo": true,
+      "jewelCapOverride": 0,
+      "phases": [
+        {
+          "name": "Spars",
+          "durationSeconds": "0",
+          "geometrySetId": 0,
+          "blitzSuppressed": false,
+          "transitionSeconds": "0",
+          "carryItems": "all",
+          "carryJewels": "all",
+          "carryJewelsDropChance": "0",
+          "cameraCenterX": "0",
+          "cameraCenterY": "8",
+          "cameraCenterZ": "0",
+          "cameraRadius": "14",
+          "hazards": [
+            {
+              "hazardId": 120,
+              "name": "StarWell",
+              "trigger": "proximity",
+              "periodSeconds": "0",
+              "telegraphFrames": 0,
+              "damage": 0,
+              "centerX": "0",
+              "centerY": "0",
+              "centerZ": "0",
+              "radius": "3"
+            }
+          ],
+          "kinematics": [
+            {
+              "trackId": 120,
+              "name": "BannerSpringA",
+              "periodSeconds": "0",
+              "amplitude": "0",
+              "originX": "4",
+              "originY": "0",
+              "originZ": "2"
+            },
+            {
+              "trackId": 121,
+              "name": "BannerSpringB",
+              "periodSeconds": "0",
+              "amplitude": "0",
+              "originX": "-4",
+              "originY": "0",
+              "originZ": "-2"
+            }
+          ],
+          "cratePoints": [
+            {
+              "x": "0",
+              "z": "5"
+            }
+          ],
+          "waterVolumes": [],
+          "creatures": []
+        }
+      ]
+    },
+    {
+      "stageId": 104,
+      "name": "The Cascade",
+      "jewelCrateChancePercent": 8,
+      "fallIsKo": true,
+      "jewelCapOverride": 0,
+      "phases": [
+        {
+          "name": "Three tiers",
+          "durationSeconds": "0",
+          "geometrySetId": 0,
+          "blitzSuppressed": false,
+          "transitionSeconds": "0",
+          "carryItems": "all",
+          "carryJewels": "all",
+          "carryJewelsDropChance": "0",
+          "cameraCenterX": "0",
+          "cameraCenterY": "8",
+          "cameraCenterZ": "0",
+          "cameraRadius": "15",
+          "hazards": [
+            {
+              "hazardId": 130,
+              "name": "WallSpringL",
+              "trigger": "proximity",
+              "periodSeconds": "0",
+              "telegraphFrames": 0,
+              "damage": 0,
+              "centerX": "-5",
+              "centerY": "0",
+              "centerZ": "0",
+              "radius": "1"
+            },
+            {
+              "hazardId": 131,
+              "name": "WallSpringR",
+              "trigger": "proximity",
+              "periodSeconds": "0",
+              "telegraphFrames": 0,
+              "damage": 0,
+              "centerX": "5",
+              "centerY": "0",
+              "centerZ": "0",
+              "radius": "1"
+            }
+          ],
+          "kinematics": [],
+          "cratePoints": [
+            {
+              "x": "-3",
+              "z": "2"
+            },
+            {
+              "x": "0",
+              "z": "2"
+            },
+            {
+              "x": "3",
+              "z": "2"
+            },
+            {
+              "x": "-2",
+              "z": "0"
+            },
+            {
+              "x": "2",
+              "z": "0"
+            },
+            {
+              "x": "0",
+              "z": "-2"
+            }
+          ],
+          "waterVolumes": [
+            {
+              "centerX": "0",
+              "centerZ": "-4",
+              "radius": "4"
+            },
+            {
+              "centerX": "0",
+              "centerZ": "4",
+              "radius": "3"
+            }
+          ],
+          "creatures": []
+        }
+      ]
     }
   ],
   "items": [
@@ -2197,7 +2549,12 @@
       "buyPrice": 100,
       "sellPrice": 40,
       "damagePerUse": 25,
-      "healPerUse": 0
+      "healPerUse": 0,
+      "tags": [
+        "powder",
+        "metal"
+      ],
+      "cosmeticSocket": ""
     },
     {
       "itemId": 2,
@@ -2209,7 +2566,12 @@
       "buyPrice": 180,
       "sellPrice": 70,
       "damagePerUse": 30,
-      "healPerUse": 0
+      "healPerUse": 0,
+      "tags": [
+        "flame",
+        "powder"
+      ],
+      "cosmeticSocket": ""
     },
     {
       "itemId": 3,
@@ -2221,7 +2583,11 @@
       "buyPrice": 80,
       "sellPrice": 30,
       "damagePerUse": 30,
-      "healPerUse": 0
+      "healPerUse": 0,
+      "tags": [
+        "metal"
+      ],
+      "cosmeticSocket": ""
     },
     {
       "itemId": 4,
@@ -2233,7 +2599,11 @@
       "buyPrice": 70,
       "sellPrice": 25,
       "damagePerUse": 28,
-      "healPerUse": 0
+      "healPerUse": 0,
+      "tags": [
+        "paper"
+      ],
+      "cosmeticSocket": ""
     },
     {
       "itemId": 5,
@@ -2245,7 +2615,11 @@
       "buyPrice": 120,
       "sellPrice": 45,
       "damagePerUse": 35,
-      "healPerUse": 0
+      "healPerUse": 0,
+      "tags": [
+        "metal"
+      ],
+      "cosmeticSocket": ""
     },
     {
       "itemId": 6,
@@ -2257,7 +2631,12 @@
       "buyPrice": 140,
       "sellPrice": 50,
       "damagePerUse": 40,
-      "healPerUse": 0
+      "healPerUse": 0,
+      "tags": [
+        "stone",
+        "metal"
+      ],
+      "cosmeticSocket": ""
     },
     {
       "itemId": 7,
@@ -2269,7 +2648,11 @@
       "buyPrice": 60,
       "sellPrice": 20,
       "damagePerUse": 15,
-      "healPerUse": 0
+      "healPerUse": 0,
+      "tags": [
+        "paper"
+      ],
+      "cosmeticSocket": ""
     },
     {
       "itemId": 8,
@@ -2281,7 +2664,11 @@
       "buyPrice": 220,
       "sellPrice": 80,
       "damagePerUse": 50,
-      "healPerUse": 0
+      "healPerUse": 0,
+      "tags": [
+        "metal"
+      ],
+      "cosmeticSocket": ""
     },
     {
       "itemId": 9,
@@ -2293,7 +2680,11 @@
       "buyPrice": 90,
       "sellPrice": 35,
       "damagePerUse": 35,
-      "healPerUse": 0
+      "healPerUse": 0,
+      "tags": [
+        "flame"
+      ],
+      "cosmeticSocket": ""
     },
     {
       "itemId": 10,
@@ -2305,7 +2696,11 @@
       "buyPrice": 150,
       "sellPrice": 55,
       "damagePerUse": 45,
-      "healPerUse": 0
+      "healPerUse": 0,
+      "tags": [
+        "powder"
+      ],
+      "cosmeticSocket": ""
     },
     {
       "itemId": 11,
@@ -2317,7 +2712,11 @@
       "buyPrice": 240,
       "sellPrice": 90,
       "damagePerUse": 60,
-      "healPerUse": 0
+      "healPerUse": 0,
+      "tags": [
+        "powder"
+      ],
+      "cosmeticSocket": ""
     },
     {
       "itemId": 12,
@@ -2329,7 +2728,12 @@
       "buyPrice": 260,
       "sellPrice": 100,
       "damagePerUse": 70,
-      "healPerUse": 0
+      "healPerUse": 0,
+      "tags": [
+        "powder",
+        "stone"
+      ],
+      "cosmeticSocket": ""
     },
     {
       "itemId": 13,
@@ -2341,7 +2745,11 @@
       "buyPrice": 40,
       "sellPrice": 15,
       "damagePerUse": 0,
-      "healPerUse": 80
+      "healPerUse": 80,
+      "tags": [
+        "food"
+      ],
+      "cosmeticSocket": ""
     },
     {
       "itemId": 14,
@@ -2353,7 +2761,11 @@
       "buyPrice": 45,
       "sellPrice": 18,
       "damagePerUse": 0,
-      "healPerUse": 90
+      "healPerUse": 90,
+      "tags": [
+        "food"
+      ],
+      "cosmeticSocket": ""
     },
     {
       "itemId": 15,
@@ -2365,7 +2777,12 @@
       "buyPrice": 80,
       "sellPrice": 30,
       "damagePerUse": 0,
-      "healPerUse": 120
+      "healPerUse": 120,
+      "tags": [
+        "food",
+        "metal"
+      ],
+      "cosmeticSocket": ""
     },
     {
       "itemId": 16,
@@ -2377,7 +2794,11 @@
       "buyPrice": 100,
       "sellPrice": 40,
       "damagePerUse": 0,
-      "healPerUse": 150
+      "healPerUse": 150,
+      "tags": [
+        "food"
+      ],
+      "cosmeticSocket": ""
     },
     {
       "itemId": 17,
@@ -2389,7 +2810,11 @@
       "buyPrice": 160,
       "sellPrice": 60,
       "damagePerUse": 0,
-      "healPerUse": 200
+      "healPerUse": 200,
+      "tags": [
+        "food"
+      ],
+      "cosmeticSocket": ""
     },
     {
       "itemId": 18,
@@ -2401,7 +2826,11 @@
       "buyPrice": 110,
       "sellPrice": 40,
       "damagePerUse": 0,
-      "healPerUse": 0
+      "healPerUse": 0,
+      "tags": [
+        "glass"
+      ],
+      "cosmeticSocket": ""
     },
     {
       "itemId": 19,
@@ -2413,7 +2842,11 @@
       "buyPrice": 130,
       "sellPrice": 50,
       "damagePerUse": 0,
-      "healPerUse": 0
+      "healPerUse": 0,
+      "tags": [
+        "stone"
+      ],
+      "cosmeticSocket": ""
     },
     {
       "itemId": 20,
@@ -2425,7 +2858,11 @@
       "buyPrice": 70,
       "sellPrice": 25,
       "damagePerUse": 0,
-      "healPerUse": 0
+      "healPerUse": 0,
+      "tags": [
+        "powder"
+      ],
+      "cosmeticSocket": ""
     },
     {
       "itemId": 21,
@@ -2437,7 +2874,11 @@
       "buyPrice": 200,
       "sellPrice": 75,
       "damagePerUse": 0,
-      "healPerUse": 0
+      "healPerUse": 0,
+      "tags": [
+        "ice"
+      ],
+      "cosmeticSocket": ""
     },
     {
       "itemId": 22,
@@ -2449,7 +2890,11 @@
       "buyPrice": 150,
       "sellPrice": 55,
       "damagePerUse": 0,
-      "healPerUse": 0
+      "healPerUse": 0,
+      "tags": [
+        "metal"
+      ],
+      "cosmeticSocket": ""
     },
     {
       "itemId": 23,
@@ -2461,7 +2906,12 @@
       "buyPrice": 220,
       "sellPrice": 80,
       "damagePerUse": 0,
-      "healPerUse": 0
+      "healPerUse": 0,
+      "tags": [
+        "metal",
+        "star"
+      ],
+      "cosmeticSocket": ""
     },
     {
       "itemId": 24,
@@ -2473,7 +2923,11 @@
       "buyPrice": 300,
       "sellPrice": 100,
       "damagePerUse": 20,
-      "healPerUse": 0
+      "healPerUse": 0,
+      "tags": [
+        "star"
+      ],
+      "cosmeticSocket": ""
     },
     {
       "itemId": 25,
@@ -2485,7 +2939,11 @@
       "buyPrice": 50,
       "sellPrice": 20,
       "damagePerUse": 10,
-      "healPerUse": 0
+      "healPerUse": 0,
+      "tags": [
+        "metal"
+      ],
+      "cosmeticSocket": ""
     },
     {
       "itemId": 26,
@@ -2497,7 +2955,9 @@
       "buyPrice": 0,
       "sellPrice": 0,
       "damagePerUse": 40,
-      "healPerUse": 0
+      "healPerUse": 0,
+      "tags": [],
+      "cosmeticSocket": ""
     },
     {
       "itemId": 27,
@@ -2509,7 +2969,9 @@
       "buyPrice": 0,
       "sellPrice": 0,
       "damagePerUse": 35,
-      "healPerUse": 0
+      "healPerUse": 0,
+      "tags": [],
+      "cosmeticSocket": ""
     },
     {
       "itemId": 28,
@@ -2521,7 +2983,9 @@
       "buyPrice": 0,
       "sellPrice": 0,
       "damagePerUse": 40,
-      "healPerUse": 0
+      "healPerUse": 0,
+      "tags": [],
+      "cosmeticSocket": ""
     },
     {
       "itemId": 29,
@@ -2533,7 +2997,9 @@
       "buyPrice": 0,
       "sellPrice": 0,
       "damagePerUse": 20,
-      "healPerUse": 0
+      "healPerUse": 0,
+      "tags": [],
+      "cosmeticSocket": ""
     },
     {
       "itemId": 30,
@@ -2545,7 +3011,739 @@
       "buyPrice": 0,
       "sellPrice": 0,
       "damagePerUse": 40,
-      "healPerUse": 0
+      "healPerUse": 0,
+      "tags": [],
+      "cosmeticSocket": ""
+    },
+    {
+      "itemId": 31,
+      "name": "Flame",
+      "category": "Material",
+      "rarity": 1,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 10,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [
+        "flame"
+      ],
+      "cosmeticSocket": ""
+    },
+    {
+      "itemId": 32,
+      "name": "Tide",
+      "category": "Material",
+      "rarity": 1,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 10,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [
+        "tide"
+      ],
+      "cosmeticSocket": ""
+    },
+    {
+      "itemId": 33,
+      "name": "Storm",
+      "category": "Material",
+      "rarity": 1,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 10,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [
+        "storm"
+      ],
+      "cosmeticSocket": ""
+    },
+    {
+      "itemId": 34,
+      "name": "Stone",
+      "category": "Material",
+      "rarity": 1,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 10,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [
+        "stone"
+      ],
+      "cosmeticSocket": ""
+    },
+    {
+      "itemId": 35,
+      "name": "Star",
+      "category": "Material",
+      "rarity": 1,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 10,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [
+        "star"
+      ],
+      "cosmeticSocket": ""
+    },
+    {
+      "itemId": 36,
+      "name": "Ice",
+      "category": "Material",
+      "rarity": 1,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 10,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [
+        "ice"
+      ],
+      "cosmeticSocket": ""
+    },
+    {
+      "itemId": 37,
+      "name": "Gunpowder",
+      "category": "Material",
+      "rarity": 1,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 10,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [
+        "powder"
+      ],
+      "cosmeticSocket": ""
+    },
+    {
+      "itemId": 38,
+      "name": "Iron",
+      "category": "Material",
+      "rarity": 1,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 10,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [
+        "metal"
+      ],
+      "cosmeticSocket": ""
+    },
+    {
+      "itemId": 39,
+      "name": "Cullet",
+      "category": "Material",
+      "rarity": 1,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 10,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [
+        "glass"
+      ],
+      "cosmeticSocket": ""
+    },
+    {
+      "itemId": 40,
+      "name": "Paper",
+      "category": "Material",
+      "rarity": 1,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 10,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [
+        "paper"
+      ],
+      "cosmeticSocket": ""
+    },
+    {
+      "itemId": 41,
+      "name": "Ration",
+      "category": "Material",
+      "rarity": 1,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 10,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [
+        "food"
+      ],
+      "cosmeticSocket": ""
+    },
+    {
+      "itemId": 42,
+      "name": "Scrap",
+      "category": "Material",
+      "rarity": 1,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 5,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [],
+      "cosmeticSocket": ""
+    },
+    {
+      "itemId": 43,
+      "name": "Tincture of Flame",
+      "category": "Card",
+      "rarity": 2,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 20,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [
+        "flame"
+      ],
+      "cosmeticSocket": ""
+    },
+    {
+      "itemId": 44,
+      "name": "Tincture of Tide",
+      "category": "Card",
+      "rarity": 2,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 20,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [
+        "tide"
+      ],
+      "cosmeticSocket": ""
+    },
+    {
+      "itemId": 45,
+      "name": "Tincture of Storm",
+      "category": "Card",
+      "rarity": 2,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 20,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [
+        "storm"
+      ],
+      "cosmeticSocket": ""
+    },
+    {
+      "itemId": 46,
+      "name": "Tincture of Stone",
+      "category": "Card",
+      "rarity": 2,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 20,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [
+        "stone"
+      ],
+      "cosmeticSocket": ""
+    },
+    {
+      "itemId": 47,
+      "name": "Tincture of Star",
+      "category": "Card",
+      "rarity": 2,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 20,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [
+        "star"
+      ],
+      "cosmeticSocket": ""
+    },
+    {
+      "itemId": 48,
+      "name": "Tincture of Ice",
+      "category": "Card",
+      "rarity": 2,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 20,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [
+        "ice"
+      ],
+      "cosmeticSocket": ""
+    },
+    {
+      "itemId": 49,
+      "name": "Tincture of Powder",
+      "category": "Card",
+      "rarity": 2,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 20,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [
+        "powder"
+      ],
+      "cosmeticSocket": ""
+    },
+    {
+      "itemId": 50,
+      "name": "Tincture of Metal",
+      "category": "Card",
+      "rarity": 2,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 20,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [
+        "metal"
+      ],
+      "cosmeticSocket": ""
+    },
+    {
+      "itemId": 51,
+      "name": "Tincture of Glass",
+      "category": "Card",
+      "rarity": 2,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 20,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [
+        "glass"
+      ],
+      "cosmeticSocket": ""
+    },
+    {
+      "itemId": 52,
+      "name": "Tincture of Paper",
+      "category": "Card",
+      "rarity": 2,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 20,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [
+        "paper"
+      ],
+      "cosmeticSocket": ""
+    },
+    {
+      "itemId": 53,
+      "name": "Tincture of Food",
+      "category": "Card",
+      "rarity": 2,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 20,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [
+        "food"
+      ],
+      "cosmeticSocket": ""
+    },
+    {
+      "itemId": 54,
+      "name": "Blueprint Scrap",
+      "category": "Card",
+      "rarity": 3,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 50,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [],
+      "cosmeticSocket": ""
+    },
+    {
+      "itemId": 55,
+      "name": "Regent\u0027s Diadem",
+      "category": "Cosmetic",
+      "rarity": 7,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 100000,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [],
+      "cosmeticSocket": "Head"
+    },
+    {
+      "itemId": 56,
+      "name": "Felt Cap",
+      "category": "Cosmetic",
+      "rarity": 2,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 80,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [],
+      "cosmeticSocket": "Head"
+    },
+    {
+      "itemId": 57,
+      "name": "Soft Crown",
+      "category": "Cosmetic",
+      "rarity": 4,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 400,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [],
+      "cosmeticSocket": "Head"
+    },
+    {
+      "itemId": 58,
+      "name": "Animal Ears",
+      "category": "Cosmetic",
+      "rarity": 3,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 180,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [],
+      "cosmeticSocket": "Head"
+    },
+    {
+      "itemId": 59,
+      "name": "Wind-up Key",
+      "category": "Cosmetic",
+      "rarity": 3,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 200,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [],
+      "cosmeticSocket": "Head"
+    },
+    {
+      "itemId": 60,
+      "name": "Ribbon Hat",
+      "category": "Cosmetic",
+      "rarity": 2,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 90,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [],
+      "cosmeticSocket": "Head"
+    },
+    {
+      "itemId": 61,
+      "name": "Pilot Cap",
+      "category": "Cosmetic",
+      "rarity": 3,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 160,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [],
+      "cosmeticSocket": "Head"
+    },
+    {
+      "itemId": 62,
+      "name": "Beret",
+      "category": "Cosmetic",
+      "rarity": 2,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 70,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [],
+      "cosmeticSocket": "Head"
+    },
+    {
+      "itemId": 63,
+      "name": "Gauntlets",
+      "category": "Cosmetic",
+      "rarity": 3,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 150,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [],
+      "cosmeticSocket": "Arm"
+    },
+    {
+      "itemId": 64,
+      "name": "Bracelets",
+      "category": "Cosmetic",
+      "rarity": 2,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 85,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [],
+      "cosmeticSocket": "Arm"
+    },
+    {
+      "itemId": 65,
+      "name": "Soft Paws",
+      "category": "Cosmetic",
+      "rarity": 3,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 170,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [],
+      "cosmeticSocket": "Arm"
+    },
+    {
+      "itemId": 66,
+      "name": "Cuff Links",
+      "category": "Cosmetic",
+      "rarity": 2,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 75,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [],
+      "cosmeticSocket": "Arm"
+    },
+    {
+      "itemId": 67,
+      "name": "Arm Bands",
+      "category": "Cosmetic",
+      "rarity": 2,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 80,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [],
+      "cosmeticSocket": "Arm"
+    },
+    {
+      "itemId": 68,
+      "name": "Work Gloves",
+      "category": "Cosmetic",
+      "rarity": 1,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 40,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [],
+      "cosmeticSocket": "Arm"
+    },
+    {
+      "itemId": 69,
+      "name": "Sash",
+      "category": "Cosmetic",
+      "rarity": 2,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 90,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [],
+      "cosmeticSocket": "Waist"
+    },
+    {
+      "itemId": 70,
+      "name": "Utility Belt",
+      "category": "Cosmetic",
+      "rarity": 3,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 160,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [],
+      "cosmeticSocket": "Waist"
+    },
+    {
+      "itemId": 71,
+      "name": "Hip Pouch",
+      "category": "Cosmetic",
+      "rarity": 2,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 85,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [],
+      "cosmeticSocket": "Waist"
+    },
+    {
+      "itemId": 72,
+      "name": "Boots",
+      "category": "Cosmetic",
+      "rarity": 2,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 100,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [],
+      "cosmeticSocket": "Leg"
+    },
+    {
+      "itemId": 73,
+      "name": "Anklets",
+      "category": "Cosmetic",
+      "rarity": 2,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 80,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [],
+      "cosmeticSocket": "Leg"
+    },
+    {
+      "itemId": 74,
+      "name": "Spats",
+      "category": "Cosmetic",
+      "rarity": 2,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 75,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [],
+      "cosmeticSocket": "Leg"
+    },
+    {
+      "itemId": 75,
+      "name": "Knee Pads",
+      "category": "Cosmetic",
+      "rarity": 1,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 45,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [],
+      "cosmeticSocket": "Leg"
+    },
+    {
+      "itemId": 76,
+      "name": "Small Wings",
+      "category": "Cosmetic",
+      "rarity": 4,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 450,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [],
+      "cosmeticSocket": "Back"
+    },
+    {
+      "itemId": 77,
+      "name": "Paper Kite",
+      "category": "Cosmetic",
+      "rarity": 3,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 190,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [],
+      "cosmeticSocket": "Back"
+    },
+    {
+      "itemId": 78,
+      "name": "Barrel Pack",
+      "category": "Cosmetic",
+      "rarity": 3,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 200,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [],
+      "cosmeticSocket": "Back"
+    },
+    {
+      "itemId": 79,
+      "name": "Soft Tail",
+      "category": "Cosmetic",
+      "rarity": 3,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 180,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [],
+      "cosmeticSocket": "Back"
     }
   ]
 }

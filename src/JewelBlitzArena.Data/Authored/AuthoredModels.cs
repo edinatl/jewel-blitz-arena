@@ -193,5 +193,7 @@ namespace JewelBlitzArena.Data
         public int HealPerUse { get; set; }
         /// <summary>Canonical tag names (flame, tide, …). Empty → no Tinker affinity.</summary>
         public List<string> Tags { get; set; } = new List<string>();
+        /// <summary>head | arm | waist | leg | back for cosmetics; omit/empty otherwise.</summary>
+        public string CosmeticSocket { get; set; } = string.Empty;
     }
 }

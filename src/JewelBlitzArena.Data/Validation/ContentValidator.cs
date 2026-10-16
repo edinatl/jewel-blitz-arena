@@ -331,7 +331,8 @@ namespace JewelBlitzArena.Data
                         $"Item '{item.Name}' has unknown category '{item.Category}'."));
                 }
 
-                if (!TryParseEligibility(item.CrateEligibility, out CrateEligibility eligibility))
+                bool eligibilityOk = TryParseEligibility(item.CrateEligibility, out CrateEligibility eligibility);
+                if (!eligibilityOk)
                 {
                     result.Errors.Add(new ValidationIssue(
                         "crate_eligibility",
@@ -360,6 +361,36 @@ namespace JewelBlitzArena.Data
                                 $"Item '{item.Name}' has unknown tag '{tag}'."));
                         }
                     }
+                }
+
+                bool categoryOk = TryParseCategory(item.Category, out ItemCategory itemCategory);
+                if (!TryParseCosmeticSocket(item.CosmeticSocket, out CosmeticSocket socket))
+                {
+                    result.Errors.Add(new ValidationIssue(
+                        "cosmetic_socket",
+                        $"Item '{item.Name}' has unknown cosmetic_socket '{item.CosmeticSocket}'."));
+                }
+                else if (categoryOk && itemCategory == ItemCategory.Cosmetic)
+                {
+                    if (socket == CosmeticSocket.None)
+                    {
+                        result.Errors.Add(new ValidationIssue(
+                            "cosmetic_socket",
+                            $"Cosmetic '{item.Name}' requires cosmetic_socket (head|arm|waist|leg|back)."));
+                    }
+
+                    if (eligibilityOk && eligibility == CrateEligibility.Always)
+                    {
+                        result.Errors.Add(new ValidationIssue(
+                            "cosmetic_crate",
+                            $"Cosmetic '{item.Name}' must not be always crate-eligible."));
+                    }
+                }
+                else if (socket != CosmeticSocket.None)
+                {
+                    result.Errors.Add(new ValidationIssue(
+                        "cosmetic_socket",
+                        $"Item '{item.Name}' sets cosmetic_socket but category is not Cosmetic."));
                 }
 
                 int maxDmg = BalanceBudgets.MaxItemDamagePerUse(item.Rarity);
@@ -531,6 +562,19 @@ namespace JewelBlitzArena.Data
         public static bool TryParseEligibility(string text, out CrateEligibility value)
         {
             return Enum.TryParse(text, ignoreCase: true, out value);
+        }
+
+        /// <summary>Empty/null → <see cref="CosmeticSocket.None"/>; otherwise head|arm|waist|leg|back.</summary>
+        public static bool TryParseCosmeticSocket(string? text, out CosmeticSocket value)
+        {
+            value = CosmeticSocket.None;
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return true;
+            }
+
+            return Enum.TryParse(text.Trim(), ignoreCase: true, out value)
+                && value != CosmeticSocket.None;
         }
 
         public static bool TryParseTag(string text, out ItemTag value)

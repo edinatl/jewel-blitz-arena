@@ -1,3 +1,5 @@
+using JewelBlitzArena.Data;
+
 namespace JewelBlitzArena.Meta
 {
     /// <summary>
@@ -10,8 +12,8 @@ namespace JewelBlitzArena.Meta
         /// <summary>Solitaire — rarity 7, never, pocketable (stub id).</summary>
         public const int SolitaireItemId = 910001;
 
-        /// <summary>Regent's Diadem — rarity 7 head cosmetic (stub id).</summary>
-        public const int DiademItemId = 910002;
+        /// <summary>Regent's Diadem — rarity 7 head cosmetic (S5 catalog id).</summary>
+        public const int DiademItemId = SampleContentFactory.RegentsDiademItemId;
 
         public const int DiademSellCarats = 100_000;
 

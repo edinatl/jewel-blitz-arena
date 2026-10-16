@@ -196,6 +196,7 @@ namespace JewelBlitzArena.Data
                 ContentValidator.TryParseCategory(src.Category, out ItemCategory category);
                 ContentValidator.TryParseEligibility(src.CrateEligibility, out CrateEligibility eligibility);
                 ItemTag tags = ContentValidator.ParseTagMask(src.Tags);
+                ContentValidator.TryParseCosmeticSocket(src.CosmeticSocket, out CosmeticSocket socket);
                 items.Add(new ItemRecord
                 {
                     ItemId = src.ItemId,
@@ -209,6 +210,7 @@ namespace JewelBlitzArena.Data
                     DamagePerUse = src.DamagePerUse,
                     HealPerUse = src.HealPerUse,
                     Tags = tags,
+                    CosmeticSocket = socket,
                 });
             }
 

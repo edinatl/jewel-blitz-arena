@@ -12,7 +12,7 @@ public sealed class TinkerAffinityTests
     public void Starter_items_have_canonical_tags()
     {
         ContentCatalog catalog = Catalog();
-        Assert.That(catalog.SchemaVersion, Is.EqualTo(11u));
+        Assert.That(catalog.SchemaVersion, Is.EqualTo(ContentSchema.Version));
         Assert.That(catalog.TryGetItem(1, out ItemRecord pistol), Is.True);
         Assert.That(pistol.Tags & ItemTag.Powder, Is.EqualTo(ItemTag.Powder));
         Assert.That(pistol.Tags & ItemTag.Metal, Is.EqualTo(ItemTag.Metal));

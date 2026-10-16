@@ -87,6 +87,14 @@ namespace JewelBlitzArena.Data
         /// <summary>Blueprint Scrap — lifts Tinker tier cap to 7.</summary>
         public const int BlueprintScrapItemId = 54;
 
+        /// <summary>Fitting Room cosmetics ×25 (names.md) — Never crate; ids 55–79.</summary>
+        public const int CosmeticCount = 25;
+        public const int CosmeticItemIdMin = 55;
+        public const int CosmeticItemIdMax = 79;
+
+        /// <summary>Regent's Diadem — rarity 7 head cosmetic (Citrine gift; catalog id).</summary>
+        public const int RegentsDiademItemId = 55;
+
         public static AuthoredContentPack CreateS5StubPack()
         {
             return new AuthoredContentPack
@@ -1781,6 +1789,51 @@ namespace JewelBlitzArena.Data
             AddNever(TinctureFoodItemId, "Tincture of Food", "Card", 2, 20, "food");
 
             AddNever(BlueprintScrapItemId, "Blueprint Scrap", "Card", 3, 50);
+
+            void AddCosmetic(int itemId, string name, string socket, int rarity, int sell)
+            {
+                items.Add(new AuthoredItem
+                {
+                    ItemId = itemId,
+                    Name = name,
+                    Category = "Cosmetic",
+                    Rarity = rarity,
+                    CrateEligibility = "Never",
+                    Pocketable = false,
+                    DamagePerUse = 0,
+                    HealPerUse = 0,
+                    BuyPrice = 0,
+                    SellPrice = sell,
+                    CosmeticSocket = socket,
+                });
+            }
+
+            // Fitting Room stubs — head×8, arm×6, waist×3, leg×4, back×4 (cast.md §7 sockets).
+            AddCosmetic(RegentsDiademItemId, "Regent's Diadem", "Head", 7, 100_000);
+            AddCosmetic(56, "Felt Cap", "Head", 2, 80);
+            AddCosmetic(57, "Soft Crown", "Head", 4, 400);
+            AddCosmetic(58, "Animal Ears", "Head", 3, 180);
+            AddCosmetic(59, "Wind-up Key", "Head", 3, 200);
+            AddCosmetic(60, "Ribbon Hat", "Head", 2, 90);
+            AddCosmetic(61, "Pilot Cap", "Head", 3, 160);
+            AddCosmetic(62, "Beret", "Head", 2, 70);
+            AddCosmetic(63, "Gauntlets", "Arm", 3, 150);
+            AddCosmetic(64, "Bracelets", "Arm", 2, 85);
+            AddCosmetic(65, "Soft Paws", "Arm", 3, 170);
+            AddCosmetic(66, "Cuff Links", "Arm", 2, 75);
+            AddCosmetic(67, "Arm Bands", "Arm", 2, 80);
+            AddCosmetic(68, "Work Gloves", "Arm", 1, 40);
+            AddCosmetic(69, "Sash", "Waist", 2, 90);
+            AddCosmetic(70, "Utility Belt", "Waist", 3, 160);
+            AddCosmetic(71, "Hip Pouch", "Waist", 2, 85);
+            AddCosmetic(72, "Boots", "Leg", 2, 100);
+            AddCosmetic(73, "Anklets", "Leg", 2, 80);
+            AddCosmetic(74, "Spats", "Leg", 2, 75);
+            AddCosmetic(75, "Knee Pads", "Leg", 1, 45);
+            AddCosmetic(76, "Small Wings", "Back", 4, 450);
+            AddCosmetic(77, "Paper Kite", "Back", 3, 190);
+            AddCosmetic(78, "Barrel Pack", "Back", 3, 200);
+            AddCosmetic(79, "Soft Tail", "Back", 3, 180);
 
             return items;
         }

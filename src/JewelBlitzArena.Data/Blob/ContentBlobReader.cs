@@ -250,6 +250,7 @@ namespace JewelBlitzArena.Data
                 DamagePerUse = br.ReadInt32(),
                 HealPerUse = br.ReadInt32(),
                 Tags = (ItemTag)br.ReadUInt16(),
+                CosmeticSocket = (CosmeticSocket)br.ReadByte(),
             };
         }
 

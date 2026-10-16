@@ -15,8 +15,9 @@ namespace JewelBlitzArena.Data
         /// v9: optional per-phase <c>crate_points</c> + <c>water_volumes</c>.
         /// v10: optional per-phase <c>creatures</c> (Vein Guard / stage creatures).
         /// v11: item <c>tags</c> bitmask for Tinker affinity (items-and-economy.md §1).
+        /// v12: item <c>cosmetic_socket</c> for Fitting Room cosmetics (items-and-economy.md §1).
         /// </summary>
-        public const uint Version = 11;
+        public const uint Version = 12;
 
         public const int MaxTagsPerItem = 4;
         public const string BlobExtension = ".jba";
@@ -72,6 +73,17 @@ namespace JewelBlitzArena.Data
         Gift = 11,
         /// <summary>Pressworks Vein Guard drops — never enter inventory / crate tables.</summary>
         StageWeapon = 12,
+    }
+
+    /// <summary>Fitting Room attachment socket (cast.md §7 / items-and-economy.md §1).</summary>
+    public enum CosmeticSocket : byte
+    {
+        None = 0,
+        Head = 1,
+        Arm = 2,
+        Waist = 3,
+        Leg = 4,
+        Back = 5,
     }
 
     public enum CrateEligibility : byte
