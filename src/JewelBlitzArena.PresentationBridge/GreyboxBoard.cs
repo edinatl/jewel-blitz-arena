@@ -65,6 +65,21 @@ namespace JewelBlitzArena.PresentationBridge
                 Plot(FixDisplay.ToFloat(item.PosX), FixDisplay.ToFloat(item.PosZ), 'o');
             }
 
+            // Stage hazards (H idle / ! telegraph) and kinematics (+) under patches/actors.
+            var hazards = new StageHazardHudEntry[MatchStageHazardHud.MaxHazards];
+            int hazardCount = MatchStageHazardHud.CollectHazards(ref state, hazards);
+            for (int i = 0; i < hazardCount; i++)
+            {
+                Plot(hazards[i].X, hazards[i].Z, hazards[i].BoardGlyph);
+            }
+
+            var kinematics = new StageKinematicHudEntry[MatchStageHazardHud.MaxKinematics];
+            int kinematicCount = MatchStageHazardHud.CollectKinematics(ref state, kinematics);
+            for (int i = 0; i < kinematicCount; i++)
+            {
+                Plot(kinematics[i].X, kinematics[i].Z, kinematics[i].BoardGlyph);
+            }
+
             // World patches under actors/items (Ice ~, Smoke #, Slow =).
             var patches = new WorldPatchHudEntry[MatchWorldPatchHud.MaxEntries];
             int patchCount = MatchWorldPatchHud.Collect(ref state, patches);
@@ -90,6 +105,8 @@ namespace JewelBlitzArena.PresentationBridge
                 .Append(" jewels=").Append(state.ActiveJewelCount)
                 .Append(" items=").Append(state.ActiveLooseItemCount)
                 .Append(" patches=").Append(patchCount)
+                .Append(" hazards=").Append(hazardCount)
+                .Append(" kin=").Append(kinematicCount)
                 .AppendLine();
 
             for (int i = 0; i < state.ActorCount; i++)

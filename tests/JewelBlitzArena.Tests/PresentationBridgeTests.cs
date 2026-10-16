@@ -1,3 +1,4 @@
+using JewelBlitzArena.Data;
 using JewelBlitzArena.PresentationBridge;
 using JewelBlitzArena.Sim;
 
@@ -159,8 +160,69 @@ public sealed class PresentationBridgeTests
 
         string board = GreyboxBoard.Render(ref state);
         Assert.That(board, Does.Contain("patches=3"));
+        Assert.That(board, Does.Contain("hazards=0"));
         Assert.That(board, Does.Contain("~"));
         Assert.That(board, Does.Contain("#"));
         Assert.That(board, Does.Contain("="));
+    }
+
+    [Test]
+    public void MatchStageHazardHud_reports_citrine_breakaway_hazards()
+    {
+        ContentCatalog catalog = ContentCompiler.Compile(SampleContentFactory.CreateS5StubPack());
+        var config = MatchConfig.CreateDefault(0x48415A485544UL, actorCount: 2);
+        unsafe
+        {
+            config.StageId = SampleContentFactory.CitrineBazaarStageId;
+            config.FighterIds[0] = SampleContentFactory.RookFighterId;
+            config.FighterIds[1] = SampleContentFactory.RookFighterId;
+        }
+
+        var sim = new Simulation();
+        sim.Reset(config, catalog);
+
+        MatchState bazaar = sim.Snapshot();
+        Assert.That(MatchStageHazardHud.FormatPhaseSummary(ref bazaar), Does.Contain("phase=0"));
+        Assert.That(MatchStageHazardHud.FormatPhaseSummary(ref bazaar), Does.Contain("hazards=1"));
+        Assert.That(MatchStageHazardHud.FormatHazardSummary(ref bazaar), Does.Contain("HZD1@"));
+
+        // Through Bazaar duration into Breakaway transition — hazards off while TRANS.
+        for (int f = 0; f < 25 * 60; f++)
+        {
+            sim.Step(InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral);
+        }
+
+        MatchState transition = sim.Snapshot();
+        string phaseLine = MatchStageHazardHud.FormatPhaseSummary(ref transition);
+        Assert.That(phaseLine, Does.Contain("phase=1"));
+        Assert.That(phaseLine, Does.Contain("TRANS"));
+        Assert.That(phaseLine, Does.Contain("HZD_OFF"));
+
+        for (int f = 0; f < 2 * 60; f++)
+        {
+            sim.Step(InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral);
+        }
+
+        MatchState breakaway = sim.Snapshot();
+        var hazBuf = new StageHazardHudEntry[MatchStageHazardHud.MaxHazards];
+        int hn = MatchStageHazardHud.CollectHazards(ref breakaway, hazBuf);
+        Assert.That(hn, Is.EqualTo(1));
+        Assert.That(hazBuf[0].HazardId, Is.EqualTo(2));
+        Assert.That(hazBuf[0].Damage, Is.EqualTo(80));
+
+        var kinBuf = new StageKinematicHudEntry[MatchStageHazardHud.MaxKinematics];
+        int kn = MatchStageHazardHud.CollectKinematics(ref breakaway, kinBuf);
+        Assert.That(kn, Is.EqualTo(1));
+        Assert.That(kinBuf[0].TrackId, Is.EqualTo(1));
+
+        string summary = MatchStageHazardHud.FormatHazardSummary(ref breakaway);
+        Assert.That(summary, Does.StartWith("hazards=1"));
+        Assert.That(summary, Does.Contain("HZD2"));
+
+        string board = GreyboxBoard.Render(ref breakaway);
+        Assert.That(board, Does.Contain("hazards=1"));
+        Assert.That(board, Does.Contain("kin=1"));
+        // Hazard glyph may be overwritten by actors at the same tile; header counts are authoritative.
+        Assert.That(board, Does.Contain("H").Or.Contain("!"));
     }
 }
