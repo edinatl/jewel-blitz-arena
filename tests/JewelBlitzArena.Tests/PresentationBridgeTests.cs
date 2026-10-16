@@ -108,5 +108,59 @@ public sealed class PresentationBridgeTests
         Assert.That(board, Does.Contain("A"));
         Assert.That(board, Does.Contain("B"));
         Assert.That(board, Does.Contain("frame="));
+        Assert.That(board, Does.Contain("patches=0"));
+    }
+
+    [Test]
+    public void MatchWorldPatchHud_collects_and_formats_active_patches()
+    {
+        var state = new MatchState { ActorCount = 2 };
+        WorldPatchRuntime.InitializeMatch(ref state);
+        Assert.That(MatchWorldPatchHud.FormatSummary(ref state), Is.EqualTo(string.Empty));
+
+        WorldPatchRuntime.Spawn(
+            ref state,
+            WorldPatchRuntime.KindIce,
+            Fix.FromInt(1),
+            Fix.Zero,
+            MatchRules.IceJarFreezeRange,
+            MatchRules.IcePatchLifetimeFrames);
+        WorldPatchRuntime.Spawn(
+            ref state,
+            WorldPatchRuntime.KindSmoke,
+            Fix.FromInt(2),
+            Fix.Zero,
+            MatchRules.SmokeJarBlindRange,
+            MatchRules.SmokePatchLifetimeFrames);
+        WorldPatchRuntime.Spawn(
+            ref state,
+            WorldPatchRuntime.KindSlow,
+            Fix.FromInt(-1),
+            Fix.Zero,
+            MatchRules.AdhesiveSlowRange,
+            MatchRules.AdhesivePatchLifetimeFrames);
+
+        var buf = new WorldPatchHudEntry[MatchWorldPatchHud.MaxEntries];
+        int n = MatchWorldPatchHud.Collect(ref state, buf);
+        Assert.That(n, Is.EqualTo(3));
+        Assert.That(buf[0].KindTag, Is.EqualTo("ICE"));
+        Assert.That(buf[0].BoardGlyph, Is.EqualTo('~'));
+        Assert.That(buf[1].KindTag, Is.EqualTo("SMK"));
+        Assert.That(buf[1].BoardGlyph, Is.EqualTo('#'));
+        Assert.That(buf[2].KindTag, Is.EqualTo("SLW"));
+        Assert.That(buf[2].BoardGlyph, Is.EqualTo('='));
+        Assert.That(buf[0].RemainingFrames, Is.EqualTo(MatchRules.IcePatchLifetimeFrames));
+
+        string summary = MatchWorldPatchHud.FormatSummary(ref state);
+        Assert.That(summary, Does.StartWith("patches=3"));
+        Assert.That(summary, Does.Contain("ICE@"));
+        Assert.That(summary, Does.Contain("SMK@"));
+        Assert.That(summary, Does.Contain("SLW@"));
+
+        string board = GreyboxBoard.Render(ref state);
+        Assert.That(board, Does.Contain("patches=3"));
+        Assert.That(board, Does.Contain("~"));
+        Assert.That(board, Does.Contain("#"));
+        Assert.That(board, Does.Contain("="));
     }
 }

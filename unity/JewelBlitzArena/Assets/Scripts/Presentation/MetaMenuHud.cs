@@ -140,6 +140,12 @@ namespace JewelBlitzArena.Presentation
 
             GUILayout.Label("P1 WASD+JKL  |  P2 arrows+123  |  R restart  |  Esc menu");
 
+            string patchLine = MatchWorldPatchHud.FormatSummary(ref state);
+            if (!string.IsNullOrEmpty(patchLine))
+            {
+                GUILayout.Label(patchLine);
+            }
+
             for (int i = 0; i < state.ActorCount; i++)
             {
                 ActorSlot a = MatchStateAccess.Actor(ref state, i);

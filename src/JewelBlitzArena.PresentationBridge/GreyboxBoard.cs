@@ -65,6 +65,14 @@ namespace JewelBlitzArena.PresentationBridge
                 Plot(FixDisplay.ToFloat(item.PosX), FixDisplay.ToFloat(item.PosZ), 'o');
             }
 
+            // World patches under actors/items (Ice ~, Smoke #, Slow =).
+            var patches = new WorldPatchHudEntry[MatchWorldPatchHud.MaxEntries];
+            int patchCount = MatchWorldPatchHud.Collect(ref state, patches);
+            for (int i = 0; i < patchCount; i++)
+            {
+                Plot(patches[i].X, patches[i].Z, patches[i].BoardGlyph);
+            }
+
             char[] actorGlyphs = { 'A', 'B', 'C', 'D' };
             for (int i = 0; i < state.ActorCount; i++)
             {
@@ -81,6 +89,7 @@ namespace JewelBlitzArena.PresentationBridge
             sb.Append("frame=").Append(state.Frame)
                 .Append(" jewels=").Append(state.ActiveJewelCount)
                 .Append(" items=").Append(state.ActiveLooseItemCount)
+                .Append(" patches=").Append(patchCount)
                 .AppendLine();
 
             for (int i = 0; i < state.ActorCount; i++)
