@@ -21,6 +21,9 @@ namespace JewelBlitzArena.Meta
         /// <summary>Adds ProfileSalt + TinkerCounter for Tinker craft seeding.</summary>
         public const int Version5 = 5;
 
-        public const int Current = Version5;
+        /// <summary>Adds Bench Notes + Logbook pool reveals.</summary>
+        public const int Version6 = 6;
+
+        public const int Current = Version6;
     }
 }

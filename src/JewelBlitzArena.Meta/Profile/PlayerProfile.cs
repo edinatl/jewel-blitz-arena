@@ -51,6 +51,9 @@ namespace JewelBlitzArena.Meta
 
         public LedgerInventory Ledger { get; } = new LedgerInventory();
 
+        /// <summary>Tinker pair outcomes + Logbook pool reveals (economy §4).</summary>
+        public BenchNotesLedger BenchNotes { get; } = new BenchNotesLedger();
+
         public bool HasFlag(int flag) => (Flags & flag) != 0;
 
         public void SetFlag(int flag, bool value = true)

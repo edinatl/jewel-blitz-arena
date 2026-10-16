@@ -138,7 +138,7 @@ public sealed class TinkerRuntimeTests
             store.Save(profile);
 
             PlayerProfile loaded = store.LoadOrCreate();
-            Assert.That(loaded.SchemaVersion, Is.EqualTo(ProfileSchema.Version5));
+            Assert.That(loaded.SchemaVersion, Is.EqualTo(ProfileSchema.Current));
             Assert.That(loaded.ProfileSalt, Is.EqualTo(0xABCD1234UL));
             Assert.That(loaded.TinkerCounter, Is.EqualTo(42));
         }

@@ -313,6 +313,7 @@ namespace JewelBlitzArena.Meta
                 }
 
                 profile.Ledger.Grant(ScrapItemId);
+                BenchNotesRuntime.RecordCraft(profile, inputA, inputB, outcome);
                 return new TinkerAttemptResult(
                     outcome, 0, chitsEarned: 1, scrapGranted: true, counterUsed, tier);
             }
@@ -332,6 +333,7 @@ namespace JewelBlitzArena.Meta
                 }
 
                 profile.Ledger.Grant(ScrapItemId);
+                BenchNotesRuntime.RecordCraft(profile, inputA, inputB, TinkerOutcome.Failure);
                 return new TinkerAttemptResult(
                     TinkerOutcome.Failure, 0, chitsEarned: 1, scrapGranted: true, counterUsed, tier);
             }
@@ -353,6 +355,7 @@ namespace JewelBlitzArena.Meta
                 }
             }
 
+            BenchNotesRuntime.RecordCraft(profile, inputA, inputB, outcome);
             return new TinkerAttemptResult(
                 outcome, resultId, chitsEarned: 0, scrapGranted: false, counterUsed, tier);
         }
@@ -391,6 +394,7 @@ namespace JewelBlitzArena.Meta
                 }
 
                 profile.Ledger.Grant(ScrapItemId);
+                BenchNotesRuntime.RecordCraft(profile, inputA, inputB, outcome);
                 return new TinkerAttemptResult(outcome, 0, chitsEarned: 1, scrapGranted: true, counterUsed);
             }
 
@@ -405,6 +409,7 @@ namespace JewelBlitzArena.Meta
                 }
             }
 
+            BenchNotesRuntime.RecordCraft(profile, inputA, inputB, outcome);
             return new TinkerAttemptResult(
                 outcome, resultId, chitsEarned: 0, scrapGranted: false, counterUsed);
         }

@@ -96,6 +96,12 @@ namespace JewelBlitzArena.Meta
                 {
                     bw.Write(owned[i]);
                 }
+
+                // v6+: Bench Notes after Ledger.
+                if (profile.SchemaVersion >= ProfileSchema.Version6)
+                {
+                    WriteBenchNotes(bw, profile.BenchNotes);
+                }
             }
 
             return ms.ToArray();
@@ -159,6 +165,12 @@ namespace JewelBlitzArena.Meta
             }
 
             profile.Ledger.ReplaceAll(owned);
+
+            if (profile.SchemaVersion >= ProfileSchema.Version6)
+            {
+                profile.BenchNotes.ReplaceAll(ReadBenchNotes(br));
+            }
+
             return profile;
         }
 
@@ -175,6 +187,41 @@ namespace JewelBlitzArena.Meta
                 UnlockedHouseRulesBits = 0,
                 HouseRulesDefaults = default,
             };
+        }
+
+        private static void WriteBenchNotes(BinaryWriter bw, BenchNotesLedger notes)
+        {
+            var list = notes.ToList();
+            bw.Write(list.Count);
+            for (int i = 0; i < list.Count; i++)
+            {
+                BenchNotesLedger.Note n = list[i];
+                bw.Write(n.InputA);
+                bw.Write(n.InputB);
+                bw.Write(n.OutcomesSeen);
+                bw.Write(n.PoolRevealed);
+            }
+        }
+
+        private static BenchNotesLedger.Note[] ReadBenchNotes(BinaryReader br)
+        {
+            int count = br.ReadInt32();
+            if (count < 0 || count > 10_000)
+            {
+                throw new InvalidDataException("Corrupt Bench Notes count.");
+            }
+
+            var notes = new BenchNotesLedger.Note[count];
+            for (int i = 0; i < count; i++)
+            {
+                int a = br.ReadInt32();
+                int b = br.ReadInt32();
+                byte outcomes = br.ReadByte();
+                bool revealed = br.ReadBoolean();
+                notes[i] = new BenchNotesLedger.Note(a, b, outcomes, revealed);
+            }
+
+            return notes;
         }
 
         private static void WriteHouseRules(BinaryWriter bw, HouseRulesSettings h)
