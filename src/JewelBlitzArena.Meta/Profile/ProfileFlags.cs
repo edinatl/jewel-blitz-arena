@@ -29,5 +29,23 @@ namespace JewelBlitzArena.Meta
 
         /// <summary>First Facet Wheel spin.</summary>
         public const int TouchedFacetWheel = 1 << 8;
+
+        /// <summary>modes.md §8: Tilly Setter at 8 distinct clears.</summary>
+        public const int UnlockedTillySetter = 1 << 9;
+
+        /// <summary>modes.md §8: Behind the Counter + Extra Arena slot 2 at 11.</summary>
+        public const int UnlockedBehindCounter = 1 << 10;
+
+        /// <summary>modes.md §8: Spirewalk + Extra Arena slot 3 at 13.</summary>
+        public const int UnlockedSpirewalk = 1 << 11;
+
+        /// <summary>modes.md §8: The Cascade + Extra Arena slot 4 at 14 (full cast).</summary>
+        public const int UnlockedCascade = 1 << 12;
+
+        /// <summary>
+        /// Greybox: profile owns the full fighter cast (12 base + both unlocks).
+        /// Required with clear-14 for Cascade / Extra Arena slot 4.
+        /// </summary>
+        public const int OwnedFullCast = 1 << 13;
     }
 }
