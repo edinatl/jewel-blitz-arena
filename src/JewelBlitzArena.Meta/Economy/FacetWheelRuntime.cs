@@ -174,6 +174,7 @@ namespace JewelBlitzArena.Meta
             }
 
             profile.Carats -= need;
+            ShopRuntime.RecordCaratsSpent(profile, need);
             profile.FacetWheelWidthLevel = next;
             return true;
         }
