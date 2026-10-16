@@ -27,6 +27,9 @@ namespace JewelBlitzArena.Meta
         /// <summary>Adds ShopStockSeed for rotating stock reseed after Expedition.</summary>
         public const int Version7 = 7;
 
-        public const int Current = Version7;
+        /// <summary>Adds FittingLoadout (equipped cosmetic item ids per socket).</summary>
+        public const int Version8 = 8;
+
+        public const int Current = Version8;
     }
 }

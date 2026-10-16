@@ -1,4 +1,5 @@
 using System;
+using JewelBlitzArena.Data;
 
 namespace JewelBlitzArena.Meta
 {
@@ -36,6 +37,9 @@ namespace JewelBlitzArena.Meta
                         break;
                     case ProfileSchema.Version6:
                         MigrateV6ToV7(profile);
+                        break;
+                    case ProfileSchema.Version7:
+                        MigrateV7ToV8(profile);
                         break;
                     default:
                         throw new InvalidOperationException(
@@ -141,6 +145,19 @@ namespace JewelBlitzArena.Meta
             }
 
             profile.SchemaVersion = ProfileSchema.Version7;
+        }
+
+        private static void MigrateV7ToV8(PlayerProfile profile)
+        {
+            // Carry EquippedDiadem flag into Head socket when Diadem is owned.
+            if (profile.HasFlag(ProfileFlags.EquippedDiadem)
+                && profile.Ledger.Owns(CitrineGiftsRuntime.DiademItemId)
+                && profile.Fitting.Get(CosmeticSocket.Head) == 0)
+            {
+                profile.Fitting.Set(CosmeticSocket.Head, CitrineGiftsRuntime.DiademItemId);
+            }
+
+            profile.SchemaVersion = ProfileSchema.Version8;
         }
     }
 }

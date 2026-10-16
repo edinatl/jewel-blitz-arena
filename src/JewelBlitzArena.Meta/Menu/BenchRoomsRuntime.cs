@@ -126,7 +126,55 @@ namespace JewelBlitzArena.Meta
             && ShopRuntime.TrySell(profile, catalog, itemId);
 
         /// <summary>
-        /// Fitting Room: equip Regent's Diadem when owned (cosmetic stub — no Sim hitbox change).
+        /// Fitting Room: equip an owned catalog cosmetic into its socket (replaces prior).
+        /// No Sim hitbox change.
+        /// </summary>
+        public static bool TryEquipCosmetic(
+            PlayerProfile profile,
+            ContentCatalog catalog,
+            int itemId)
+        {
+            if (profile == null || catalog == null
+                || !catalog.TryGetItem(itemId, out ItemRecord item)
+                || item.Category != ItemCategory.Cosmetic
+                || item.CosmeticSocket == CosmeticSocket.None)
+            {
+                return false;
+            }
+
+            profile.SetFlag(ProfileFlags.TouchedFittingRoom);
+            if (!profile.Ledger.Owns(itemId))
+            {
+                return false;
+            }
+
+            profile.Fitting.Set(item.CosmeticSocket, itemId);
+            SyncDiademFlag(profile);
+            return true;
+        }
+
+        public static bool TryUnequipSocket(PlayerProfile profile, CosmeticSocket socket)
+        {
+            if (profile == null || socket == CosmeticSocket.None)
+            {
+                return false;
+            }
+
+            if (profile.Fitting.Get(socket) == 0)
+            {
+                return false;
+            }
+
+            profile.Fitting.Clear(socket);
+            SyncDiademFlag(profile);
+            return true;
+        }
+
+        public static int GetEquipped(PlayerProfile profile, CosmeticSocket socket) =>
+            profile == null ? 0 : profile.Fitting.Get(socket);
+
+        /// <summary>
+        /// Fitting Room: equip Regent's Diadem when owned (compat wrapper → Head socket).
         /// </summary>
         public static bool TryEquipDiadem(PlayerProfile profile)
         {
@@ -141,22 +189,22 @@ namespace JewelBlitzArena.Meta
                 return false;
             }
 
-            profile.SetFlag(ProfileFlags.EquippedDiadem);
+            profile.Fitting.Set(CosmeticSocket.Head, CitrineGiftsRuntime.DiademItemId);
+            SyncDiademFlag(profile);
             return true;
         }
 
-        public static bool TryUnequipDiadem(PlayerProfile profile)
-        {
-            if (profile == null || !profile.HasFlag(ProfileFlags.EquippedDiadem))
-            {
-                return false;
-            }
-
-            profile.SetFlag(ProfileFlags.EquippedDiadem, false);
-            return true;
-        }
+        public static bool TryUnequipDiadem(PlayerProfile profile) =>
+            TryUnequipSocket(profile, CosmeticSocket.Head);
 
         public static bool IsDiademEquipped(PlayerProfile profile) =>
-            profile != null && profile.HasFlag(ProfileFlags.EquippedDiadem);
+            profile != null
+            && profile.Fitting.Get(CosmeticSocket.Head) == CitrineGiftsRuntime.DiademItemId;
+
+        private static void SyncDiademFlag(PlayerProfile profile)
+        {
+            bool on = profile.Fitting.Get(CosmeticSocket.Head) == CitrineGiftsRuntime.DiademItemId;
+            profile.SetFlag(ProfileFlags.EquippedDiadem, on);
+        }
     }
 }

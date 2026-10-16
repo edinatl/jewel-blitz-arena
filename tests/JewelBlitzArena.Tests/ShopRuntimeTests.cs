@@ -135,7 +135,7 @@ public sealed class ShopRuntimeTests
             profile.ShopStockSeed = 0xDEADBEEFUL;
             store.Save(profile);
             PlayerProfile loaded = store.LoadOrCreate();
-            Assert.That(loaded.SchemaVersion, Is.EqualTo(ProfileSchema.Version7));
+            Assert.That(loaded.SchemaVersion, Is.EqualTo(ProfileSchema.Current));
             Assert.That(loaded.ShopStockSeed, Is.EqualTo(0xDEADBEEFUL));
         }
         finally

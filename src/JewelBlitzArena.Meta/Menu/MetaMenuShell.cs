@@ -45,6 +45,12 @@ namespace JewelBlitzArena.Meta
         public bool TryEquipDiadem(PlayerProfile profile) =>
             BenchRoomsRuntime.TryEquipDiadem(profile);
 
+        public bool TryEquipCosmetic(PlayerProfile profile, ContentCatalog catalog, int itemId) =>
+            BenchRoomsRuntime.TryEquipCosmetic(profile, catalog, itemId);
+
+        public bool TryUnequipSocket(PlayerProfile profile, CosmeticSocket socket) =>
+            BenchRoomsRuntime.TryUnequipSocket(profile, socket);
+
         /// <summary>Buy room stock via <see cref="ShopRuntime.BuildStock"/>.</summary>
         public IReadOnlyList<ShopRuntime.StockEntry> OpenBuy(
             PlayerProfile profile,

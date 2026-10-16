@@ -108,6 +108,16 @@ namespace JewelBlitzArena.Meta
                 {
                     bw.Write(profile.ShopStockSeed);
                 }
+
+                // v8+: Fitting loadout (5 socket item ids).
+                if (profile.SchemaVersion >= ProfileSchema.Version8)
+                {
+                    int[] slots = profile.Fitting.ToArray();
+                    for (int i = 0; i < FittingLoadout.SlotCount; i++)
+                    {
+                        bw.Write(slots[i]);
+                    }
+                }
             }
 
             return ms.ToArray();
@@ -180,6 +190,17 @@ namespace JewelBlitzArena.Meta
             if (profile.SchemaVersion >= ProfileSchema.Version7)
             {
                 profile.ShopStockSeed = br.ReadUInt64();
+            }
+
+            if (profile.SchemaVersion >= ProfileSchema.Version8)
+            {
+                var slots = new int[FittingLoadout.SlotCount];
+                for (int i = 0; i < FittingLoadout.SlotCount; i++)
+                {
+                    slots[i] = br.ReadInt32();
+                }
+
+                profile.Fitting.ReplaceAll(slots);
             }
 
             return profile;

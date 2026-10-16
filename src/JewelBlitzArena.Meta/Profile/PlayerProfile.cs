@@ -59,6 +59,9 @@ namespace JewelBlitzArena.Meta
         /// <summary>Tinker pair outcomes + Logbook pool reveals (economy §4).</summary>
         public BenchNotesLedger BenchNotes { get; } = new BenchNotesLedger();
 
+        /// <summary>Fitting Room equipped cosmetics (one id per socket; 0 = empty).</summary>
+        public FittingLoadout Fitting { get; } = new FittingLoadout();
+
         public bool HasFlag(int flag) => (Flags & flag) != 0;
 
         public void SetFlag(int flag, bool value = true)

@@ -125,6 +125,28 @@ namespace JewelBlitzArena.PresentationBridge
             return ok;
         }
 
+        public bool TryEquipCosmetic(int itemId)
+        {
+            if (_catalog == null || !_menu.TryEquipCosmetic(Profile, _catalog, itemId))
+            {
+                return false;
+            }
+
+            _boot.SaveProfile();
+            return true;
+        }
+
+        public bool TryUnequipSocket(CosmeticSocket socket)
+        {
+            if (!_menu.TryUnequipSocket(Profile, socket))
+            {
+                return false;
+            }
+
+            _boot.SaveProfile();
+            return true;
+        }
+
         public MatchConfig StartCustom(ModeRequest? request = null)
         {
             _boot.Boot();
