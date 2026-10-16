@@ -1,4 +1,5 @@
 using System;
+using JewelBlitzArena.Data;
 
 namespace JewelBlitzArena.Meta
 {
@@ -34,6 +35,21 @@ namespace JewelBlitzArena.Meta
             }
 
             return TinkerRuntime.TryCraft(profile, inputA, inputB, card);
+        }
+
+        public TinkerAttemptResult Craft(
+            PlayerProfile profile,
+            ContentCatalog catalog,
+            int inputA,
+            int inputB,
+            int cardItemId = 0)
+        {
+            if (profile == null)
+            {
+                throw new ArgumentNullException(nameof(profile));
+            }
+
+            return TinkerRuntime.TryCraft(profile, catalog, inputA, inputB, cardItemId);
         }
     }
 }

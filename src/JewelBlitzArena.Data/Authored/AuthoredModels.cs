@@ -191,5 +191,7 @@ namespace JewelBlitzArena.Data
         public int SellPrice { get; set; }
         public int DamagePerUse { get; set; }
         public int HealPerUse { get; set; }
+        /// <summary>Canonical tag names (flame, tide, …). Empty → no Tinker affinity.</summary>
+        public List<string> Tags { get; set; } = new List<string>();
     }
 }

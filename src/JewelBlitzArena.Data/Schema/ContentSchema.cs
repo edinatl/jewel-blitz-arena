@@ -1,3 +1,5 @@
+using System;
+
 namespace JewelBlitzArena.Data
 {
     public static class ContentSchema
@@ -12,8 +14,11 @@ namespace JewelBlitzArena.Data
         /// v8: move effect Freeze / Petrify (Petrify Gas thrown + area apply).
         /// v9: optional per-phase <c>crate_points</c> + <c>water_volumes</c>.
         /// v10: optional per-phase <c>creatures</c> (Vein Guard / stage creatures).
+        /// v11: item <c>tags</c> bitmask for Tinker affinity (items-and-economy.md §1).
         /// </summary>
-        public const uint Version = 10;
+        public const uint Version = 11;
+
+        public const int MaxTagsPerItem = 4;
         public const string BlobExtension = ".jba";
         public static readonly byte[] Magic = { (byte)'J', (byte)'B', (byte)'A', (byte)'D' };
 
@@ -74,6 +79,24 @@ namespace JewelBlitzArena.Data
         Always = 0,
         WhenOwned = 1,
         Never = 2,
+    }
+
+    /// <summary>Canonical Tinker affinity tags (items-and-economy.md §1) — bit flags.</summary>
+    [Flags]
+    public enum ItemTag : ushort
+    {
+        None = 0,
+        Flame = 1 << 0,
+        Tide = 1 << 1,
+        Storm = 1 << 2,
+        Stone = 1 << 3,
+        Star = 1 << 4,
+        Ice = 1 << 5,
+        Powder = 1 << 6,
+        Metal = 1 << 7,
+        Glass = 1 << 8,
+        Paper = 1 << 9,
+        Food = 1 << 10,
     }
 
     public enum MoveClass : byte

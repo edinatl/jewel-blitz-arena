@@ -195,6 +195,7 @@ namespace JewelBlitzArena.Data
             {
                 ContentValidator.TryParseCategory(src.Category, out ItemCategory category);
                 ContentValidator.TryParseEligibility(src.CrateEligibility, out CrateEligibility eligibility);
+                ItemTag tags = ContentValidator.ParseTagMask(src.Tags);
                 items.Add(new ItemRecord
                 {
                     ItemId = src.ItemId,
@@ -207,6 +208,7 @@ namespace JewelBlitzArena.Data
                     SellPrice = src.SellPrice,
                     DamagePerUse = src.DamagePerUse,
                     HealPerUse = src.HealPerUse,
+                    Tags = tags,
                 });
             }
 

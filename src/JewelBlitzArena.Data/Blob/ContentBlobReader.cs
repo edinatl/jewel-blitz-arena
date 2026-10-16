@@ -249,6 +249,7 @@ namespace JewelBlitzArena.Data
                 SellPrice = br.ReadInt32(),
                 DamagePerUse = br.ReadInt32(),
                 HealPerUse = br.ReadInt32(),
+                Tags = (ItemTag)br.ReadUInt16(),
             };
         }
 

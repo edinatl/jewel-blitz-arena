@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace JewelBlitzArena.Data
@@ -1305,7 +1306,15 @@ namespace JewelBlitzArena.Data
             var items = new List<AuthoredItem>();
             int id = 1;
 
-            void Add(string name, string category, int rarity, int damage, int heal, int buy, int sell)
+            void Add(
+                string name,
+                string category,
+                int rarity,
+                int damage,
+                int heal,
+                int buy,
+                int sell,
+                params string[] tags)
             {
                 items.Add(new AuthoredItem
                 {
@@ -1319,38 +1328,39 @@ namespace JewelBlitzArena.Data
                     HealPerUse = heal,
                     BuyPrice = buy,
                     SellPrice = sell,
+                    Tags = new List<string>(tags ?? Array.Empty<string>()),
                 });
             }
 
-            Add("Pistol", "Firearm", 1, 25, 0, 100, 40);
-            Add("Flare Pistol", "Firearm", 2, 30, 0, 180, 70);
-            Add("Iron Pipe", "Melee", 1, 30, 0, 80, 30);
-            Add("Bat", "Melee", 1, 28, 0, 70, 25);
-            Add("Pry Bar", "Melee", 2, 35, 0, 120, 45);
-            Add("Mallet", "Melee", 2, 40, 0, 140, 50);
-            Add("Paper Fan", "Melee", 1, 15, 0, 60, 20);
-            Add("Cutlass", "Melee", 3, 50, 0, 220, 80);
-            Add("Oil Bottle", "Explosive", 1, 35, 0, 90, 35);
-            Add("Small Bomb", "Explosive", 2, 45, 0, 150, 55);
-            Add("Medium Bomb", "Explosive", 3, 60, 0, 240, 90);
-            Add("Barrel", "Explosive", 3, 70, 0, 260, 100);
-            Add("Apple", "Healing", 1, 0, 80, 40, 15);
-            Add("Pear", "Healing", 1, 0, 90, 45, 18);
-            Add("Skewer", "Healing", 2, 0, 120, 80, 30);
-            Add("Shortcake", "Healing", 2, 0, 150, 100, 40);
-            Add("Steak", "Healing", 3, 0, 200, 160, 60);
+            Add("Pistol", "Firearm", 1, 25, 0, 100, 40, "powder", "metal");
+            Add("Flare Pistol", "Firearm", 2, 30, 0, 180, 70, "flame", "powder");
+            Add("Iron Pipe", "Melee", 1, 30, 0, 80, 30, "metal");
+            Add("Bat", "Melee", 1, 28, 0, 70, 25, "paper");
+            Add("Pry Bar", "Melee", 2, 35, 0, 120, 45, "metal");
+            Add("Mallet", "Melee", 2, 40, 0, 140, 50, "stone", "metal");
+            Add("Paper Fan", "Melee", 1, 15, 0, 60, 20, "paper");
+            Add("Cutlass", "Melee", 3, 50, 0, 220, 80, "metal");
+            Add("Oil Bottle", "Explosive", 1, 35, 0, 90, 35, "flame");
+            Add("Small Bomb", "Explosive", 2, 45, 0, 150, 55, "powder");
+            Add("Medium Bomb", "Explosive", 3, 60, 0, 240, 90, "powder");
+            Add("Barrel", "Explosive", 3, 70, 0, 260, 100, "powder", "stone");
+            Add("Apple", "Healing", 1, 0, 80, 40, 15, "food");
+            Add("Pear", "Healing", 1, 0, 90, 45, 18, "food");
+            Add("Skewer", "Healing", 2, 0, 120, 80, 30, "food", "metal");
+            Add("Shortcake", "Healing", 2, 0, 150, 100, 40, "food");
+            Add("Steak", "Healing", 3, 0, 200, 160, 60, "food");
             // ItemId 18 — Adhesive Spray applies Slow on thrown hit (items-and-economy.md).
-            Add("Adhesive Spray", "Status", 2, 0, 0, 110, 40);
+            Add("Adhesive Spray", "Status", 2, 0, 0, 110, 40, "glass");
             // ItemId 19 — Petrify Gas applies Freeze 90 f on thrown hit (balance.md §4).
-            Add("Petrify Gas", "Status", 2, 0, 0, 130, 50);
+            Add("Petrify Gas", "Status", 2, 0, 0, 130, 50, "stone");
             // ItemId 20 — Smoke Jar lasting Blind floor patch.
-            Add("Smoke Jar", "Status", 1, 0, 0, 70, 25);
+            Add("Smoke Jar", "Status", 1, 0, 0, 70, 25, "powder");
             // ItemId 21 — Ice Jar lasting Freeze floor patch.
-            Add("Ice Jar", "Status", 3, 0, 0, 200, 75);
-            Add("Rollerskates", "Mobility", 2, 0, 0, 150, 55);
-            Add("Spring Boots", "Mobility", 3, 0, 0, 220, 80);
-            Add("Kitten", "Summon", 3, 20, 0, 300, 100);
-            Add("Trumpet", "Toy", 1, 10, 0, 50, 20);
+            Add("Ice Jar", "Status", 3, 0, 0, 200, 75, "ice");
+            Add("Rollerskates", "Mobility", 2, 0, 0, 150, 55, "metal");
+            Add("Spring Boots", "Mobility", 3, 0, 0, 220, 80, "metal", "star");
+            Add("Kitten", "Summon", 3, 20, 0, 300, 100, "star");
+            Add("Trumpet", "Toy", 1, 10, 0, 50, 20, "metal");
 
             // Vein Guard stage weapons (stages.md §3.2) — Never crate-eligible; Sim FlagStageOnly.
             void AddStageWeapon(int itemId, string name, int damage)

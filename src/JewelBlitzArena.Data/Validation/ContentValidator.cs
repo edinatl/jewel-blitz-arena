@@ -342,6 +342,26 @@ namespace JewelBlitzArena.Data
                     alwaysCount++;
                 }
 
+                if (item.Tags != null)
+                {
+                    if (item.Tags.Count > ContentSchema.MaxTagsPerItem)
+                    {
+                        result.Errors.Add(new ValidationIssue(
+                            "item_tags",
+                            $"Item '{item.Name}' has {item.Tags.Count} tags; max {ContentSchema.MaxTagsPerItem}."));
+                    }
+
+                    foreach (string tag in item.Tags)
+                    {
+                        if (!TryParseTag(tag, out _))
+                        {
+                            result.Errors.Add(new ValidationIssue(
+                                "item_tags",
+                                $"Item '{item.Name}' has unknown tag '{tag}'."));
+                        }
+                    }
+                }
+
                 int maxDmg = BalanceBudgets.MaxItemDamagePerUse(item.Rarity);
                 if (item.DamagePerUse > maxDmg)
                 {
@@ -447,6 +467,38 @@ namespace JewelBlitzArena.Data
         public static bool TryParseEligibility(string text, out CrateEligibility value)
         {
             return Enum.TryParse(text, ignoreCase: true, out value);
+        }
+
+        public static bool TryParseTag(string text, out ItemTag value)
+        {
+            value = ItemTag.None;
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return false;
+            }
+
+            return Enum.TryParse(text.Trim(), ignoreCase: true, out value)
+                && value != ItemTag.None
+                && ((ushort)value & ((ushort)value - 1)) == 0; // single bit
+        }
+
+        public static ItemTag ParseTagMask(IEnumerable<string>? tags)
+        {
+            ItemTag mask = ItemTag.None;
+            if (tags == null)
+            {
+                return mask;
+            }
+
+            foreach (string tag in tags)
+            {
+                if (TryParseTag(tag, out ItemTag bit))
+                {
+                    mask |= bit;
+                }
+            }
+
+            return mask;
         }
 
         public static bool TryParseCarryItems(string text, out CarryItemsMode value)
