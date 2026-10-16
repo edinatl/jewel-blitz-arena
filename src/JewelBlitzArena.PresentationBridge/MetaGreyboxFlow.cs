@@ -116,7 +116,16 @@ namespace JewelBlitzArena.PresentationBridge
 
         public bool TrySpinFacetWheel(ulong seed, out FacetWheelBand band, out int caratsReward)
         {
-            bool ok = FacetWheelRuntime.TrySpin(Profile, seed, out band, out caratsReward);
+            bool ok = TrySpinFacetWheel(seed, out FacetWheelRuntime.SpinGrant grant);
+            band = grant.Band;
+            caratsReward = grant.CaratsReward;
+            return ok;
+        }
+
+        /// <summary>Host Facet Wheel spin with catalog item grants.</summary>
+        public bool TrySpinFacetWheel(ulong seed, out FacetWheelRuntime.SpinGrant grant)
+        {
+            bool ok = FacetWheelRuntime.TrySpin(Profile, _catalog, seed, out grant);
             if (ok)
             {
                 _boot.SaveProfile();

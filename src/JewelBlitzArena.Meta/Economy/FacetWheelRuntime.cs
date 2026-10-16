@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using JewelBlitzArena.Data;
+
 namespace JewelBlitzArena.Meta
 {
     /// <summary>Facet Wheel bands (items-and-economy.md §5).</summary>
@@ -24,6 +27,21 @@ namespace JewelBlitzArena.Meta
         public const int MaxWidthLevel = 5;
         public const int CaratsRewardMin = 500;
         public const int CaratsRewardMax = 3000;
+
+        public readonly struct SpinGrant
+        {
+            public SpinGrant(FacetWheelBand band, int caratsReward, int grantedItemId)
+            {
+                Band = band;
+                CaratsReward = caratsReward;
+                GrantedItemId = grantedItemId;
+            }
+
+            public FacetWheelBand Band { get; }
+            public int CaratsReward { get; }
+            /// <summary>Catalog item granted (0 = none / carats-only / nothing).</summary>
+            public int GrantedItemId { get; }
+        }
 
         /// <summary>Cumulative carat cost to reach each width level (economy §5).</summary>
         public static readonly int[] WidthLevelCumulativeCost =
@@ -115,27 +133,145 @@ namespace JewelBlitzArena.Meta
             return FacetWheelBand.Nothing;
         }
 
-        /// <summary>Spend Chits and apply carat rewards to the profile. Returns false if broke.</summary>
+        /// <summary>Spend Chits and apply carat rewards (no item grants).</summary>
         public static bool TrySpin(
             PlayerProfile profile, ulong seed, out FacetWheelBand band, out int caratsReward)
         {
-            band = FacetWheelBand.Nothing;
-            caratsReward = 0;
+            bool ok = TrySpin(profile, catalog: null, seed, out SpinGrant grant);
+            band = grant.Band;
+            caratsReward = grant.CaratsReward;
+            return ok;
+        }
+
+        /// <summary>
+        /// Host spin: spend Chits, apply band reward (carats and/or catalog item grant).
+        /// Item pick is deterministic from seed; empty pools grant nothing for that band.
+        /// Duplicate cosmetics pay sell price instead (capacity 1).
+        /// </summary>
+        public static bool TrySpin(
+            PlayerProfile profile,
+            ContentCatalog? catalog,
+            ulong seed,
+            out SpinGrant grant)
+        {
+            grant = new SpinGrant(FacetWheelBand.Nothing, 0, 0);
             if (profile == null || profile.Chits < SpinCostChits)
             {
                 return false;
             }
 
             profile.Chits -= SpinCostChits;
-            band = Spin(seed, profile.FacetWheelWidthLevel, out caratsReward);
-            if (caratsReward > 0)
+            FacetWheelBand band = Spin(seed, profile.FacetWheelWidthLevel, out int bandCarats);
+            int grantedItemId = 0;
+            int caratsPaid = 0;
+
+            if (band == FacetWheelBand.Carats && bandCarats > 0)
             {
-                long sum = (long)profile.Carats + caratsReward;
+                long sum = (long)profile.Carats + bandCarats;
                 profile.Carats = sum > int.MaxValue ? int.MaxValue : (int)sum;
+                caratsPaid = bandCarats;
+            }
+            else if (catalog != null
+                && band != FacetWheelBand.Nothing
+                && band != FacetWheelBand.Carats)
+            {
+                ulong x = Mix(seed ^ 0x4752414E54UL);
+                int pick = PickGrantItem(catalog, band, x);
+                if (pick != 0 && catalog.TryGetItem(pick, out ItemRecord item))
+                {
+                    if (item.Category == ItemCategory.Cosmetic && profile.Ledger.Owns(pick))
+                    {
+                        long sum = (long)profile.Carats + item.SellPrice;
+                        profile.Carats = sum > int.MaxValue ? int.MaxValue : (int)sum;
+                        caratsPaid = item.SellPrice;
+                    }
+                    else
+                    {
+                        profile.Ledger.Grant(pick);
+                        grantedItemId = pick;
+                    }
+                }
             }
 
             profile.SetFlag(ProfileFlags.TouchedFacetWheel);
+            grant = new SpinGrant(band, caratsPaid, grantedItemId);
             return true;
+        }
+
+        private static int PickGrantItem(
+            ContentCatalog catalog,
+            FacetWheelBand band,
+            ulong x)
+        {
+            var pool = new List<int>();
+            switch (band)
+            {
+                case FacetWheelBand.Tier12:
+                    CollectTier(catalog, 1, 2, pool);
+                    break;
+                case FacetWheelBand.Tier34:
+                    CollectTier(catalog, 3, 4, pool);
+                    break;
+                case FacetWheelBand.Tier5:
+                    CollectTier(catalog, 5, 5, pool);
+                    break;
+                case FacetWheelBand.Tier67:
+                    CollectTier(catalog, 6, 7, pool);
+                    break;
+                case FacetWheelBand.Materials:
+                    foreach (ItemRecord item in catalog.Items)
+                    {
+                        if (item.Category == ItemCategory.Material)
+                        {
+                            pool.Add(item.ItemId);
+                        }
+                    }
+
+                    break;
+                case FacetWheelBand.Cosmetic:
+                    foreach (ItemRecord item in catalog.Items)
+                    {
+                        if (item.Category == ItemCategory.Cosmetic)
+                        {
+                            pool.Add(item.ItemId);
+                        }
+                    }
+
+                    break;
+                default:
+                    return 0;
+            }
+
+            if (pool.Count == 0)
+            {
+                return 0;
+            }
+
+            pool.Sort();
+            int pick = (int)(x % (ulong)(uint)pool.Count);
+            return pool[pick];
+        }
+
+        private static void CollectTier(ContentCatalog catalog, int rarityMin, int rarityMax, List<int> pool)
+        {
+            foreach (ItemRecord item in catalog.Items)
+            {
+                if (item.Rarity < rarityMin || item.Rarity > rarityMax)
+                {
+                    continue;
+                }
+
+                if (item.Category == ItemCategory.StageWeapon
+                    || item.Category == ItemCategory.Gift
+                    || item.Category == ItemCategory.Material
+                    || item.Category == ItemCategory.Card
+                    || item.Category == ItemCategory.Cosmetic)
+                {
+                    continue;
+                }
+
+                pool.Add(item.ItemId);
+            }
         }
 
         public static int CostToReachWidthLevel(int level)
