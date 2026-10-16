@@ -34,6 +34,9 @@ namespace JewelBlitzArena.Meta
                     case ProfileSchema.Version5:
                         MigrateV5ToV6(profile);
                         break;
+                    case ProfileSchema.Version6:
+                        MigrateV6ToV7(profile);
+                        break;
                     default:
                         throw new InvalidOperationException(
                             $"Unknown profile schema {profile.SchemaVersion}; cannot migrate.");
@@ -128,6 +131,16 @@ namespace JewelBlitzArena.Meta
         {
             // BenchNotes starts empty for upgraded profiles.
             profile.SchemaVersion = ProfileSchema.Version6;
+        }
+
+        private static void MigrateV6ToV7(PlayerProfile profile)
+        {
+            if (profile.ShopStockSeed == 0UL)
+            {
+                profile.ShopStockSeed = 0x53484F5053544BUL;
+            }
+
+            profile.SchemaVersion = ProfileSchema.Version7;
         }
     }
 }

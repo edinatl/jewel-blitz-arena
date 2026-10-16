@@ -100,6 +100,10 @@ namespace JewelBlitzArena.Meta
                     difficulty,
                     result.FramesPlayed);
             }
+
+            // Rotating shop stock reseeds after every Expedition stage (economy §6).
+            ShopRuntime.ReseedAfterExpeditionStage(
+                profile, request.Seed, request.StageId, result.FramesPlayed);
         }
     }
 }

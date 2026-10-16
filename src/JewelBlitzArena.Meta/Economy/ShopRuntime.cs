@@ -38,6 +38,33 @@ namespace JewelBlitzArena.Meta
             && item.Category != ItemCategory.Gift
             && item.CrateEligibility != CrateEligibility.Never;
 
+        /// <summary>Build stock from the profile's current <see cref="PlayerProfile.ShopStockSeed"/>.</summary>
+        public static IReadOnlyList<StockEntry> BuildStock(
+            ContentCatalog catalog,
+            PlayerProfile profile) =>
+            BuildStock(catalog, profile, profile?.ShopStockSeed ?? 0UL);
+
+        /// <summary>
+        /// Reseed rotating stock after an Expedition stage (items-and-economy.md §6).
+        /// </summary>
+        public static void ReseedAfterExpeditionStage(
+            PlayerProfile profile,
+            ulong matchSeed,
+            int stageId,
+            int framesPlayed)
+        {
+            if (profile == null)
+            {
+                return;
+            }
+
+            ulong x = profile.ShopStockSeed;
+            x ^= matchSeed;
+            x ^= (ulong)(uint)stageId << 17;
+            x ^= (ulong)(uint)framesPlayed;
+            profile.ShopStockSeed = Mix(x == 0UL ? 1UL : x);
+        }
+
         /// <summary>
         /// Build shop stock: up to 10 always (lowest item id among sellable) + 5 rotating r3–5.
         /// </summary>

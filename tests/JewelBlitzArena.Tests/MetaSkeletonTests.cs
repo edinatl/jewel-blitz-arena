@@ -26,6 +26,7 @@ public sealed class MetaSkeletonTests
         Assert.That(v0.CaratsSpentLifetime, Is.EqualTo(0));
         Assert.That(v0.ProfileSalt, Is.EqualTo(0UL));
         Assert.That(v0.TinkerCounter, Is.EqualTo(0));
+        Assert.That(v0.ShopStockSeed, Is.Not.EqualTo(0UL));
     }
 
     [Test]

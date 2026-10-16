@@ -40,6 +40,11 @@ namespace JewelBlitzArena.Meta
         /// <summary>Monotonic Tinker attempt counter — part of craft seed; never reused.</summary>
         public int TinkerCounter { get; set; }
 
+        /// <summary>
+        /// Shop rotating-stock seed (items-and-economy.md §6). Reseeded after each Expedition stage.
+        /// </summary>
+        public ulong ShopStockSeed { get; set; }
+
         /// <summary><see cref="ProfileFlags"/> bits.</summary>
         public int Flags { get; set; }
 
@@ -83,6 +88,7 @@ namespace JewelBlitzArena.Meta
                 CaratsSpentLifetime = 0,
                 ProfileSalt = 0UL,
                 TinkerCounter = 0,
+                ShopStockSeed = 0x53484F5053544BUL, // SHOPSTK default
                 Flags = 0,
                 // House Rules rows start locked; defaults still apply via HouseRulesDefaults.
                 UnlockedHouseRulesBits = UnlockLadderRuntime.HouseRulesBitsForClears(0),

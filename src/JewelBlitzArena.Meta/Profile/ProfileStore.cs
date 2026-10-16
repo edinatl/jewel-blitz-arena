@@ -102,6 +102,12 @@ namespace JewelBlitzArena.Meta
                 {
                     WriteBenchNotes(bw, profile.BenchNotes);
                 }
+
+                // v7+: ShopStockSeed after Bench Notes.
+                if (profile.SchemaVersion >= ProfileSchema.Version7)
+                {
+                    bw.Write(profile.ShopStockSeed);
+                }
             }
 
             return ms.ToArray();
@@ -169,6 +175,11 @@ namespace JewelBlitzArena.Meta
             if (profile.SchemaVersion >= ProfileSchema.Version6)
             {
                 profile.BenchNotes.ReplaceAll(ReadBenchNotes(br));
+            }
+
+            if (profile.SchemaVersion >= ProfileSchema.Version7)
+            {
+                profile.ShopStockSeed = br.ReadUInt64();
             }
 
             return profile;

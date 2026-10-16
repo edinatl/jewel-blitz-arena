@@ -1,5 +1,6 @@
 using JewelBlitzArena.Data;
 using JewelBlitzArena.Meta;
+using JewelBlitzArena.Sim;
 
 namespace JewelBlitzArena.Tests;
 
@@ -83,5 +84,66 @@ public sealed class ShopRuntimeTests
         profile.Carats = 2000;
         Assert.That(FacetWheelRuntime.TryWiden(profile), Is.True);
         Assert.That(profile.CaratsSpentLifetime, Is.EqualTo(2000));
+    }
+
+    [Test]
+    public void Expedition_stage_reseeds_shop_stock()
+    {
+        ContentCatalog catalog = Catalog();
+        var profile = PlayerProfile.CreateNew();
+        ulong before = profile.ShopStockSeed;
+        IReadOnlyList<ShopRuntime.StockEntry> stockA = ShopRuntime.BuildStock(catalog, profile);
+
+        var orch = new ExpeditionModeOrchestrator();
+        var request = new ModeRequest
+        {
+            Mode = ModeId.Expedition,
+            Seed = 0x524553454544UL,
+            StageId = SampleContentFactory.CitrineBazaarStageId,
+            Difficulty = 4,
+        };
+        var result = new MatchResult
+        {
+            CaratsEarned = 0,
+            ActorCount = 2,
+            FramesPlayed = 120,
+        };
+        unsafe
+        {
+            result.Placements[0] = 2;
+            result.Placements[1] = 1;
+        }
+
+        orch.ApplyResult(profile, result, request);
+        Assert.That(profile.ShopStockSeed, Is.Not.EqualTo(before));
+
+        IReadOnlyList<ShopRuntime.StockEntry> stockB = ShopRuntime.BuildStock(catalog, profile);
+        // Rotating slice may differ; full equality is not required — seed change is the contract.
+        Assert.That(stockB.Count, Is.EqualTo(stockA.Count));
+    }
+
+    [Test]
+    public void Profile_v7_round_trips_ShopStockSeed()
+    {
+        string dir = Path.Combine(Path.GetTempPath(), "jba-shop-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(dir);
+        string path = Path.Combine(dir, "profile.jbp");
+        try
+        {
+            var store = new ProfileStore(path);
+            PlayerProfile profile = PlayerProfile.CreateNew("Ed");
+            profile.ShopStockSeed = 0xDEADBEEFUL;
+            store.Save(profile);
+            PlayerProfile loaded = store.LoadOrCreate();
+            Assert.That(loaded.SchemaVersion, Is.EqualTo(ProfileSchema.Version7));
+            Assert.That(loaded.ShopStockSeed, Is.EqualTo(0xDEADBEEFUL));
+        }
+        finally
+        {
+            if (Directory.Exists(dir))
+            {
+                Directory.Delete(dir, recursive: true);
+            }
+        }
     }
 }

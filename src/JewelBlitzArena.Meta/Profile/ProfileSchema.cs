@@ -24,6 +24,9 @@ namespace JewelBlitzArena.Meta
         /// <summary>Adds Bench Notes + Logbook pool reveals.</summary>
         public const int Version6 = 6;
 
-        public const int Current = Version6;
+        /// <summary>Adds ShopStockSeed for rotating stock reseed after Expedition.</summary>
+        public const int Version7 = 7;
+
+        public const int Current = Version7;
     }
 }
