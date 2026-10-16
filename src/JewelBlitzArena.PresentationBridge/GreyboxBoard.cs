@@ -88,6 +88,14 @@ namespace JewelBlitzArena.PresentationBridge
                 Plot(creatures[i].X, creatures[i].Z, creatures[i].BoardGlyph);
             }
 
+            // Boss anatomy (L/h/t/V, r repairing, x broken) under patches/actors.
+            var bossParts = new BossHudEntry[MatchBossHud.MaxParts];
+            int bossCount = MatchBossHud.Collect(ref state, bossParts);
+            for (int i = 0; i < bossCount; i++)
+            {
+                Plot(bossParts[i].X, bossParts[i].Z, bossParts[i].BoardGlyph);
+            }
+
             // World patches under actors/items (Ice ~, Smoke #, Slow =).
             var patches = new WorldPatchHudEntry[MatchWorldPatchHud.MaxEntries];
             int patchCount = MatchWorldPatchHud.Collect(ref state, patches);
@@ -115,7 +123,8 @@ namespace JewelBlitzArena.PresentationBridge
                 .Append(" patches=").Append(patchCount)
                 .Append(" hazards=").Append(hazardCount)
                 .Append(" kin=").Append(kinematicCount)
-                .Append(" creatures=").Append(creatureCount);
+                .Append(" creatures=").Append(creatureCount)
+                .Append(" boss=").Append(bossCount);
             if (state.MatchOver)
             {
                 sb.Append(" MATCH_OVER");

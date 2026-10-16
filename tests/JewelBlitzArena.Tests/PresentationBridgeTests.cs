@@ -227,6 +227,74 @@ public sealed class PresentationBridgeTests
     }
 
     [Test]
+    public void MatchBossHud_reports_Harvester_parts()
+    {
+        ContentCatalog catalog = ContentCompiler.Compile(SampleContentFactory.CreateS5StubPack());
+        var config = MatchConfig.CreateDefault(0x424F5353485544UL, actorCount: 2);
+        unsafe
+        {
+            config.StageId = SampleContentFactory.HarvesterTerracesStageId;
+            config.FighterIds[0] = SampleContentFactory.RookFighterId;
+            config.FighterIds[1] = SampleContentFactory.RookFighterId;
+        }
+
+        var sim = new Simulation();
+        sim.Reset(config, catalog);
+        MatchState snap = sim.Snapshot();
+
+        var buf = new BossHudEntry[MatchBossHud.MaxParts];
+        int n = MatchBossHud.Collect(ref snap, buf);
+        Assert.That(n, Is.EqualTo(6));
+        Assert.That(buf[0].BoardGlyph, Is.EqualTo('L'));
+        Assert.That(buf[4].KindId, Is.EqualTo(BossPartRuntime.KindHead));
+        Assert.That(buf[4].BoardGlyph, Is.EqualTo('h'));
+        Assert.That(buf[5].KindId, Is.EqualTo(BossPartRuntime.KindTail));
+        Assert.That(buf[5].BoardGlyph, Is.EqualTo('t'));
+
+        string summary = MatchBossHud.FormatSummary(ref snap);
+        Assert.That(summary, Does.StartWith("boss=6"));
+        Assert.That(summary, Does.Contain("HEAD@"));
+        Assert.That(summary, Does.Contain("TAIL@"));
+
+        string board = GreyboxBoard.Render(ref snap);
+        Assert.That(board, Does.Contain("boss=6"));
+        Assert.That(board, Does.Contain("L"));
+        Assert.That(board, Does.Contain("h"));
+        Assert.That(board, Does.Contain("t"));
+    }
+
+    [Test]
+    public void MatchBossHud_reports_Vitre_body_on_Press()
+    {
+        ContentCatalog catalog = ContentCompiler.Compile(SampleContentFactory.CreateS5StubPack());
+        var config = MatchConfig.CreateDefault(0x56495452454844UL, actorCount: 2);
+        unsafe
+        {
+            config.StageId = SampleContentFactory.PressworksStageId;
+            config.PhaseClockPermille = 100;
+            config.FighterIds[0] = SampleContentFactory.RookFighterId;
+            config.FighterIds[1] = SampleContentFactory.RookFighterId;
+        }
+
+        var sim = new Simulation();
+        sim.Reset(config, catalog);
+        for (int f = 0; f < 540 + 12; f++)
+        {
+            sim.Step(InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral);
+        }
+
+        MatchState press = sim.Snapshot();
+        Assert.That(press.PhaseIndex, Is.EqualTo(1));
+        var buf = new BossHudEntry[MatchBossHud.MaxParts];
+        int n = MatchBossHud.Collect(ref press, buf);
+        Assert.That(n, Is.EqualTo(1));
+        Assert.That(buf[0].KindId, Is.EqualTo(VitreBossRuntime.KindVitreBody));
+        Assert.That(buf[0].BoardGlyph, Is.EqualTo('V'));
+        Assert.That(MatchBossHud.FormatSummary(ref press), Does.Contain("VITRE@"));
+        Assert.That(GreyboxBoard.Render(ref press), Does.Contain("boss=1"));
+    }
+
+    [Test]
     public void MatchStageCreatureHud_reports_Pressworks_Vein_Guards()
     {
         ContentCatalog catalog = ContentCompiler.Compile(SampleContentFactory.CreateS5StubPack());
