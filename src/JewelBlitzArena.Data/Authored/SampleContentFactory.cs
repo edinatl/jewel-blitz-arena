@@ -30,7 +30,10 @@ namespace JewelBlitzArena.Data
         /// <summary>S5 stub Petrify Gas — thrown hit applies Freeze (matches <c>MatchRules.PetrifyGasItemId</c>).</summary>
         public const int PetrifyGasItemId = 19;
 
-        /// <summary>S5 stub Ice Jar — thrown hit freezes a short floor-patch radius (matches <c>MatchRules.IceJarItemId</c>).</summary>
+        /// <summary>S5 stub Smoke Jar — lasting Blind floor patch (matches <c>MatchRules.SmokeJarItemId</c>).</summary>
+        public const int SmokeJarItemId = 20;
+
+        /// <summary>S5 stub Ice Jar — lasting Freeze floor patch (matches <c>MatchRules.IceJarItemId</c>).</summary>
         public const int IceJarItemId = 21;
 
         public static AuthoredContentPack CreateS5StubPack()
@@ -560,8 +563,9 @@ namespace JewelBlitzArena.Data
             Add("Adhesive Spray", "Status", 2, 0, 0, 110, 40);
             // ItemId 19 — Petrify Gas applies Freeze 90 f on thrown hit (balance.md §4).
             Add("Petrify Gas", "Status", 2, 0, 0, 130, 50);
+            // ItemId 20 — Smoke Jar lasting Blind floor patch.
             Add("Smoke Jar", "Status", 1, 0, 0, 70, 25);
-            // ItemId 21 — Ice Jar floor-patch stub (freeze in radius at impact).
+            // ItemId 21 — Ice Jar lasting Freeze floor patch.
             Add("Ice Jar", "Status", 3, 0, 0, 200, 75);
             Add("Rollerskates", "Mobility", 2, 0, 0, 150, 55);
             Add("Spring Boots", "Mobility", 3, 0, 0, 220, 80);

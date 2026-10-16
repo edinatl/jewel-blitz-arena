@@ -194,6 +194,31 @@ namespace JewelBlitzArena.Sim
             }
         }
 
+        /// <summary>
+        /// World patches (Ice/Smoke floor) reuse the GleamPickups pool until gleam economy lands.
+        /// </summary>
+        public static GenericPoolSlot GetWorldPatch(ref MatchState state, int index)
+        {
+            unsafe
+            {
+                fixed (byte* p = state.GleamPickups)
+                {
+                    return ((GenericPoolSlot*)p)[index];
+                }
+            }
+        }
+
+        public static void SetWorldPatch(ref MatchState state, int index, in GenericPoolSlot slot)
+        {
+            unsafe
+            {
+                fixed (byte* p = state.GleamPickups)
+                {
+                    ((GenericPoolSlot*)p)[index] = slot;
+                }
+            }
+        }
+
         public static GenericPoolSlot GetKinematic(ref MatchState state, int index)
         {
             unsafe

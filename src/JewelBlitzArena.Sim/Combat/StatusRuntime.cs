@@ -53,6 +53,27 @@ namespace JewelBlitzArena.Sim
             Apply(ref state, casterIndex, range, ClampUShort(CapHard(frames)), groundedOnly: false, Kind.Freeze);
         }
 
+        /// <summary>Single-target Blind (Smoke Jar patch pulses).</summary>
+        public static void ApplyBlind(ref MatchState state, int victimIndex, int frames)
+        {
+            if (victimIndex < 0 || victimIndex >= state.ActorCount || frames <= 0)
+            {
+                return;
+            }
+
+            ref ActorSlot victim = ref MatchStateAccess.Actor(ref state, victimIndex);
+            if (!victim.IsAlive || victim.IsEliminated || victim.InvulnFrames > 0)
+            {
+                return;
+            }
+
+            int f = ClampUShort(frames);
+            if (f > victim.BlindFrames)
+            {
+                victim.BlindFrames = (ushort)f;
+            }
+        }
+
         /// <summary>Single-target Slow (Adhesive Spray thrown hits).</summary>
         public static void ApplySlow(ref MatchState state, int victimIndex, int frames)
         {

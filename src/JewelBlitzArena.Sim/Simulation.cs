@@ -131,6 +131,7 @@ namespace JewelBlitzArena.Sim
             }
 
             ItemRuntime.InitializeMatch(ref _state);
+            WorldPatchRuntime.InitializeMatch(ref _state);
             _stageGraph = StageRuntime.ResolveGraph(catalog, config.StageId);
             int jewelCap = config.JewelCap > 0
                 ? config.JewelCap
@@ -181,6 +182,7 @@ namespace JewelBlitzArena.Sim
             // S1 consumes S2 contacts (Blitz, thrown-item damage), then ticks combat.
             CombatSystem.ConsumeContacts(ref _state, ref _contacts);
             CombatSystem.TickActors(ref _state, _kits);
+            WorldPatchRuntime.Tick(ref _state);
 
             // S4 stage graph: timers, transitions, hazards, kinematics.
             StageRuntime.Tick(ref _state, _stageGraph, ref _contacts);

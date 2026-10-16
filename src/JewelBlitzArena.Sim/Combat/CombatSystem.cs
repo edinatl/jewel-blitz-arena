@@ -236,6 +236,20 @@ namespace JewelBlitzArena.Sim
                             ApplyThrownItemHit(ref state, itemSlot, victim);
                             break;
                         }
+
+                    case SimEventKind.ItemLanded:
+                        {
+                            int itemSlot = ev.SlotA;
+                            if (itemSlot < 0 || itemSlot >= PoolCaps.LooseItems)
+                            {
+                                break;
+                            }
+
+                            LooseItemSlot item = MatchStateAccess.GetLooseItem(ref state, itemSlot);
+                            WorldPatchRuntime.TrySpawnFromItem(
+                                ref state, item.ItemId, item.PosX, item.PosZ);
+                            break;
+                        }
                 }
             }
         }
@@ -499,15 +513,10 @@ namespace JewelBlitzArena.Sim
             {
                 StatusRuntime.ApplyFreeze(ref state, vic, MatchRules.FreezeDurationFrames);
             }
-            else if (itemId == MatchRules.IceJarItemId)
+            else if (itemId == MatchRules.IceJarItemId || itemId == MatchRules.SmokeJarItemId)
             {
-                // Floor-patch stub: freeze actors near impact (includes the hit victim).
-                StatusRuntime.ApplyFreezeInRadius(
-                    ref state,
-                    impactX,
-                    impactZ,
-                    MatchRules.IceJarFreezeRange,
-                    MatchRules.FreezeDurationFrames);
+                // Lasting floor patch at impact; first pulse applies this frame via Tick.
+                WorldPatchRuntime.TrySpawnFromItem(ref state, itemId, impactX, impactZ);
             }
 
             const int thrownDamage = 40;

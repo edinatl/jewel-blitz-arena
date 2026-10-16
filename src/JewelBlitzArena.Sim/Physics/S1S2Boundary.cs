@@ -41,6 +41,8 @@ namespace JewelBlitzArena.Sim
         PhaseChanged = 8,
         PhaseTransitionStarted = 9,
         HazardHitActor = 10,
+        /// <summary>Loose item left flight and settled on the field. SlotA = item index.</summary>
+        ItemLanded = 11,
     }
 
     /// <summary>Ephemeral per-step event (not part of <see cref="MatchState"/> hash).</summary>

@@ -235,6 +235,7 @@ namespace JewelBlitzArena.Sim
                     }
 
                     DespawnFieldItems(ref state);
+                    WorldPatchRuntime.InitializeMatch(ref state);
                     break;
                 case StageCarryItems.HeldOnly:
                     DespawnFieldItems(ref state);

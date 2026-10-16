@@ -107,13 +107,31 @@ namespace JewelBlitzArena.Sim
         public const int PetrifyGasItemId = 19;
 
         /// <summary>
+        /// S5 stub Smoke Jar item id (<c>SampleContentFactory.SmokeJarItemId</c>).
+        /// Land / hit spawns a lasting Blind floor patch.
+        /// </summary>
+        public const int SmokeJarItemId = 20;
+
+        /// <summary>Smoke Jar patch radius.</summary>
+        public static readonly Fix SmokeJarBlindRange = Fix.FromInt(3);
+
+        /// <summary>Smoke Jar lasting patch lifetime (4 s).</summary>
+        public const int SmokePatchLifetimeFrames = 240;
+
+        /// <summary>
         /// S5 stub Ice Jar item id (<c>SampleContentFactory.IceJarItemId</c>).
-        /// Thrown hit freezes actors in a short floor-patch radius (stub).
+        /// Land / hit spawns a lasting Freeze floor patch.
         /// </summary>
         public const int IceJarItemId = 21;
 
-        /// <summary>Ice Jar impact freeze radius (floor-patch stub).</summary>
+        /// <summary>Ice Jar patch radius.</summary>
         public static readonly Fix IceJarFreezeRange = Fix.FromInt(2);
+
+        /// <summary>Ice Jar lasting patch lifetime (3 s).</summary>
+        public const int IcePatchLifetimeFrames = 180;
+
+        /// <summary>Status refresh while standing in a world patch.</summary>
+        public const int WorldPatchStatusPulseFrames = 30;
 
         /// <summary>Hard-control cap for stun/dizzy/freeze/pin/grab sources (balance.md §4).</summary>
         public const int HardControlCapFrames = 120;

@@ -215,6 +215,7 @@ namespace JewelBlitzArena.Sim
                         item.FlightFrames = 0;
                         item.VelX = Fix.Zero;
                         item.VelZ = Fix.Zero;
+                        contacts.Add(SimEventKind.ItemLanded, (byte)i, 0);
                     }
                 }
 
