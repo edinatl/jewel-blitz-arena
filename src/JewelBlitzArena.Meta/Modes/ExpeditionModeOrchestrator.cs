@@ -90,6 +90,16 @@ namespace JewelBlitzArena.Meta
             {
                 profile.BestExpeditionDifficulty = difficulty;
             }
+
+            if (cleared)
+            {
+                ExpeditionClearBonusRuntime.TryGrant(
+                    profile,
+                    request.Seed,
+                    request.StageId,
+                    difficulty,
+                    result.FramesPlayed);
+            }
         }
     }
 }

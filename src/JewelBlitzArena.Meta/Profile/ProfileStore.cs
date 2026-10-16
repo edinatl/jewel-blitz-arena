@@ -83,6 +83,9 @@ namespace JewelBlitzArena.Meta
                 // v3+: Chits + FacetWheelWidthLevel.
                 bw.Write(profile.Chits);
                 bw.Write(profile.FacetWheelWidthLevel);
+                // v4+: PlaytimeSeconds + CaratsSpentLifetime.
+                bw.Write(profile.PlaytimeSeconds);
+                bw.Write(profile.CaratsSpentLifetime);
 
                 int[] owned = profile.Ledger.ToArray();
                 bw.Write(owned.Length);
@@ -126,6 +129,12 @@ namespace JewelBlitzArena.Meta
             {
                 profile.Chits = br.ReadInt32();
                 profile.FacetWheelWidthLevel = br.ReadInt32();
+            }
+
+            if (profile.SchemaVersion >= ProfileSchema.Version4)
+            {
+                profile.PlaytimeSeconds = br.ReadInt32();
+                profile.CaratsSpentLifetime = br.ReadInt32();
             }
 
             int count = br.ReadInt32();

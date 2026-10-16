@@ -15,6 +15,9 @@ namespace JewelBlitzArena.Meta
         /// <summary>Adds Chits + FacetWheelWidthLevel for Facet Wheel greybox.</summary>
         public const int Version3 = 3;
 
-        public const int Current = Version3;
+        /// <summary>Adds PlaytimeSeconds + CaratsSpentLifetime for Citrine gifts.</summary>
+        public const int Version4 = 4;
+
+        public const int Current = Version4;
     }
 }

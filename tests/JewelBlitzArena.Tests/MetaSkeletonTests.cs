@@ -22,6 +22,8 @@ public sealed class MetaSkeletonTests
         Assert.That(v0.BestExpeditionDifficulty, Is.EqualTo(0));
         Assert.That(v0.Chits, Is.EqualTo(0));
         Assert.That(v0.FacetWheelWidthLevel, Is.EqualTo(0));
+        Assert.That(v0.PlaytimeSeconds, Is.EqualTo(0));
+        Assert.That(v0.CaratsSpentLifetime, Is.EqualTo(0));
     }
 
     [Test]

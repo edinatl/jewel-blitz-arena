@@ -47,5 +47,11 @@ namespace JewelBlitzArena.Meta
         /// Required with clear-14 for Cascade / Extra Arena slot 4.
         /// </summary>
         public const int OwnedFullCast = 1 << 13;
+
+        /// <summary>Captain Citrine gift: Solitaire received once.</summary>
+        public const int ReceivedSolitaire = 1 << 14;
+
+        /// <summary>Captain Citrine gift: Regent's Diadem received once.</summary>
+        public const int ReceivedDiadem = 1 << 15;
     }
 }

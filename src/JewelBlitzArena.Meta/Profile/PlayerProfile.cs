@@ -28,6 +28,12 @@ namespace JewelBlitzArena.Meta
         /// <summary>Facet Wheel width level 0–5 (cumulative carat widen steps).</summary>
         public int FacetWheelWidthLevel { get; set; }
 
+        /// <summary>Lifetime playtime in seconds — feeds Citrine gift appearance (economy §6).</summary>
+        public int PlaytimeSeconds { get; set; }
+
+        /// <summary>Lifetime carats spent in shop/widen — feeds Citrine gift appearance.</summary>
+        public int CaratsSpentLifetime { get; set; }
+
         /// <summary><see cref="ProfileFlags"/> bits.</summary>
         public int Flags { get; set; }
 
@@ -64,6 +70,8 @@ namespace JewelBlitzArena.Meta
                 BestExpeditionDifficulty = 0,
                 Chits = 0,
                 FacetWheelWidthLevel = 0,
+                PlaytimeSeconds = 0,
+                CaratsSpentLifetime = 0,
                 Flags = 0,
                 // House Rules rows start locked; defaults still apply via HouseRulesDefaults.
                 UnlockedHouseRulesBits = UnlockLadderRuntime.HouseRulesBitsForClears(0),
