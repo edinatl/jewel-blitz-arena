@@ -229,7 +229,7 @@ static int RecordFixtures(string[] args)
         actorCount: 2,
         stageId: SampleContentFactory.HarvesterTerracesStageId,
         p0Log: BuildWalkLog(180),
-        notes: "S8: Harvester Terraces boss AI + terrace crates (jewel cap 6; footfall/intake/stomp; 4 breakable crates)."));
+        notes: "S8: Harvester Terraces anatomy + crates (legs/head/tail; footfall/intake/stomp; 4 crates)."));
 
     // Pressworks: 10% clock → Sorting 150f + transition 12f → The Press (Live Hands chase).
     Write(corpus, CorpusRunner.Capture(

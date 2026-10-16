@@ -5,7 +5,7 @@ namespace JewelBlitzArena.Sim
     /// <summary>
     /// Breakable stage props (crates) on the unused <see cref="MatchState.Crates"/> pool.
     /// One Attack hit opens (combat-and-match.md). Jewel vs item roll uses
-    /// <see cref="StageGraph.JewelCrateChancePercent"/>. Boss legs/head/tail deferred.
+    /// <see cref="StageGraph.JewelCrateChancePercent"/>. Boss anatomy is <see cref="BossPartRuntime"/>.
     /// </summary>
     public static class BreakableRuntime
     {
@@ -152,11 +152,11 @@ namespace JewelBlitzArena.Sim
 
         private static void ArmHarvesterCrates(ref MatchState state)
         {
-            // Terrace crate points (stages.md §3.1 — jewels from broken crates).
-            SpawnCrate(ref state, 0, Fix.FromInt(3), Fix.FromInt(2));
-            SpawnCrate(ref state, 1, Fix.FromInt(-3), Fix.FromInt(2));
-            SpawnCrate(ref state, 2, Fix.FromInt(3), Fix.FromInt(-2));
-            SpawnCrate(ref state, 3, Fix.FromInt(-3), Fix.FromInt(-2));
+            // Terrace crate points outside boss-part hit radii (legs at ±2,±2).
+            SpawnCrate(ref state, 0, Fix.FromInt(6), Fix.FromInt(5));
+            SpawnCrate(ref state, 1, Fix.FromInt(-6), Fix.FromInt(5));
+            SpawnCrate(ref state, 2, Fix.FromInt(6), Fix.FromInt(-5));
+            SpawnCrate(ref state, 3, Fix.FromInt(-6), Fix.FromInt(-5));
         }
 
         private static void SpawnCrate(ref MatchState state, int index, Fix x, Fix z)

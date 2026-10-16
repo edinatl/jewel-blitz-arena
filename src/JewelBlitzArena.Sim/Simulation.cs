@@ -145,6 +145,7 @@ namespace JewelBlitzArena.Sim
                 config.PhaseClockPermille,
                 ref _contacts);
             BreakableRuntime.InitializeMatch(ref _state, _stageGraph);
+            BossPartRuntime.InitializeMatch(ref _state, _stageGraph);
         }
 
         public void Step(InputFrame i0, InputFrame i1, InputFrame i2, InputFrame i3)
@@ -183,8 +184,11 @@ namespace JewelBlitzArena.Sim
             // S1 consumes S2 contacts (Blitz, thrown-item damage), then ticks combat.
             CombatSystem.ConsumeContacts(ref _state, ref _contacts);
             CombatSystem.TickActors(ref _state, _kits);
+            // Boss parts before crates so anatomy takes Attack priority on Harvester.
+            BossPartRuntime.ResolveAttackHits(ref _state, _kits, ref _contacts);
             BreakableRuntime.ResolveAttackHits(
                 ref _state, _kits, _stageGraph, _catalog, ref _contacts);
+            BossPartRuntime.Tick(ref _state);
             WorldPatchRuntime.Tick(ref _state);
             GleamRuntime.Tick(ref _state, ref _contacts);
 

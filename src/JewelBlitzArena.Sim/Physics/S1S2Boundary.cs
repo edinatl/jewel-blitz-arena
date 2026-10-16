@@ -47,6 +47,10 @@ namespace JewelBlitzArena.Sim
         CrateBroken = 12,
         /// <summary>Expedition gleam collected. SlotA = actor, SlotB = gleam slot.</summary>
         GleamPickedUp = 13,
+        /// <summary>Boss part took damage. SlotA = part index, SlotB = attacker.</summary>
+        BossPartHit = 14,
+        /// <summary>Boss part Life reached 0. SlotA = part index, SlotB = kind.</summary>
+        BossPartBroken = 15,
     }
 
     /// <summary>Ephemeral per-step event (not part of <see cref="MatchState"/> hash).</summary>

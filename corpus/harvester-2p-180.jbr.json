@@ -1,7 +1,7 @@
 {
   "formatVersion": 3,
   "name": "harvester-2p-180",
-  "notes": "S8: Harvester Terraces boss AI \u002B terrace crates (jewel cap 6; footfall/intake/stomp; 4 breakable crates).",
+  "notes": "S8: Harvester Terraces anatomy \u002B crates (legs/head/tail; footfall/intake/stomp; 4 crates).",
   "seed": 5350911184760624689,
   "stageId": 6,
   "actorCount": 2,
@@ -12,7 +12,7 @@
     3,
     4
   ],
-  "expectedHashHex": "8f3f4308c3eb289d",
+  "expectedHashHex": "ef1311c712bd5d71",
   "frames": [
     {
       "p0": 32,

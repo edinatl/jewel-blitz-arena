@@ -216,6 +216,28 @@ namespace JewelBlitzArena.Sim
             }
         }
 
+        public static GenericPoolSlot GetBossSub(ref MatchState state, int index)
+        {
+            unsafe
+            {
+                fixed (byte* p = state.BossSubActors)
+                {
+                    return ((GenericPoolSlot*)p)[index];
+                }
+            }
+        }
+
+        public static void SetBossSub(ref MatchState state, int index, in GenericPoolSlot slot)
+        {
+            unsafe
+            {
+                fixed (byte* p = state.BossSubActors)
+                {
+                    ((GenericPoolSlot*)p)[index] = slot;
+                }
+            }
+        }
+
         /// <summary>
         /// World patches (Ice/Smoke/Slow) and Expedition gleams share the GleamPickups pool
         /// (TypeId ranges; see <see cref="WorldPatchRuntime"/> / <see cref="GleamRuntime"/>).
