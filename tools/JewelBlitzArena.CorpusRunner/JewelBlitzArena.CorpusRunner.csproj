@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\JewelBlitzArena.Data\JewelBlitzArena.Data.csproj" />
     <ProjectReference Include="..\..\src\JewelBlitzArena.Tools\JewelBlitzArena.Tools.csproj" />
     <ProjectReference Include="..\..\src\JewelBlitzArena.Sim\JewelBlitzArena.Sim.csproj" />
   </ItemGroup>

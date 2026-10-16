@@ -5,13 +5,14 @@
   "seed": 5350911184942948146,
   "stageId": 0,
   "actorCount": 4,
+  "phaseClockPermille": 0,
   "fighterIds": [
-    0,
     1,
     2,
-    3
+    3,
+    4
   ],
-  "expectedHashHex": "028308c38daf6f25",
+  "expectedHashHex": "7bf0c62416f2b486",
   "frames": [
     {
       "p0": 32,

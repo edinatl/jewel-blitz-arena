@@ -1,4 +1,5 @@
 using JewelBlitzArena.Sim;
+using JewelBlitzArena.Tools.Corpus;
 using JewelBlitzArena.Tools.Replay;
 
 namespace JewelBlitzArena.Tools.Viewer;
@@ -25,7 +26,7 @@ public static class ReplayViewerStub
 
         MatchConfig config = recording.ToMatchConfig();
         var sim = new Simulation();
-        sim.Reset(config);
+        sim.Reset(config, CorpusCatalog.LoadS5Stub());
 
         var dumps = new List<FrameDump> { Dump(sim) };
         ReplayRecording.CpuHandoff[] handoffs = recording.CpuHandoffs ?? Array.Empty<ReplayRecording.CpuHandoff>();

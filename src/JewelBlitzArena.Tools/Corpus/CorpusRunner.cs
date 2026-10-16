@@ -1,3 +1,4 @@
+using JewelBlitzArena.Data;
 using JewelBlitzArena.Sim;
 using JewelBlitzArena.Tools.Replay;
 
@@ -78,8 +79,9 @@ public static class CorpusRunner
     public static ulong Replay(ReplayRecording recording)
     {
         MatchConfig config = recording.ToMatchConfig();
+        ContentCatalog catalog = CorpusCatalog.LoadS5Stub();
         var sim = new Simulation();
-        sim.Reset(config);
+        sim.Reset(config, catalog);
 
         ReplayRecording.CpuHandoff[] handoffs = recording.CpuHandoffs ?? Array.Empty<ReplayRecording.CpuHandoff>();
         ReplayRecording.ItemSpawn[] spawns = recording.ItemSpawns ?? Array.Empty<ReplayRecording.ItemSpawn>();
@@ -150,6 +152,8 @@ public static class CorpusRunner
         Func<int, InputFrame, InputFrame>? p3ForFrame = null,
         ReplayRecording.CpuHandoff[]? cpuHandoffs = null,
         ReplayRecording.ItemSpawn[]? itemSpawns = null,
+        int phaseClockPermille = 0,
+        int[]? fighterIds = null,
         string? notes = null)
     {
         var frames = new ReplayRecording.FrameInputs[p0Log.Length];
@@ -178,6 +182,18 @@ public static class CorpusRunner
             };
         }
 
+        int[] ids = fighterIds ?? DefaultCorpusFighterIds();
+        if (ids.Length < PoolCaps.Actors)
+        {
+            var padded = new int[PoolCaps.Actors];
+            for (int i = 0; i < PoolCaps.Actors; i++)
+            {
+                padded[i] = i < ids.Length ? ids[i] : ids[ids.Length - 1];
+            }
+
+            ids = padded;
+        }
+
         var recording = new ReplayRecording
         {
             FormatVersion = ReplayRecording.CurrentFormatVersion,
@@ -186,7 +202,8 @@ public static class CorpusRunner
             Seed = seed,
             StageId = stageId,
             ActorCount = actorCount,
-            FighterIds = Enumerable.Range(0, PoolCaps.Actors).ToArray(),
+            PhaseClockPermille = phaseClockPermille,
+            FighterIds = ids,
             Frames = frames,
             CpuHandoffs = cpuHandoffs ?? Array.Empty<ReplayRecording.CpuHandoff>(),
             ItemSpawns = itemSpawns ?? Array.Empty<ReplayRecording.ItemSpawn>(),
@@ -197,4 +214,13 @@ public static class CorpusRunner
         recording.ExpectedHashHex = ReplayRecording.FormatHashHex(hash);
         return recording;
     }
+
+    /// <summary>Rook / Sable / Bulwark / Lune — ids present in the S5 stub pack.</summary>
+    public static int[] DefaultCorpusFighterIds() =>
+    [
+        SampleContentFactory.RookFighterId,
+        SampleContentFactory.SableFighterId,
+        SampleContentFactory.BulwarkFighterId,
+        SampleContentFactory.LuneFighterId,
+    ];
 }

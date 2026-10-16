@@ -1,17 +1,18 @@
 {
   "formatVersion": 3,
   "name": "neutral-2p-180",
-  "notes": "S0-style two-actor walk for 3 seconds.",
+  "notes": "S0-style two-actor walk for 3 seconds (flat stageId=0; S5 kits via catalog).",
   "seed": 5350911184942948145,
   "stageId": 0,
   "actorCount": 2,
+  "phaseClockPermille": 0,
   "fighterIds": [
-    0,
     1,
     2,
-    3
+    3,
+    4
   ],
-  "expectedHashHex": "2832fa4e0b3a44c3",
+  "expectedHashHex": "42926461b3d96983",
   "frames": [
     {
       "p0": 32,

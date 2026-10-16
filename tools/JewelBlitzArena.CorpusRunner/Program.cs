@@ -1,4 +1,5 @@
-﻿using JewelBlitzArena.Sim;
+﻿using JewelBlitzArena.Data;
+using JewelBlitzArena.Sim;
 using JewelBlitzArena.Tools.Corpus;
 using JewelBlitzArena.Tools.Replay;
 
@@ -100,7 +101,7 @@ static int RecordFixtures(string[] args)
         actorCount: 2,
         stageId: 0,
         p0Log: BuildWalkLog(180),
-        notes: "S0-style two-actor walk for 3 seconds."));
+        notes: "S0-style two-actor walk for 3 seconds (flat stageId=0; S5 kits via catalog)."));
 
     Write(corpus, CorpusRunner.Capture(
         name: "ffa-4p-240",
@@ -114,9 +115,9 @@ static int RecordFixtures(string[] args)
         name: "buttons-2p-120",
         seed: 0x4A42415F53305F33UL,
         actorCount: 2,
-        stageId: 1,
+        stageId: SampleContentFactory.CitrineBazaarStageId,
         p0Log: BuildButtonLog(120),
-        notes: "Stick + Jump/Attack bits exercised."));
+        notes: "Stick + Jump/Attack on Citrine Bazaar (stage graph + hazards via S5 catalog)."));
 
     Write(corpus, CorpusRunner.Capture(
         name: "idle-2p-60",
@@ -180,6 +181,16 @@ static int RecordFixtures(string[] args)
             },
         },
         notes: "S8: Ice/Smoke/Adhesive world patches via item-spawn handoffs (format v3)."));
+
+    // Fulgur Cloister phase advance: 10% Phase Clock → Courtyard 240f + Landslide 24f → Library.
+    Write(corpus, CorpusRunner.Capture(
+        name: "fulgur-library-2p-300",
+        seed: 0x4A42415F46554731UL, // JBA_FUG1
+        actorCount: 2,
+        stageId: SampleContentFactory.FulgurCloisterStageId,
+        p0Log: BuildWalkLog(300),
+        phaseClockPermille: 100,
+        notes: "S8: Fulgur Cloister via S5 catalog; PhaseClock 10% reaches Library with crush hazard + bookcase kin."));
 
     Console.WriteLine($"Recorded fixtures into {Path.GetFullPath(corpus)}");
     return 0;

@@ -24,6 +24,12 @@ public sealed class ReplayRecording
 
     public int ActorCount { get; set; }
 
+    /// <summary>
+    /// House Rule 7 Phase Clock as permille. 0 = default 1000 (100%).
+    /// Additive field — older fixtures omit it and keep full-speed clocks.
+    /// </summary>
+    public int PhaseClockPermille { get; set; }
+
     public int[] FighterIds { get; set; } = new int[PoolCaps.Actors];
 
     /// <summary>Expected xxHash64 after replaying every frame (hex string, e.g. "a1b2c3d4e5f60718").</summary>
@@ -85,6 +91,11 @@ public sealed class ReplayRecording
     {
         var config = MatchConfig.CreateDefault(Seed, ActorCount);
         config.StageId = StageId;
+        if (PhaseClockPermille > 0)
+        {
+            config.PhaseClockPermille = PhaseClockPermille;
+        }
+
         for (int i = 0; i < PoolCaps.Actors; i++)
         {
             int id = i < FighterIds.Length ? FighterIds[i] : i;

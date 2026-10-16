@@ -11,6 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\JewelBlitzArena.Data\JewelBlitzArena.Data.csproj" />
     <ProjectReference Include="..\JewelBlitzArena.Sim\JewelBlitzArena.Sim.csproj" />
   </ItemGroup>
 

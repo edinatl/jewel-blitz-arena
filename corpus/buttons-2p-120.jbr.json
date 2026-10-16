@@ -1,17 +1,18 @@
 {
   "formatVersion": 3,
   "name": "buttons-2p-120",
-  "notes": "Stick \u002B Jump/Attack bits exercised.",
+  "notes": "Stick \u002B Jump/Attack on Citrine Bazaar (stage graph \u002B hazards via S5 catalog).",
   "seed": 5350911184942948147,
   "stageId": 1,
   "actorCount": 2,
+  "phaseClockPermille": 0,
   "fighterIds": [
-    0,
     1,
     2,
-    3
+    3,
+    4
   ],
-  "expectedHashHex": "88664772ec2d739b",
+  "expectedHashHex": "acb863ab4fd92776",
   "frames": [
     {
       "p0": 1856,
