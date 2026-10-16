@@ -2433,6 +2433,66 @@
       "sellPrice": 20,
       "damagePerUse": 10,
       "healPerUse": 0
+    },
+    {
+      "itemId": 26,
+      "name": "Stage Mortar",
+      "category": "StageWeapon",
+      "rarity": 1,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 0,
+      "damagePerUse": 40,
+      "healPerUse": 0
+    },
+    {
+      "itemId": 27,
+      "name": "Stage Frost Staff",
+      "category": "StageWeapon",
+      "rarity": 1,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 0,
+      "damagePerUse": 35,
+      "healPerUse": 0
+    },
+    {
+      "itemId": 28,
+      "name": "Stage Mallet",
+      "category": "StageWeapon",
+      "rarity": 1,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 0,
+      "damagePerUse": 40,
+      "healPerUse": 0
+    },
+    {
+      "itemId": 29,
+      "name": "Stage Net",
+      "category": "StageWeapon",
+      "rarity": 1,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 0,
+      "damagePerUse": 20,
+      "healPerUse": 0
+    },
+    {
+      "itemId": 30,
+      "name": "Stage Flame",
+      "category": "StageWeapon",
+      "rarity": 1,
+      "crateEligibility": "Never",
+      "pocketable": false,
+      "buyPrice": 0,
+      "sellPrice": 0,
+      "damagePerUse": 40,
+      "healPerUse": 0
     }
   ]
 }

@@ -141,6 +141,13 @@ namespace JewelBlitzArena.Sim
         /// </summary>
         public const int IceJarItemId = 21;
 
+        /// <summary>Vein Guard stage-weapon item ids (SampleContentFactory mirrors).</summary>
+        public const int StageMortarItemId = 26;
+        public const int StageFrostStaffItemId = 27;
+        public const int StageMalletItemId = 28;
+        public const int StageNetItemId = 29;
+        public const int StageFlameItemId = 30;
+
         /// <summary>Ice Jar patch radius.</summary>
         public static readonly Fix IceJarFreezeRange = Fix.FromInt(2);
 

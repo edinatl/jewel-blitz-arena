@@ -4,7 +4,8 @@ namespace JewelBlitzArena.Data
 {
     /// <summary>
     /// S5 stub pack: full cast kits (cast.md §6 + kit behaviors), five story-arena
-    /// phase stubs (Citrine → Orrery) plus two boss-arena stubs, 25 always-eligible starter items.
+    /// phase stubs (Citrine → Orrery) plus two boss-arena stubs, 25 always-eligible starters
+    /// plus 5 Never-eligible Vein Guard stage weapons.
     /// </summary>
     public static class SampleContentFactory
     {
@@ -41,6 +42,13 @@ namespace JewelBlitzArena.Data
 
         /// <summary>S5 stub Ice Jar — lasting Freeze floor patch (matches <c>MatchRules.IceJarItemId</c>).</summary>
         public const int IceJarItemId = 21;
+
+        /// <summary>Vein Guard stage weapons (never crate-eligible; MatchRules mirrors).</summary>
+        public const int StageMortarItemId = 26;
+        public const int StageFrostStaffItemId = 27;
+        public const int StageMalletItemId = 28;
+        public const int StageNetItemId = 29;
+        public const int StageFlameItemId = 30;
 
         public static AuthoredContentPack CreateS5StubPack()
         {
@@ -1334,6 +1342,30 @@ namespace JewelBlitzArena.Data
             Add("Spring Boots", "Mobility", 3, 0, 0, 220, 80);
             Add("Kitten", "Summon", 3, 20, 0, 300, 100);
             Add("Trumpet", "Toy", 1, 10, 0, 50, 20);
+
+            // Vein Guard stage weapons (stages.md §3.2) — Never crate-eligible; Sim FlagStageOnly.
+            void AddStageWeapon(int itemId, string name, int damage)
+            {
+                items.Add(new AuthoredItem
+                {
+                    ItemId = itemId,
+                    Name = name,
+                    Category = "StageWeapon",
+                    Rarity = 1,
+                    CrateEligibility = "Never",
+                    Pocketable = false,
+                    DamagePerUse = damage,
+                    HealPerUse = 0,
+                    BuyPrice = 0,
+                    SellPrice = 0,
+                });
+            }
+
+            AddStageWeapon(StageMortarItemId, "Stage Mortar", 40);
+            AddStageWeapon(StageFrostStaffItemId, "Stage Frost Staff", 35);
+            AddStageWeapon(StageMalletItemId, "Stage Mallet", 40);
+            AddStageWeapon(StageNetItemId, "Stage Net", 20);
+            AddStageWeapon(StageFlameItemId, "Stage Flame", 40);
 
             return items;
         }

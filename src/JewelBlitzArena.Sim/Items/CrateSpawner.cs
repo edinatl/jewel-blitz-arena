@@ -30,7 +30,15 @@ namespace JewelBlitzArena.Sim
         }
 
         /// <summary>Spawn a rolled item at a world position (stage prop / crate break).</summary>
-        public static int TrySpawnLooseItem(ref MatchState state, int itemId, FixVec3 pos)
+        public static int TrySpawnLooseItem(ref MatchState state, int itemId, FixVec3 pos) =>
+            TrySpawnLooseItem(ref state, itemId, pos, stageOnly: false);
+
+        /// <summary>
+        /// Spawn a loose item; <paramref name="stageOnly"/> marks Vein Guard / arena weapons
+        /// that must not enter Meta inventory.
+        /// </summary>
+        public static int TrySpawnLooseItem(
+            ref MatchState state, int itemId, FixVec3 pos, bool stageOnly)
         {
             if (itemId < 0)
             {
@@ -52,6 +60,7 @@ namespace JewelBlitzArena.Sim
                 HolderSlot = LooseItemSlot.NoHolder,
             };
             item.IsActive = true;
+            item.IsStageOnly = stageOnly;
             MatchStateAccess.SetLooseItem(ref state, slot, item);
             state.ActiveLooseItemCount = CountActiveItems(ref state);
             return slot;

@@ -184,6 +184,7 @@ namespace JewelBlitzArena.Sim
                     hit.Flags = FlagBroken;
                     MatchStateAccess.SetStageCreature(ref state, best, hit);
                     events.Add(SimEventKind.StageCreatureBroken, (byte)best, (byte)hit.TypeId);
+                    OnBroken(ref state, hit.TypeId, hit.PosX, hit.PosZ);
                 }
                 else
                 {
@@ -191,6 +192,28 @@ namespace JewelBlitzArena.Sim
                 }
             }
         }
+
+        private static void OnBroken(ref MatchState state, int kind, Fix x, Fix z)
+        {
+            int itemId = ItemIdForKind(kind);
+            if (itemId < 0)
+            {
+                return;
+            }
+
+            CrateSpawner.TrySpawnLooseItem(
+                ref state, itemId, new FixVec3(x, Fix.Zero, z), stageOnly: true);
+        }
+
+        private static int ItemIdForKind(int kind) => kind switch
+        {
+            KindMortar => MatchRules.StageMortarItemId,
+            KindFrostStaff => MatchRules.StageFrostStaffItemId,
+            KindMallet => MatchRules.StageMalletItemId,
+            KindNet => MatchRules.StageNetItemId,
+            KindFlame => MatchRules.StageFlameItemId,
+            _ => -1,
+        };
 
         private static void ArmVeinGuards(ref MatchState state)
         {

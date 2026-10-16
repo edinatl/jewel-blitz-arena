@@ -53,7 +53,25 @@ namespace JewelBlitzArena.Sim
 
         public const byte FlagActive = 1 << 0;
         public const byte FlagInFlight = 1 << 1;
+        /// <summary>Stage-only weapon (Vein Guard drop) — never scrapes into Meta inventory.</summary>
+        public const byte FlagStageOnly = 1 << 2;
         public const byte NoHolder = 255;
+
+        public bool IsStageOnly
+        {
+            get => (Flags & FlagStageOnly) != 0;
+            set
+            {
+                if (value)
+                {
+                    Flags = (byte)(Flags | FlagStageOnly);
+                }
+                else
+                {
+                    Flags = (byte)(Flags & ~FlagStageOnly);
+                }
+            }
+        }
 
         public bool IsActive
         {

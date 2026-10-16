@@ -63,6 +63,8 @@ namespace JewelBlitzArena.Data
         Card = 9,
         Cosmetic = 10,
         Gift = 11,
+        /// <summary>Pressworks Vein Guard drops — never enter inventory / crate tables.</summary>
+        StageWeapon = 12,
     }
 
     public enum CrateEligibility : byte

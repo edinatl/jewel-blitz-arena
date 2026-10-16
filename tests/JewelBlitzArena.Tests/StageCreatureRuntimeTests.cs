@@ -81,6 +81,74 @@ public sealed class StageCreatureRuntimeTests
         Assert.That(StageCreatureRuntime.CountActive(ref press), Is.EqualTo(0));
     }
 
+    [Test]
+    public void Destroying_each_guard_drops_matching_stage_weapon()
+    {
+        int[] expectedIds =
+        {
+            MatchRules.StageMortarItemId,
+            MatchRules.StageFrostStaffItemId,
+            MatchRules.StageMalletItemId,
+            MatchRules.StageNetItemId,
+            MatchRules.StageFlameItemId,
+        };
+
+        // Kill one at a time on fresh resets so the sorting gate does not clear mid-test.
+        for (int kindIndex = 0; kindIndex < expectedIds.Length; kindIndex++)
+        {
+            var sim = ResetPressworks(Seed ^ (ulong)(0x10 + kindIndex));
+            MatchState snap = sim.Snapshot();
+            int before = snap.ActiveLooseItemCount;
+            GenericPoolSlot guard = MatchStateAccess.GetStageCreature(ref snap, kindIndex);
+            Fix gx = guard.PosX;
+            Fix gz = guard.PosZ;
+
+            BreakCreature(sim, ref snap, kindIndex);
+            snap = sim.Snapshot();
+
+            Assert.That(snap.ActiveLooseItemCount, Is.EqualTo(before + 1));
+            Assert.That(
+                (MatchStateAccess.GetStageCreature(ref snap, kindIndex).Flags
+                    & StageCreatureRuntime.FlagBroken) != 0,
+                Is.True,
+                "Broken flag must remain for gate counting");
+
+            bool found = false;
+            for (int i = 0; i < PoolCaps.LooseItems; i++)
+            {
+                LooseItemSlot item = MatchStateAccess.GetLooseItem(ref snap, i);
+                if (!item.IsActive || item.ItemId != expectedIds[kindIndex])
+                {
+                    continue;
+                }
+
+                found = true;
+                Assert.That(item.IsStageOnly, Is.True);
+                Assert.That(item.PosX.Raw, Is.EqualTo(gx.Raw));
+                Assert.That(item.PosZ.Raw, Is.EqualTo(gz.Raw));
+                break;
+            }
+
+            Assert.That(found, Is.True, $"expected stage weapon {expectedIds[kindIndex]}");
+        }
+    }
+
+    [Test]
+    public void Four_destroys_still_opens_gate_with_drops_present()
+    {
+        var sim = ResetPressworks(Seed ^ 5UL, phaseClockPermille: 1000);
+        MatchState snap = sim.Snapshot();
+        for (int i = 0; i < 4; i++)
+        {
+            BreakCreature(sim, ref snap, i);
+            snap = sim.Snapshot();
+        }
+
+        Assert.That(snap.PhaseIndex, Is.GreaterThanOrEqualTo(1));
+        Assert.That(snap.ActiveLooseItemCount, Is.GreaterThanOrEqualTo(4),
+            "stage weapons should remain after gate clears creatures");
+    }
+
     private static Simulation ResetPressworks(ulong seed, int phaseClockPermille = 1000)
     {
         ContentCatalog catalog = ContentCompiler.Compile(SampleContentFactory.CreateS5StubPack());
