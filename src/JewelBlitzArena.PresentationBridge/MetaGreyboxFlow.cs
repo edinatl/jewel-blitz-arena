@@ -102,10 +102,38 @@ namespace JewelBlitzArena.PresentationBridge
             return BenchRoomAscii.RenderBuy(stock, _catalog, Profile);
         }
 
-        /// <summary>Editor-free ASCII for Facet Wheel band weights.</summary>
-        public string RenderFacetWheelRoom()
+        /// <summary>Editor-free ASCII for Sell room (list via BuildSellList).</summary>
+        public string RenderSellRoom()
         {
-            return BenchRoomAscii.RenderFacetWheel(Profile);
+            IReadOnlyList<ShopRuntime.SellEntry> list = OpenSellList();
+            return BenchRoomAscii.RenderSell(list, _catalog, Profile);
+        }
+
+        /// <summary>Editor-free ASCII for Fitting Room sockets + owned cosmetics.</summary>
+        public string RenderFittingRoom()
+        {
+            Profile.SetFlag(ProfileFlags.TouchedFittingRoom);
+            _boot.SaveProfile();
+            return BenchRoomAscii.RenderFitting(Profile, _catalog);
+        }
+
+        /// <summary>Editor-free ASCII for Facet Wheel band weights.</summary>
+        public string RenderFacetWheelRoom() =>
+            RenderFacetWheelRoom(spinSeed: null);
+
+        /// <summary>
+        /// Facet Wheel ASCII; when <paramref name="spinSeed"/> is set, spins once and shows grant.
+        /// </summary>
+        public string RenderFacetWheelRoom(ulong? spinSeed)
+        {
+            FacetWheelRuntime.SpinGrant? last = null;
+            if (spinSeed.HasValue
+                && TrySpinFacetWheel(spinSeed.Value, out FacetWheelRuntime.SpinGrant grant))
+            {
+                last = grant;
+            }
+
+            return BenchRoomAscii.RenderFacetWheel(Profile, last);
         }
 
         public IReadOnlyList<BenchRoomsRuntime.BenchRoomEntry> BuildBenchRooms(ulong visitSeed = 0UL) =>

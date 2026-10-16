@@ -6,8 +6,8 @@ using JewelBlitzArena.Meta;
 namespace JewelBlitzArena.PresentationBridge
 {
     /// <summary>
-    /// Editor-free ASCII for Tilly's Bench Buy + Facet Wheel rooms (modes.md §6).
-    /// Presentation-only; stock comes from <see cref="ShopRuntime.BuildStock"/>.
+    /// Editor-free ASCII for Tilly's Bench rooms (modes.md §6).
+    /// Presentation-only; Buy/Sell bind to ShopRuntime stock/list APIs.
     /// </summary>
     public static class BenchRoomAscii
     {
@@ -21,6 +21,15 @@ namespace JewelBlitzArena.PresentationBridge
             "Carats",
             "Cosmetic",
             "Nothing",
+        };
+
+        private static readonly CosmeticSocket[] FittingSockets =
+        {
+            CosmeticSocket.Head,
+            CosmeticSocket.Arm,
+            CosmeticSocket.Waist,
+            CosmeticSocket.Leg,
+            CosmeticSocket.Back,
         };
 
         public static string RenderRooms(IReadOnlyList<BenchRoomsRuntime.BenchRoomEntry> rooms)
@@ -73,7 +82,88 @@ namespace JewelBlitzArena.PresentationBridge
             return sb.ToString();
         }
 
-        public static string RenderFacetWheel(PlayerProfile profile)
+        public static string RenderSell(
+            IReadOnlyList<ShopRuntime.SellEntry> list,
+            ContentCatalog? catalog,
+            PlayerProfile profile)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("=== Sell ===");
+            sb.AppendLine($"Carats: {(profile != null ? profile.Carats : 0)}");
+            if (list == null || list.Count == 0)
+            {
+                sb.AppendLine("(nothing to sell)");
+                return sb.ToString();
+            }
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                ShopRuntime.SellEntry e = list[i];
+                string name = $"#{e.ItemId}";
+                if (catalog != null && catalog.TryGetItem(e.ItemId, out ItemRecord item))
+                {
+                    name = item.Name;
+                }
+
+                sb.AppendLine($"  {i + 1,2}. {name,-20} {e.SellPrice,5}c");
+            }
+
+            return sb.ToString();
+        }
+
+        public static string RenderFitting(PlayerProfile profile, ContentCatalog? catalog)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("=== Fitting Room ===");
+            for (int i = 0; i < FittingSockets.Length; i++)
+            {
+                CosmeticSocket socket = FittingSockets[i];
+                int equipped = profile != null ? profile.Fitting.Get(socket) : 0;
+                string label = equipped == 0 ? "(empty)" : $"#{equipped}";
+                if (equipped != 0 && catalog != null && catalog.TryGetItem(equipped, out ItemRecord item))
+                {
+                    label = item.Name;
+                }
+
+                sb.AppendLine($"  {socket,-5} {label}");
+            }
+
+            sb.AppendLine("-- owned cosmetics --");
+            if (profile == null || catalog == null)
+            {
+                sb.AppendLine("(none)");
+                return sb.ToString();
+            }
+
+            int listed = 0;
+            int[] owned = profile.Ledger.ToArray();
+            for (int i = 0; i < owned.Length; i++)
+            {
+                if (!catalog.TryGetItem(owned[i], out ItemRecord cos)
+                    || cos.Category != ItemCategory.Cosmetic)
+                {
+                    continue;
+                }
+
+                bool on = profile.Fitting.Get(cos.CosmeticSocket) == cos.ItemId;
+                sb.AppendLine($"  {cos.Name,-20} {cos.CosmeticSocket,-5}{(on ? " *" : "")}");
+                listed++;
+            }
+
+            if (listed == 0)
+            {
+                sb.AppendLine("(none)");
+            }
+
+            return sb.ToString();
+        }
+
+        public static string RenderFacetWheel(PlayerProfile profile) =>
+            RenderFacetWheel(profile, lastGrant: null);
+
+        public static string RenderFacetWheel(
+            PlayerProfile profile,
+            FacetWheelRuntime.SpinGrant? lastGrant)
         {
             var sb = new StringBuilder();
             int width = profile != null ? profile.FacetWheelWidthLevel : 0;
@@ -104,6 +194,32 @@ namespace JewelBlitzArena.PresentationBridge
                 sb.Append(' ');
                 sb.Append(w);
                 sb.AppendLine("‰");
+            }
+
+            if (lastGrant.HasValue)
+            {
+                FacetWheelRuntime.SpinGrant g = lastGrant.Value;
+                sb.Append("Last spin: ");
+                sb.Append(BandLabels[(int)g.Band]);
+                if (g.GrantedItemId != 0)
+                {
+                    sb.Append(" → item #");
+                    sb.Append(g.GrantedItemId);
+                }
+
+                if (g.CaratsReward > 0)
+                {
+                    sb.Append(" → ");
+                    sb.Append(g.CaratsReward);
+                    sb.Append('c');
+                }
+
+                if (g.GrantedItemId == 0 && g.CaratsReward == 0)
+                {
+                    sb.Append(" → (nothing)");
+                }
+
+                sb.AppendLine();
             }
 
             return sb.ToString();

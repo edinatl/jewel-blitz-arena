@@ -127,17 +127,30 @@ internal static class Program
             flow.SetCatalog(catalog);
             flow.BootProfile();
             flow.Profile.Carats = 5_000;
-            flow.Profile.Chits = FacetWheelRuntime.SpinCostChits;
+            flow.Profile.Chits = FacetWheelRuntime.SpinCostChits * 3;
             flow.Profile.ShopStockSeed = seed == 0UL ? 0x42454E4348UL : seed;
+            // Seed a couple owned sellables / cosmetics for Sell + Fitting smoke.
+            flow.Profile.Ledger.Grant(1);
+            flow.Profile.Ledger.Grant(SampleContentFactory.RegentsDiademItemId);
+            flow.Profile.Ledger.Grant(63);
 
             string render;
             if (room is "buy")
             {
                 render = flow.RenderBuyRoom();
             }
+            else if (room is "sell")
+            {
+                render = flow.RenderSellRoom();
+            }
+            else if (room is "fitting" or "fit")
+            {
+                flow.TryEquipCosmetic(SampleContentFactory.RegentsDiademItemId);
+                render = flow.RenderFittingRoom();
+            }
             else if (room is "wheel" or "facet" or "facetwheel")
             {
-                render = flow.RenderFacetWheelRoom();
+                render = flow.RenderFacetWheelRoom(spinSeed: seed == 0UL ? 0x574845454CUL : seed);
             }
             else if (room is "rooms" or "menu")
             {
@@ -145,7 +158,8 @@ internal static class Program
             }
             else
             {
-                Console.Error.WriteLine($"unknown --bench room '{room}' (buy|wheel|rooms)");
+                Console.Error.WriteLine(
+                    $"unknown --bench room '{room}' (buy|sell|fitting|wheel|rooms)");
                 return 2;
             }
 
@@ -373,8 +387,8 @@ internal static class Program
               --blob PATH         Optional .jba content blob
               --neutral           All-neutral inputs
               --meta              Boot → Custom → profile stamp path
-              --bench buy|wheel|rooms
-                                  Editor-free Bench room ASCII (Buy stock / Facet Wheel)
+              --bench buy|sell|fitting|wheel|rooms
+                                  Editor-free Bench room ASCII
               --loopback          DualSessionHarness rollback greybox
               --delivery-delay N  Loopback one-way delay in frames (default 2)
             """);
