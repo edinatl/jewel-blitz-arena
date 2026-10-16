@@ -172,10 +172,21 @@ internal static class Program
             {
                 render = flow.RenderBenchRooms(visitSeed: seed);
             }
+            else if (room is "talk")
+            {
+                flow.Profile.SetFlag(ProfileFlags.UnlockedCaptainCitrine);
+                flow.Profile.PlaytimeSeconds = 3600;
+                flow.Profile.CaratsSpentLifetime = 50_000;
+                render = flow.RenderTalkRoom(visitSeed: seed == 0UL ? 0x54414C4BUL : seed);
+            }
+            else if (room is "tinker")
+            {
+                render = flow.RenderTinkerRoom(craft: true, inputA: 3, inputB: 5);
+            }
             else
             {
                 Console.Error.WriteLine(
-                    $"unknown --bench room '{room}' (buy|sell|fitting|ledger|wheel|rooms)");
+                    $"unknown --bench room '{room}' (buy|sell|fitting|ledger|wheel|rooms|talk|tinker)");
                 return 2;
             }
 
@@ -520,7 +531,7 @@ internal static class Program
               --neutral           All-neutral inputs
               --meta              Boot → Custom → profile stamp path
               --solitaire         Pocket Solitaire + mid-match TryUse smoke
-              --bench buy|sell|fitting|ledger|wheel|rooms
+              --bench buy|sell|fitting|ledger|wheel|rooms|talk|tinker
                                   Editor-free Bench room ASCII
               --loopback          DualSessionHarness rollback greybox
               --delivery-delay N  Loopback one-way delay in frames (default 2)

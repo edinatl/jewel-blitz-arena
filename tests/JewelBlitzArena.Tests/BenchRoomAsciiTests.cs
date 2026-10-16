@@ -136,4 +136,92 @@ public sealed class BenchRoomAsciiTests
             }
         }
     }
+
+    [Test]
+    public void RenderTalk_shows_Citrine_status_and_gift_line()
+    {
+        ContentCatalog catalog = ContentCompiler.Compile(SampleContentFactory.CreateS5StubPack());
+        var profile = PlayerProfile.CreateNew();
+        profile.SetFlag(ProfileFlags.UnlockedCaptainCitrine);
+        profile.PlaytimeSeconds = 7200;
+        profile.CaratsSpentLifetime = 20_000;
+
+        string away = BenchRoomAscii.RenderTalk(profile, visitSeed: 1UL, catalog: catalog);
+        Assert.That(away, Does.Contain("=== Talk ==="));
+        Assert.That(away, Does.Contain("Appear chance:"));
+        Assert.That(away, Does.Contain("Solitaire=pending"));
+
+        bool granted = false;
+        for (ulong seed = 1; seed < 4000; seed++)
+        {
+            if (!CitrineGiftsRuntime.IsAtBench(profile, seed))
+            {
+                continue;
+            }
+
+            int gift = CitrineGiftsRuntime.TryGrantGift(profile, seed);
+            string ascii = BenchRoomAscii.RenderTalk(profile, seed, gift, catalog);
+            Assert.That(ascii, Does.Contain("Citrine is at the bench."));
+            if (gift != 0)
+            {
+                Assert.That(ascii, Does.Contain("Last gift:"));
+                Assert.That(ascii, Does.Contain("Solitaire"));
+                granted = true;
+                break;
+            }
+        }
+
+        Assert.That(granted, Is.True, "expected a Talk gift within seeds");
+    }
+
+    [Test]
+    public void RenderTinker_shows_last_craft_outcome()
+    {
+        ContentCatalog catalog = ContentCompiler.Compile(SampleContentFactory.CreateS5StubPack());
+        var profile = PlayerProfile.CreateNew();
+        TinkerRuntime.EnsureSalt(profile);
+        profile.Ledger.Grant(3);
+        profile.Ledger.Grant(5);
+        TinkerAttemptResult craft = TinkerRuntime.TryCraft(profile, catalog, 3, 5);
+        string ascii = BenchRoomAscii.RenderTinker(profile, catalog, craft, 3, 5);
+        Assert.That(ascii, Does.Contain("=== Tinker ==="));
+        Assert.That(ascii, Does.Contain("Chits:"));
+        Assert.That(ascii, Does.Contain("Salt: set"));
+        Assert.That(ascii, Does.Contain("Inputs:"));
+        Assert.That(ascii, Does.Contain("Last craft:"));
+        Assert.That(ascii, Does.Contain(craft.Outcome.ToString()));
+    }
+
+    [Test]
+    public void MetaGreyboxFlow_RenderTalk_and_Tinker()
+    {
+        ContentCatalog catalog = ContentCompiler.Compile(SampleContentFactory.CreateS5StubPack());
+        string path = MetaGreyboxFlow.DefaultTempProfilePath("jba-talk-tinker-");
+        try
+        {
+            var flow = new MetaGreyboxFlow(path);
+            flow.SetCatalog(catalog);
+            flow.BootProfile();
+            flow.Profile.SetFlag(ProfileFlags.UnlockedCaptainCitrine);
+            flow.Profile.PlaytimeSeconds = 3600;
+            flow.Profile.CaratsSpentLifetime = 50_000;
+
+            string talk = flow.RenderTalkRoom(visitSeed: 0x54414C4BUL);
+            Assert.That(talk, Does.Contain("=== Talk ==="));
+            Assert.That(flow.Profile.HasFlag(ProfileFlags.TouchedTalkRoom), Is.True);
+
+            string tinker = flow.RenderTinkerRoom(craft: true);
+            Assert.That(tinker, Does.Contain("=== Tinker ==="));
+            Assert.That(tinker, Does.Contain("Last craft:"));
+            Assert.That(flow.Profile.HasFlag(ProfileFlags.TouchedTinkerStub), Is.True);
+        }
+        finally
+        {
+            string? dir = Path.GetDirectoryName(path);
+            if (dir != null && Directory.Exists(dir))
+            {
+                Directory.Delete(dir, recursive: true);
+            }
+        }
+    }
 }

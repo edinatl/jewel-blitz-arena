@@ -182,6 +182,105 @@ namespace JewelBlitzArena.PresentationBridge
             return sb.ToString();
         }
 
+        public static string RenderTalk(
+            PlayerProfile profile,
+            ulong visitSeed,
+            int lastGiftItemId = 0,
+            ContentCatalog? catalog = null)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("=== Talk ===");
+            bool atBench = profile != null && CitrineGiftsRuntime.IsAtBench(profile, visitSeed);
+            int chance = profile != null ? CitrineGiftsRuntime.AppearanceChancePermille(profile) : 0;
+            sb.AppendLine(atBench
+                ? "Citrine is at the bench."
+                : "Citrine is away.");
+            sb.AppendLine($"Appear chance: {chance}‰");
+            bool sol = profile != null && CitrineGiftsRuntime.HasReceivedSolitaire(profile);
+            bool dia = profile != null && CitrineGiftsRuntime.HasReceivedDiadem(profile);
+            sb.AppendLine($"Gifts: Solitaire={(sol ? "received" : "pending")}  Diadem={(dia ? "received" : "pending")}");
+            if (lastGiftItemId != 0)
+            {
+                string name = $"#{lastGiftItemId}";
+                if (catalog != null && catalog.TryGetItem(lastGiftItemId, out ItemRecord gift))
+                {
+                    name = gift.Name;
+                }
+
+                sb.AppendLine($"Last gift: {name}");
+            }
+
+            return sb.ToString();
+        }
+
+        public static string RenderTinker(
+            PlayerProfile profile,
+            ContentCatalog? catalog,
+            TinkerAttemptResult? lastCraft = null,
+            int inputA = 0,
+            int inputB = 0)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("=== Tinker ===");
+            int chits = profile != null ? profile.Chits : 0;
+            int counter = profile != null ? profile.TinkerCounter : 0;
+            bool salted = profile != null && profile.ProfileSalt != 0UL;
+            sb.AppendLine($"Chits: {chits}  Counter: {counter}  Salt: {(salted ? "set" : "none")}");
+            if (inputA != 0 || inputB != 0)
+            {
+                sb.AppendLine($"Inputs: {ItemLabel(catalog, inputA)} + {ItemLabel(catalog, inputB)}");
+            }
+
+            if (lastCraft.HasValue)
+            {
+                TinkerAttemptResult r = lastCraft.Value;
+                sb.Append("Last craft: ");
+                sb.Append(r.Outcome);
+                if (r.TargetTier > 0)
+                {
+                    sb.Append("  tier=");
+                    sb.Append(r.TargetTier);
+                }
+
+                if (r.ResultItemId != 0)
+                {
+                    sb.Append(" → ");
+                    sb.Append(ItemLabel(catalog, r.ResultItemId));
+                }
+
+                if (r.ChitsEarned > 0)
+                {
+                    sb.Append("  +");
+                    sb.Append(r.ChitsEarned);
+                    sb.Append(" chit");
+                }
+
+                if (r.ScrapGranted)
+                {
+                    sb.Append("  +Scrap");
+                }
+
+                sb.AppendLine();
+            }
+
+            return sb.ToString();
+        }
+
+        private static string ItemLabel(ContentCatalog? catalog, int itemId)
+        {
+            if (itemId == 0)
+            {
+                return "(none)";
+            }
+
+            if (catalog != null && catalog.TryGetItem(itemId, out ItemRecord item))
+            {
+                return item.Name;
+            }
+
+            return $"#{itemId}";
+        }
+
         public static string RenderFacetWheel(PlayerProfile profile) =>
             RenderFacetWheel(profile, lastGrant: null);
 

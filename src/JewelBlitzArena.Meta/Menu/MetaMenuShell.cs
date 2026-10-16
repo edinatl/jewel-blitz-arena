@@ -24,6 +24,14 @@ namespace JewelBlitzArena.Meta
 
         public void OpenTinker(PlayerProfile profile) => _tinker.Open(profile);
 
+        public TinkerAttemptResult CraftTinker(
+            PlayerProfile profile,
+            ContentCatalog catalog,
+            int inputA,
+            int inputB,
+            int cardItemId = 0) =>
+            _tinker.Craft(profile, catalog, inputA, inputB, cardItemId);
+
         /// <summary>Custom stage list including Extra Arena box (locked rows visible).</summary>
         public IReadOnlyList<ExtraArenaRuntime.StageCursorEntry> BuildCustomStageCursor(
             PlayerProfile profile,

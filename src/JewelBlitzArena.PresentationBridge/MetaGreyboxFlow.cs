@@ -142,6 +142,45 @@ namespace JewelBlitzArena.PresentationBridge
         public string RenderBenchRooms(ulong visitSeed = 0UL) =>
             BenchRoomAscii.RenderRooms(BuildBenchRooms(visitSeed));
 
+        /// <summary>
+        /// Talk ASCII; when <paramref name="visitSeed"/> is set, attempts Citrine gift grant.
+        /// </summary>
+        public string RenderTalkRoom(ulong? visitSeed = null)
+        {
+            ulong seed = visitSeed ?? 0UL;
+            int gift = 0;
+            if (visitSeed.HasValue)
+            {
+                gift = _menu.OpenTalk(Profile, seed);
+                _boot.SaveProfile();
+            }
+            else
+            {
+                Profile.SetFlag(ProfileFlags.TouchedTalkRoom);
+                _boot.SaveProfile();
+            }
+
+            return BenchRoomAscii.RenderTalk(Profile, seed, gift, _catalog);
+        }
+
+        /// <summary>
+        /// Tinker ASCII; when <paramref name="craft"/> is true, runs one craft with starter inputs.
+        /// </summary>
+        public string RenderTinkerRoom(bool craft = false, int inputA = 3, int inputB = 5)
+        {
+            _menu.OpenTinker(Profile);
+            TinkerAttemptResult? last = null;
+            if (craft && _catalog != null)
+            {
+                Profile.Ledger.Grant(inputA);
+                Profile.Ledger.Grant(inputB);
+                last = _menu.CraftTinker(Profile, _catalog, inputA, inputB);
+            }
+
+            _boot.SaveProfile();
+            return BenchRoomAscii.RenderTinker(Profile, _catalog, last, craft ? inputA : 0, craft ? inputB : 0);
+        }
+
         public bool TrySpinFacetWheel(ulong seed, out FacetWheelBand band, out int caratsReward)
         {
             bool ok = TrySpinFacetWheel(seed, out FacetWheelRuntime.SpinGrant grant);
