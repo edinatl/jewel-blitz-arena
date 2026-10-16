@@ -68,5 +68,8 @@ namespace JewelBlitzArena.Meta
 
         /// <summary>Opened Sell room at least once (list bound via ShopRuntime.BuildSellList).</summary>
         public const int TouchedSellRoom = 1 << 20;
+
+        /// <summary>Opened Ledger room at least once.</summary>
+        public const int TouchedLedgerRoom = 1 << 21;
     }
 }

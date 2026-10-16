@@ -62,6 +62,9 @@ namespace JewelBlitzArena.Meta
         /// <summary>Fitting Room equipped cosmetics (one id per socket; 0 = empty).</summary>
         public FittingLoadout Fitting { get; } = new FittingLoadout();
 
+        /// <summary>Pocket Items flags (up to five pocketable owned ids).</summary>
+        public PocketLoadout Pockets { get; } = new PocketLoadout();
+
         public bool HasFlag(int flag) => (Flags & flag) != 0;
 
         public void SetFlag(int flag, bool value = true)

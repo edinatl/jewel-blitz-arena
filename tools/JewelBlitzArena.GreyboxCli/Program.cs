@@ -148,6 +148,12 @@ internal static class Program
                 flow.TryEquipCosmetic(SampleContentFactory.RegentsDiademItemId);
                 render = flow.RenderFittingRoom();
             }
+            else if (room is "ledger")
+            {
+                flow.Profile.Ledger.Grant(SampleContentFactory.SolitaireItemId);
+                flow.TryPocketItem(SampleContentFactory.SolitaireItemId);
+                render = flow.RenderLedgerRoom();
+            }
             else if (room is "wheel" or "facet" or "facetwheel")
             {
                 render = flow.RenderFacetWheelRoom(spinSeed: seed == 0UL ? 0x574845454CUL : seed);
@@ -159,7 +165,7 @@ internal static class Program
             else
             {
                 Console.Error.WriteLine(
-                    $"unknown --bench room '{room}' (buy|sell|fitting|wheel|rooms)");
+                    $"unknown --bench room '{room}' (buy|sell|fitting|ledger|wheel|rooms)");
                 return 2;
             }
 
@@ -387,7 +393,7 @@ internal static class Program
               --blob PATH         Optional .jba content blob
               --neutral           All-neutral inputs
               --meta              Boot → Custom → profile stamp path
-              --bench buy|sell|fitting|wheel|rooms
+              --bench buy|sell|fitting|ledger|wheel|rooms
                                   Editor-free Bench room ASCII
               --loopback          DualSessionHarness rollback greybox
               --delivery-delay N  Loopback one-way delay in frames (default 2)

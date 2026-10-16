@@ -125,6 +125,21 @@ namespace JewelBlitzArena.Meta
             && catalog != null
             && ShopRuntime.TrySell(profile, catalog, itemId);
 
+        /// <summary>Ledger room: owned catalog entries + pocket flags.</summary>
+        public static IReadOnlyList<LedgerRuntime.LedgerEntry> OpenLedger(
+            PlayerProfile profile,
+            ContentCatalog catalog) =>
+            LedgerRuntime.OpenLedger(profile, catalog);
+
+        public static bool TryPocket(
+            PlayerProfile profile,
+            ContentCatalog catalog,
+            int itemId) =>
+            LedgerRuntime.TryPocket(profile, catalog, itemId);
+
+        public static bool TryUnpocket(PlayerProfile profile, int itemId) =>
+            LedgerRuntime.TryUnpocket(profile, itemId);
+
         /// <summary>
         /// Fitting Room: equip an owned catalog cosmetic into its socket (replaces prior).
         /// No Sim hitbox change.

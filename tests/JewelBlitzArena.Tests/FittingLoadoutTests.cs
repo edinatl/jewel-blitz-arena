@@ -60,7 +60,7 @@ public sealed class FittingLoadoutTests
             store.Save(profile);
 
             PlayerProfile loaded = store.LoadOrCreate();
-            Assert.That(loaded.SchemaVersion, Is.EqualTo(ProfileSchema.Version8));
+            Assert.That(loaded.SchemaVersion, Is.EqualTo(ProfileSchema.Current));
             Assert.That(loaded.Fitting.Get(CosmeticSocket.Head), Is.EqualTo(55));
             Assert.That(loaded.Fitting.Get(CosmeticSocket.Back), Is.EqualTo(76));
             Assert.That(loaded.Fitting.Get(CosmeticSocket.Arm), Is.EqualTo(0));

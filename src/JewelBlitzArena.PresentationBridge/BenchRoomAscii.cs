@@ -158,6 +158,30 @@ namespace JewelBlitzArena.PresentationBridge
             return sb.ToString();
         }
 
+        public static string RenderLedger(
+            IReadOnlyList<LedgerRuntime.LedgerEntry> entries,
+            PlayerProfile profile)
+        {
+            var sb = new StringBuilder();
+            sb.AppendLine("=== Ledger ===");
+            int pocketed = profile != null ? profile.Pockets.Count : 0;
+            sb.AppendLine($"Owned: {(entries != null ? entries.Count : 0)}  Pocketed: {pocketed}/{PocketLoadout.MaxSlots}");
+            if (entries == null || entries.Count == 0)
+            {
+                sb.AppendLine("(empty)");
+                return sb.ToString();
+            }
+
+            for (int i = 0; i < entries.Count; i++)
+            {
+                LedgerRuntime.LedgerEntry e = entries[i];
+                string pocket = e.IsPocketed ? " P" : (e.Pocketable ? " ." : "  ");
+                sb.AppendLine($"  {i + 1,2}.{pocket} {e.Name,-20} {e.Category}");
+            }
+
+            return sb.ToString();
+        }
+
         public static string RenderFacetWheel(PlayerProfile profile) =>
             RenderFacetWheel(profile, lastGrant: null);
 

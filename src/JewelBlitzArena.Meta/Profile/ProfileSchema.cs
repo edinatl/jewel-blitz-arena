@@ -30,6 +30,9 @@ namespace JewelBlitzArena.Meta
         /// <summary>Adds FittingLoadout (equipped cosmetic item ids per socket).</summary>
         public const int Version8 = 8;
 
-        public const int Current = Version8;
+        /// <summary>Adds PocketLoadout (up to five pocketable item ids).</summary>
+        public const int Version9 = 9;
+
+        public const int Current = Version9;
     }
 }

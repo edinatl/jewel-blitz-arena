@@ -41,6 +41,9 @@ namespace JewelBlitzArena.Meta
                     case ProfileSchema.Version7:
                         MigrateV7ToV8(profile);
                         break;
+                    case ProfileSchema.Version8:
+                        MigrateV8ToV9(profile);
+                        break;
                     default:
                         throw new InvalidOperationException(
                             $"Unknown profile schema {profile.SchemaVersion}; cannot migrate.");
@@ -158,6 +161,12 @@ namespace JewelBlitzArena.Meta
             }
 
             profile.SchemaVersion = ProfileSchema.Version8;
+        }
+
+        private static void MigrateV8ToV9(PlayerProfile profile)
+        {
+            // Pockets start empty for upgraded profiles.
+            profile.SchemaVersion = ProfileSchema.Version9;
         }
     }
 }

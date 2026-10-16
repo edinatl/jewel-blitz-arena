@@ -184,6 +184,46 @@ namespace JewelBlitzArena.PresentationBridge
             return true;
         }
 
+        public IReadOnlyList<LedgerRuntime.LedgerEntry> OpenLedger()
+        {
+            if (_catalog == null)
+            {
+                return Array.Empty<LedgerRuntime.LedgerEntry>();
+            }
+
+            IReadOnlyList<LedgerRuntime.LedgerEntry> entries = _menu.OpenLedger(Profile, _catalog);
+            _boot.SaveProfile();
+            return entries;
+        }
+
+        public bool TryPocketItem(int itemId)
+        {
+            if (_catalog == null || !_menu.TryPocket(Profile, _catalog, itemId))
+            {
+                return false;
+            }
+
+            _boot.SaveProfile();
+            return true;
+        }
+
+        public bool TryUnpocketItem(int itemId)
+        {
+            if (!_menu.TryUnpocket(Profile, itemId))
+            {
+                return false;
+            }
+
+            _boot.SaveProfile();
+            return true;
+        }
+
+        public string RenderLedgerRoom()
+        {
+            IReadOnlyList<LedgerRuntime.LedgerEntry> entries = OpenLedger();
+            return BenchRoomAscii.RenderLedger(entries, Profile);
+        }
+
         public MatchConfig StartCustom(ModeRequest? request = null)
         {
             _boot.Boot();

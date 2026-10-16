@@ -118,6 +118,17 @@ namespace JewelBlitzArena.Meta
                         bw.Write(slots[i]);
                     }
                 }
+
+                // v9+: Pocket loadout (count + ids).
+                if (profile.SchemaVersion >= ProfileSchema.Version9)
+                {
+                    int[] pockets = profile.Pockets.ToArray();
+                    bw.Write(pockets.Length);
+                    for (int i = 0; i < pockets.Length; i++)
+                    {
+                        bw.Write(pockets[i]);
+                    }
+                }
             }
 
             return ms.ToArray();
@@ -201,6 +212,23 @@ namespace JewelBlitzArena.Meta
                 }
 
                 profile.Fitting.ReplaceAll(slots);
+            }
+
+            if (profile.SchemaVersion >= ProfileSchema.Version9)
+            {
+                int pocketCount = br.ReadInt32();
+                if (pocketCount < 0 || pocketCount > PocketLoadout.MaxSlots)
+                {
+                    throw new InvalidDataException("Corrupt Pocket count.");
+                }
+
+                var pockets = new int[pocketCount];
+                for (int i = 0; i < pocketCount; i++)
+                {
+                    pockets[i] = br.ReadInt32();
+                }
+
+                profile.Pockets.ReplaceAll(pockets);
             }
 
             return profile;

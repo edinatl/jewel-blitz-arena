@@ -68,6 +68,17 @@ namespace JewelBlitzArena.Meta
 
         public bool TrySell(PlayerProfile profile, ContentCatalog catalog, int itemId) =>
             BenchRoomsRuntime.TrySell(profile, catalog, itemId);
+
+        public IReadOnlyList<LedgerRuntime.LedgerEntry> OpenLedger(
+            PlayerProfile profile,
+            ContentCatalog catalog) =>
+            BenchRoomsRuntime.OpenLedger(profile, catalog);
+
+        public bool TryPocket(PlayerProfile profile, ContentCatalog catalog, int itemId) =>
+            BenchRoomsRuntime.TryPocket(profile, catalog, itemId);
+
+        public bool TryUnpocket(PlayerProfile profile, int itemId) =>
+            BenchRoomsRuntime.TryUnpocket(profile, itemId);
     }
 
     public readonly struct MetaMenuEntry
