@@ -72,7 +72,7 @@ public sealed class DataPipelineTests
         Assert.That(loaded.Stages[4].Phases[2].Name, Is.EqualTo("Planet disc"));
         Assert.That(loaded.Stages[4].Phases[2].Hazards.Length, Is.EqualTo(2));
         Assert.That(loaded.Stages[5].JewelCapOverride, Is.EqualTo(6));
-        Assert.That(loaded.Stages[5].Phases[0].Hazards.Length, Is.EqualTo(4));
+        Assert.That(loaded.Stages[5].Phases[0].Hazards.Length, Is.EqualTo(6));
         Assert.That(loaded.Stages[5].Phases[0].CratePoints.Length, Is.EqualTo(4));
         Assert.That(loaded.Stages[5].Phases[0].CratePoints[0].XRaw, Is.EqualTo(Fix.FromInt(6).Raw));
         Assert.That(loaded.Stages[5].Phases[0].CratePoints[0].ZRaw, Is.EqualTo(Fix.FromInt(5).Raw));

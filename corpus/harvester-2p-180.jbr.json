@@ -1,7 +1,7 @@
 {
   "formatVersion": 3,
   "name": "harvester-2p-180",
-  "notes": "S8: Harvester Terraces anatomy \u002B crates (legs/head/tail; footfall/intake/stomp; 4 crates).",
+  "notes": "S8: Harvester Terraces anatomy \u002B Spray DoT \u002B crates (legs/head/tail; footfall/intake/stomp/spray; 4 crates).",
   "seed": 5350911184760624689,
   "stageId": 6,
   "actorCount": 2,
@@ -12,7 +12,7 @@
     3,
     4
   ],
-  "expectedHashHex": "08819ab1abbfa07e",
+  "expectedHashHex": "c2146777e5573227",
   "frames": [
     {
       "p0": 32,

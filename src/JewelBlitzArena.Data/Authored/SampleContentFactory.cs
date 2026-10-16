@@ -1123,6 +1123,32 @@ namespace JewelBlitzArena.Data
                                 CenterZ = "0",
                                 Radius = "4",
                             },
+                            // Abrasive Spray (stages.md §3.1): 50/s while inside; side nozzles.
+                            // Period 1 s + pulse overlap ≈ continuous 50/s; stun skipped in Sim.
+                            new AuthoredHazard
+                            {
+                                HazardId = 54,
+                                Name = "AbrasiveSprayL",
+                                Trigger = "timer",
+                                PeriodSeconds = "1",
+                                TelegraphFrames = 0,
+                                Damage = 50,
+                                CenterX = "-6",
+                                CenterZ = "0",
+                                Radius = "2.5",
+                            },
+                            new AuthoredHazard
+                            {
+                                HazardId = 55,
+                                Name = "AbrasiveSprayR",
+                                Trigger = "timer",
+                                PeriodSeconds = "1",
+                                TelegraphFrames = 0,
+                                Damage = 50,
+                                CenterX = "6",
+                                CenterZ = "0",
+                                Radius = "2.5",
+                            },
                         },
                         Kinematics = new List<AuthoredKinematic>
                         {

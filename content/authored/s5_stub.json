@@ -1966,6 +1966,30 @@
               "centerY": "0",
               "centerZ": "0",
               "radius": "4"
+            },
+            {
+              "hazardId": 54,
+              "name": "AbrasiveSprayL",
+              "trigger": "timer",
+              "periodSeconds": "1",
+              "telegraphFrames": 0,
+              "damage": 50,
+              "centerX": "-6",
+              "centerY": "0",
+              "centerZ": "0",
+              "radius": "2.5"
+            },
+            {
+              "hazardId": 55,
+              "name": "AbrasiveSprayR",
+              "trigger": "timer",
+              "periodSeconds": "1",
+              "telegraphFrames": 0,
+              "damage": 50,
+              "centerX": "6",
+              "centerY": "0",
+              "centerZ": "0",
+              "radius": "2.5"
             }
           ],
           "kinematics": [

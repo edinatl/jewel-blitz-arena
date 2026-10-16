@@ -12,6 +12,10 @@ namespace JewelBlitzArena.Sim
         public const byte HazardFlagTelegraph = 1 << 1;
         public const byte KinematicFlagActive = 1 << 0;
 
+        /// <summary>Harvester abrasive Spray dust (side nozzles); DoT without hit-stun.</summary>
+        public const int AbrasiveSprayHazardIdL = 54;
+        public const int AbrasiveSprayHazardIdR = 55;
+
         public static StageGraph ResolveGraph(ContentCatalog? catalog, int stageId)
         {
             if (catalog != null && catalog.TryGetStage(stageId, out StageRecord record))
@@ -435,7 +439,13 @@ namespace JewelBlitzArena.Sim
                     actor.Life = 0;
                 }
 
-                actor.StunFrames = MatchRules.HitStunBase;
+                // Spray is continuous abrasive dust — greybox skips stun so DoT feels like DoT.
+                if (hazard.HazardId != AbrasiveSprayHazardIdL
+                    && hazard.HazardId != AbrasiveSprayHazardIdR)
+                {
+                    actor.StunFrames = MatchRules.HitStunBase;
+                }
+
                 events.Add(SimEventKind.HazardHitActor, (byte)a, (byte)hazard.HazardId);
             }
         }

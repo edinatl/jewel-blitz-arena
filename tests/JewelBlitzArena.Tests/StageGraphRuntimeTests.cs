@@ -396,8 +396,11 @@ public sealed class StageGraphRuntimeTests
         Assert.That(stage.Phases.Length, Is.EqualTo(1));
         Assert.That(stage.Phases[0].Name, Is.EqualTo("Terrace hunt"));
         Assert.That(stage.Phases[0].DurationFrames, Is.EqualTo(0));
-        Assert.That(stage.Phases[0].Hazards.Length, Is.EqualTo(4));
+        Assert.That(stage.Phases[0].Hazards.Length, Is.EqualTo(6));
         Assert.That(stage.Phases[0].Kinematics.Length, Is.EqualTo(1));
+        Assert.That(stage.Phases[0].Hazards[4].HazardId, Is.EqualTo(StageRuntime.AbrasiveSprayHazardIdL));
+        Assert.That(stage.Phases[0].Hazards[4].Damage, Is.EqualTo(50));
+        Assert.That(stage.Phases[0].Hazards[5].HazardId, Is.EqualTo(StageRuntime.AbrasiveSprayHazardIdR));
 
         var config = MatchConfig.CreateDefault(Seed ^ 8UL, actorCount: 2);
         unsafe
@@ -410,7 +413,7 @@ public sealed class StageGraphRuntimeTests
         var sim = new Simulation();
         sim.Reset(config, catalog);
         Assert.That(sim.State.JewelCap, Is.EqualTo(6));
-        Assert.That(sim.State.ActiveHazardCount, Is.EqualTo(4));
+        Assert.That(sim.State.ActiveHazardCount, Is.EqualTo(6));
         Assert.That(sim.State.ActiveKinematicCount, Is.EqualTo(1));
     }
 
