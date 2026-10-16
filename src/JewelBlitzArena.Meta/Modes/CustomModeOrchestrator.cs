@@ -1,3 +1,4 @@
+using JewelBlitzArena.Data;
 using JewelBlitzArena.Sim;
 
 namespace JewelBlitzArena.Meta
@@ -17,7 +18,14 @@ namespace JewelBlitzArena.Meta
         {
             int actors = ClampActors(request.ActorCount);
             MatchConfig config = MatchConfig.CreateDefault(request.Seed, actors);
-            config.StageId = request.StageId;
+            int stageId = request.StageId;
+            // Locked Extra Arena → fall back to Citrine (box visible but not selectable).
+            if (!ExtraArenaRuntime.IsStageUnlocked(profile, stageId))
+            {
+                stageId = SampleContentFactory.CitrineBazaarStageId;
+            }
+
+            config.StageId = stageId;
             config.HouseRulesBits = HouseRulesBits.ToSimBits(request.HouseRules);
             if (request.HouseRules.JewelCap > 0)
             {

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using JewelBlitzArena.Data;
 
 namespace JewelBlitzArena.Meta
 {
@@ -22,6 +23,15 @@ namespace JewelBlitzArena.Meta
         }
 
         public void OpenTinker(PlayerProfile profile) => _tinker.Open(profile);
+
+        /// <summary>Custom stage list including Extra Arena box (locked rows visible).</summary>
+        public IReadOnlyList<ExtraArenaRuntime.StageCursorEntry> BuildCustomStageCursor(
+            PlayerProfile profile,
+            ContentCatalog? catalog = null) =>
+            ExtraArenaRuntime.BuildCustomStageCursor(profile, catalog);
+
+        public int ExtraArenaSlotsUnlocked(PlayerProfile profile) =>
+            UnlockLadderRuntime.ExtraArenaSlotCount(profile);
     }
 
     public readonly struct MetaMenuEntry
