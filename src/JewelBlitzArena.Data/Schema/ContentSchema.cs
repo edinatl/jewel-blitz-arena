@@ -11,8 +11,9 @@ namespace JewelBlitzArena.Data
         /// v7: move effects Dizzy / Slow / Pin (Smoke Vault, Mine Field, Holdfast).
         /// v8: move effect Freeze / Petrify (Petrify Gas thrown + area apply).
         /// v9: optional per-phase <c>crate_points</c> + <c>water_volumes</c>.
+        /// v10: optional per-phase <c>creatures</c> (Vein Guard / stage creatures).
         /// </summary>
-        public const uint Version = 9;
+        public const uint Version = 10;
         public const string BlobExtension = ".jba";
         public static readonly byte[] Magic = { (byte)'J', (byte)'B', (byte)'A', (byte)'D' };
 
@@ -23,6 +24,7 @@ namespace JewelBlitzArena.Data
         public const int MaxKinematicsPerPhase = 8;
         public const int MaxCratePointsPerPhase = 8;
         public const int MaxWaterVolumesPerPhase = 4;
+        public const int MaxCreaturesPerPhase = 8;
         public const int MaxItems = 256;
         public const int MaxFighters = 32;
         public const int MaxStages = 32;

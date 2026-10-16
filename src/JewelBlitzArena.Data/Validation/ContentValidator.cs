@@ -200,6 +200,13 @@ namespace JewelBlitzArena.Data
                             $"Stage '{stage.Name}' phase '{phase.Name}' exceeds water volume cap."));
                     }
 
+                    if (phase.Creatures.Count > ContentSchema.MaxCreaturesPerPhase)
+                    {
+                        result.Errors.Add(new ValidationIssue(
+                            "phase_creatures",
+                            $"Stage '{stage.Name}' phase '{phase.Name}' exceeds creature cap."));
+                    }
+
                     foreach (AuthoredHazard hazard in phase.Hazards)
                     {
                         if (!TryParseHazardTrigger(hazard.Trigger, out _))
@@ -267,6 +274,36 @@ namespace JewelBlitzArena.Data
                             result.Errors.Add(new ValidationIssue(
                                 "water_volume_fix",
                                 $"Stage '{stage.Name}' phase '{phase.Name}' water[{wi}]: {ex.Message}"));
+                        }
+                    }
+
+                    for (int gi = 0; gi < phase.Creatures.Count; gi++)
+                    {
+                        AuthoredCreature creature = phase.Creatures[gi];
+                        if (creature.KindId < 1 || creature.KindId > 5)
+                        {
+                            result.Errors.Add(new ValidationIssue(
+                                "creature_kind",
+                                $"Stage '{stage.Name}' phase '{phase.Name}' creature[{gi}] kind {creature.KindId} out of 1–5."));
+                        }
+
+                        if (creature.MaxLife < 0)
+                        {
+                            result.Errors.Add(new ValidationIssue(
+                                "creature_life",
+                                $"Stage '{stage.Name}' phase '{phase.Name}' creature[{gi}] maxLife must be ≥ 0."));
+                        }
+
+                        try
+                        {
+                            _ = DecimalFixParser.ParseToRaw(creature.X);
+                            _ = DecimalFixParser.ParseToRaw(creature.Z);
+                        }
+                        catch (FormatException ex)
+                        {
+                            result.Errors.Add(new ValidationIssue(
+                                "creature_fix",
+                                $"Stage '{stage.Name}' phase '{phase.Name}' creature[{gi}]: {ex.Message}"));
                         }
                     }
                 }

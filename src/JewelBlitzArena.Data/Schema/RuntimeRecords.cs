@@ -97,6 +97,7 @@ namespace JewelBlitzArena.Data
         public StageKinematicRecord[] Kinematics { get; set; } = System.Array.Empty<StageKinematicRecord>();
         public StageCratePointRecord[] CratePoints { get; set; } = System.Array.Empty<StageCratePointRecord>();
         public StageWaterVolumeRecord[] WaterVolumes { get; set; } = System.Array.Empty<StageWaterVolumeRecord>();
+        public StageCreatureRecord[] Creatures { get; set; } = System.Array.Empty<StageCreatureRecord>();
     }
 
     public sealed class StageCratePointRecord
@@ -110,6 +111,15 @@ namespace JewelBlitzArena.Data
         public long CenterXRaw { get; set; }
         public long CenterZRaw { get; set; }
         public long RadiusRaw { get; set; }
+    }
+
+    public sealed class StageCreatureRecord
+    {
+        public int KindId { get; set; }
+        public long XRaw { get; set; }
+        public long ZRaw { get; set; }
+        public int MaxLife { get; set; }
+        public int DropItemId { get; set; }
     }
 
     public static class ScriptedCameraMaskBits

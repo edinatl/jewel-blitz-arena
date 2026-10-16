@@ -17,6 +17,19 @@ public sealed class StageCreatureRuntimeTests
     }
 
     [Test]
+    public void Pressworks_Sorting_authors_five_creatures_in_catalog()
+    {
+        ContentCatalog catalog = ContentCompiler.Compile(SampleContentFactory.CreateS5StubPack());
+        Assert.That(
+            catalog.TryGetStage(SampleContentFactory.PressworksStageId, out StageRecord stage),
+            Is.True);
+        Assert.That(stage.Phases[0].Creatures.Length, Is.EqualTo(5));
+        Assert.That(stage.Phases[0].Creatures[0].KindId, Is.EqualTo(StageCreatureRuntime.KindMortar));
+        Assert.That(stage.Phases[0].Creatures[4].KindId, Is.EqualTo(StageCreatureRuntime.KindFlame));
+        Assert.That(stage.Phases[1].Creatures.Length, Is.EqualTo(0));
+    }
+
+    [Test]
     public void Other_stages_have_no_creatures()
     {
         ContentCatalog catalog = ContentCompiler.Compile(SampleContentFactory.CreateS5StubPack());

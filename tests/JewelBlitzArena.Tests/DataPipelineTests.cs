@@ -82,6 +82,8 @@ public sealed class DataPipelineTests
         Assert.That(loaded.Stages[2].Phases[2].WaterVolumes.Length, Is.EqualTo(1));
         Assert.That(loaded.Stages[3].Phases[1].WaterVolumes.Length, Is.EqualTo(1));
         Assert.That(loaded.Stages[6].Phases[0].BlitzSuppressed, Is.True);
+        Assert.That(loaded.Stages[6].Phases[0].Creatures.Length, Is.EqualTo(5));
+        Assert.That(loaded.Stages[6].Phases[0].Creatures[0].KindId, Is.EqualTo(1));
         Assert.That(loaded.Stages[6].Phases[1].Name, Is.EqualTo("The Press"));
         Assert.That(loaded.AlwaysEligibleItems().Count, Is.EqualTo(25));
     }

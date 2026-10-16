@@ -103,6 +103,9 @@ namespace JewelBlitzArena.Data
 
         /// <summary>Persistent water volumes for this phase. Empty = none.</summary>
         public List<AuthoredWaterVolume> WaterVolumes { get; set; } = new List<AuthoredWaterVolume>();
+
+        /// <summary>Stage creatures (Vein Guards). Empty = none.</summary>
+        public List<AuthoredCreature> Creatures { get; set; } = new List<AuthoredCreature>();
     }
 
     public sealed class AuthoredCratePoint
@@ -116,6 +119,19 @@ namespace JewelBlitzArena.Data
         public string CenterX { get; set; } = "0";
         public string CenterZ { get; set; } = "0";
         public string Radius { get; set; } = "8";
+    }
+
+    /// <summary>
+    /// Vein Guard / stage creature spawn. KindId 1–5 = mortar/frost/mallet/net/flame.
+    /// MaxLife 0 → Sim default (300). DropItemId 0 → Kind→stage-weapon map.
+    /// </summary>
+    public sealed class AuthoredCreature
+    {
+        public int KindId { get; set; }
+        public string X { get; set; } = "0";
+        public string Z { get; set; } = "0";
+        public int MaxLife { get; set; }
+        public int DropItemId { get; set; }
     }
 
     /// <summary>Presentation-only scripted camera path for a phase enter-transition.</summary>

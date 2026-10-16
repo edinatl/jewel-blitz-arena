@@ -159,6 +159,17 @@ namespace JewelBlitzArena.Data
                     bw.Write(w.CenterZRaw);
                     bw.Write(w.RadiusRaw);
                 }
+
+                StageCreatureRecord[] creatures = p.Creatures ?? System.Array.Empty<StageCreatureRecord>();
+                bw.Write(creatures.Length);
+                foreach (StageCreatureRecord c in creatures)
+                {
+                    bw.Write(c.KindId);
+                    bw.Write(c.XRaw);
+                    bw.Write(c.ZRaw);
+                    bw.Write(c.MaxLife);
+                    bw.Write(c.DropItemId);
+                }
             }
         }
 

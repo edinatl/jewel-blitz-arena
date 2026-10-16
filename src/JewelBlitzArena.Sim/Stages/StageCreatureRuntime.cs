@@ -25,33 +25,13 @@ namespace JewelBlitzArena.Sim
 
         public static void InitializeMatch(ref MatchState state, StageGraph graph)
         {
-            Clear(ref state);
-            if (graph.StageId != SampleContentFactory.PressworksStageId)
-            {
-                return;
-            }
-
-            // Phase 0 Sorting is entered from StageRuntime.InitializeMatch — arm there too.
-            ArmVeinGuards(ref state);
+            // StageRuntime.EnterPhase already called OnPhaseEnter; re-arm phase 0 from data.
+            ArmFromPhase(ref state, graph, phaseIndex: 0);
         }
 
         public static void OnPhaseEnter(ref MatchState state, StageGraph graph, int phaseIndex)
         {
-            if (graph.StageId != SampleContentFactory.PressworksStageId)
-            {
-                Clear(ref state);
-                return;
-            }
-
-            if (phaseIndex == 0)
-            {
-                ArmVeinGuards(ref state);
-            }
-            else
-            {
-                // Sorting over — clear remaining guards (gate already opened).
-                Clear(ref state);
-            }
+            ArmFromPhase(ref state, graph, phaseIndex);
         }
 
         public static int CountActive(ref MatchState state)
@@ -184,7 +164,7 @@ namespace JewelBlitzArena.Sim
                     hit.Flags = FlagBroken;
                     MatchStateAccess.SetStageCreature(ref state, best, hit);
                     events.Add(SimEventKind.StageCreatureBroken, (byte)best, (byte)hit.TypeId);
-                    OnBroken(ref state, hit.TypeId, hit.PosX, hit.PosZ);
+                    OnBroken(ref state, hit.TypeId, hit.Reserved0, hit.PosX, hit.PosZ);
                 }
                 else
                 {
@@ -193,9 +173,9 @@ namespace JewelBlitzArena.Sim
             }
         }
 
-        private static void OnBroken(ref MatchState state, int kind, Fix x, Fix z)
+        private static void OnBroken(ref MatchState state, int kind, int dropItemId, Fix x, Fix z)
         {
-            int itemId = ItemIdForKind(kind);
+            int itemId = dropItemId > 0 ? dropItemId : ItemIdForKind(kind);
             if (itemId < 0)
             {
                 return;
@@ -215,18 +195,32 @@ namespace JewelBlitzArena.Sim
             _ => -1,
         };
 
-        private static void ArmVeinGuards(ref MatchState state)
+        private static void ArmFromPhase(ref MatchState state, StageGraph graph, int phaseIndex)
         {
             Clear(ref state);
-            // Spread along the sorting hall (Ban-safe Fix ints).
-            Arm(ref state, 0, KindMortar, Fix.FromInt(-6), Fix.FromInt(3));
-            Arm(ref state, 1, KindFrostStaff, Fix.FromInt(-3), Fix.FromInt(-3));
-            Arm(ref state, 2, KindMallet, Fix.FromInt(0), Fix.FromInt(4));
-            Arm(ref state, 3, KindNet, Fix.FromInt(3), Fix.FromInt(-2));
-            Arm(ref state, 4, KindFlame, Fix.FromInt(6), Fix.FromInt(2));
+            if (!graph.TryGetPhase(phaseIndex, out StagePhaseDef phase))
+            {
+                return;
+            }
+
+            int count = 0;
+            for (int i = 0; i < phase.Creatures.Length && count < PoolCaps.StageCreatures; i++)
+            {
+                StageCreatureDef c = phase.Creatures[i];
+                if (c.KindId < 1)
+                {
+                    continue;
+                }
+
+                int life = c.MaxLife > 0 ? c.MaxLife : GuardMaxLife;
+                int dropId = c.DropItemId > 0 ? c.DropItemId : ItemIdForKind(c.KindId);
+                Arm(ref state, count, c.KindId, c.X, c.Z, life, dropId);
+                count++;
+            }
         }
 
-        private static void Arm(ref MatchState state, int index, int kind, Fix x, Fix z)
+        private static void Arm(
+            ref MatchState state, int index, int kind, Fix x, Fix z, int maxLife, int dropItemId)
         {
             if (index < 0 || index >= PoolCaps.StageCreatures)
             {
@@ -239,9 +233,11 @@ namespace JewelBlitzArena.Sim
                 PosY = Fix.Zero,
                 PosZ = z,
                 TypeId = kind,
-                Param0 = GuardMaxLife,
+                Param0 = maxLife,
                 Flags = FlagActive,
-                Reserved1 = (ushort)GuardMaxLife,
+                // Drop item id in Reserved0 (stage weapons are small ints).
+                Reserved0 = (byte)(dropItemId > 255 ? 255 : (dropItemId < 0 ? 0 : dropItemId)),
+                Reserved1 = (ushort)(maxLife > 65535 ? 65535 : maxLife),
             };
             MatchStateAccess.SetStageCreature(ref state, index, slot);
         }

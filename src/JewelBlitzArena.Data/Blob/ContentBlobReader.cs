@@ -215,6 +215,20 @@ namespace JewelBlitzArena.Data
                     };
                 }
 
+                int creatureCount = br.ReadInt32();
+                phase.Creatures = new StageCreatureRecord[creatureCount];
+                for (int c = 0; c < creatureCount; c++)
+                {
+                    phase.Creatures[c] = new StageCreatureRecord
+                    {
+                        KindId = br.ReadInt32(),
+                        XRaw = br.ReadInt64(),
+                        ZRaw = br.ReadInt64(),
+                        MaxLife = br.ReadInt32(),
+                        DropItemId = br.ReadInt32(),
+                    };
+                }
+
                 s.Phases[i] = phase;
             }
 

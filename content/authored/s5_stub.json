@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 9,
+  "schemaVersion": 10,
   "fighters": [
     {
       "fighterId": 1,
@@ -1289,7 +1289,8 @@
           ],
           "kinematics": [],
           "cratePoints": [],
-          "waterVolumes": []
+          "waterVolumes": [],
+          "creatures": []
         },
         {
           "name": "Breakaway",
@@ -1335,7 +1336,8 @@
             }
           ],
           "cratePoints": [],
-          "waterVolumes": []
+          "waterVolumes": [],
+          "creatures": []
         },
         {
           "name": "Geode shelf",
@@ -1372,7 +1374,8 @@
           ],
           "kinematics": [],
           "cratePoints": [],
-          "waterVolumes": []
+          "waterVolumes": [],
+          "creatures": []
         }
       ]
     },
@@ -1412,7 +1415,8 @@
           ],
           "kinematics": [],
           "cratePoints": [],
-          "waterVolumes": []
+          "waterVolumes": [],
+          "creatures": []
         },
         {
           "name": "Library",
@@ -1458,7 +1462,8 @@
             }
           ],
           "cratePoints": [],
-          "waterVolumes": []
+          "waterVolumes": [],
+          "creatures": []
         }
       ]
     },
@@ -1498,7 +1503,8 @@
           ],
           "kinematics": [],
           "cratePoints": [],
-          "waterVolumes": []
+          "waterVolumes": [],
+          "creatures": []
         },
         {
           "name": "Vault door",
@@ -1550,7 +1556,8 @@
               "centerZ": "0",
               "radius": "8"
             }
-          ]
+          ],
+          "creatures": []
         },
         {
           "name": "Hull breach",
@@ -1593,7 +1600,8 @@
               "centerZ": "0",
               "radius": "8"
             }
-          ]
+          ],
+          "creatures": []
         }
       ]
     },
@@ -1643,7 +1651,8 @@
             }
           ],
           "cratePoints": [],
-          "waterVolumes": []
+          "waterVolumes": [],
+          "creatures": []
         },
         {
           "name": "Flooding",
@@ -1695,7 +1704,8 @@
               "centerZ": "0",
               "radius": "8"
             }
-          ]
+          ],
+          "creatures": []
         },
         {
           "name": "Crane yard",
@@ -1742,7 +1752,8 @@
             }
           ],
           "cratePoints": [],
-          "waterVolumes": []
+          "waterVolumes": [],
+          "creatures": []
         }
       ]
     },
@@ -1792,7 +1803,8 @@
             }
           ],
           "cratePoints": [],
-          "waterVolumes": []
+          "waterVolumes": [],
+          "creatures": []
         },
         {
           "name": "Infestation",
@@ -1835,7 +1847,8 @@
           ],
           "kinematics": [],
           "cratePoints": [],
-          "waterVolumes": []
+          "waterVolumes": [],
+          "creatures": []
         },
         {
           "name": "Planet disc",
@@ -1894,7 +1907,8 @@
             }
           ],
           "cratePoints": [],
-          "waterVolumes": []
+          "waterVolumes": [],
+          "creatures": []
         }
       ]
     },
@@ -2021,7 +2035,8 @@
               "z": "-5"
             }
           ],
-          "waterVolumes": []
+          "waterVolumes": [],
+          "creatures": []
         }
       ]
     },
@@ -2058,7 +2073,44 @@
             }
           ],
           "cratePoints": [],
-          "waterVolumes": []
+          "waterVolumes": [],
+          "creatures": [
+            {
+              "kindId": 1,
+              "x": "-6",
+              "z": "3",
+              "maxLife": 300,
+              "dropItemId": 0
+            },
+            {
+              "kindId": 2,
+              "x": "-3",
+              "z": "-3",
+              "maxLife": 300,
+              "dropItemId": 0
+            },
+            {
+              "kindId": 3,
+              "x": "0",
+              "z": "4",
+              "maxLife": 300,
+              "dropItemId": 0
+            },
+            {
+              "kindId": 4,
+              "x": "3",
+              "z": "-2",
+              "maxLife": 300,
+              "dropItemId": 0
+            },
+            {
+              "kindId": 5,
+              "x": "6",
+              "z": "2",
+              "maxLife": 300,
+              "dropItemId": 0
+            }
+          ]
         },
         {
           "name": "The Press",
@@ -2128,7 +2180,8 @@
             }
           ],
           "cratePoints": [],
-          "waterVolumes": []
+          "waterVolumes": [],
+          "creatures": []
         }
       ]
     }

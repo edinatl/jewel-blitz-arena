@@ -139,6 +139,22 @@ namespace JewelBlitzArena.Data
                         }
                     }
 
+                    var creatures = new List<StageCreatureRecord>(p.Creatures?.Count ?? 0);
+                    if (p.Creatures != null)
+                    {
+                        foreach (AuthoredCreature c in p.Creatures)
+                        {
+                            creatures.Add(new StageCreatureRecord
+                            {
+                                KindId = c.KindId,
+                                XRaw = DecimalFixParser.ParseToRaw(c.X),
+                                ZRaw = DecimalFixParser.ParseToRaw(c.Z),
+                                MaxLife = c.MaxLife,
+                                DropItemId = c.DropItemId,
+                            });
+                        }
+                    }
+
                     StagePhaseRecord phaseRec = new StagePhaseRecord
                     {
                         Name = p.Name,
@@ -157,6 +173,7 @@ namespace JewelBlitzArena.Data
                         Kinematics = kinematics.ToArray(),
                         CratePoints = cratePoints.ToArray(),
                         WaterVolumes = waterVolumes.ToArray(),
+                        Creatures = creatures.ToArray(),
                     };
                     ApplyScriptedCamera(p.ScriptedCamera, phaseRec);
                     phases.Add(phaseRec);

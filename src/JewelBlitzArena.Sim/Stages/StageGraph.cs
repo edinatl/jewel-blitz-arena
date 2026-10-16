@@ -111,6 +111,20 @@ namespace JewelBlitzArena.Sim
                         new Fix(wr.RadiusRaw));
                 }
 
+                StageCreatureRecord[] srcCreatures =
+                    src.Creatures ?? System.Array.Empty<StageCreatureRecord>();
+                var creatures = new StageCreatureDef[srcCreatures.Length];
+                for (int g = 0; g < srcCreatures.Length; g++)
+                {
+                    StageCreatureRecord gr = srcCreatures[g];
+                    creatures[g] = new StageCreatureDef(
+                        gr.KindId,
+                        new Fix(gr.XRaw),
+                        new Fix(gr.ZRaw),
+                        gr.MaxLife,
+                        gr.DropItemId);
+                }
+
                 phases[i] = new StagePhaseDef(
                     src.DurationFrames,
                     src.TransitionFrames,
@@ -122,7 +136,8 @@ namespace JewelBlitzArena.Sim
                     hazards,
                     kinematics,
                     cratePoints,
-                    waterVolumes);
+                    waterVolumes,
+                    creatures);
             }
 
             return new StageGraph(
@@ -147,7 +162,8 @@ namespace JewelBlitzArena.Sim
             StageHazardDef[] hazards,
             StageKinematicDef[] kinematics,
             StageCratePointDef[] cratePoints,
-            StageWaterVolumeDef[] waterVolumes)
+            StageWaterVolumeDef[] waterVolumes,
+            StageCreatureDef[] creatures)
         {
             DurationFrames = durationFrames;
             TransitionFrames = transitionFrames;
@@ -160,6 +176,7 @@ namespace JewelBlitzArena.Sim
             Kinematics = kinematics ?? System.Array.Empty<StageKinematicDef>();
             CratePoints = cratePoints ?? System.Array.Empty<StageCratePointDef>();
             WaterVolumes = waterVolumes ?? System.Array.Empty<StageWaterVolumeDef>();
+            Creatures = creatures ?? System.Array.Empty<StageCreatureDef>();
         }
 
         public int DurationFrames { get; }
@@ -173,6 +190,25 @@ namespace JewelBlitzArena.Sim
         public StageKinematicDef[] Kinematics { get; }
         public StageCratePointDef[] CratePoints { get; }
         public StageWaterVolumeDef[] WaterVolumes { get; }
+        public StageCreatureDef[] Creatures { get; }
+    }
+
+    public readonly struct StageCreatureDef
+    {
+        public StageCreatureDef(int kindId, Fix x, Fix z, int maxLife, int dropItemId)
+        {
+            KindId = kindId;
+            X = x;
+            Z = z;
+            MaxLife = maxLife;
+            DropItemId = dropItemId;
+        }
+
+        public int KindId { get; }
+        public Fix X { get; }
+        public Fix Z { get; }
+        public int MaxLife { get; }
+        public int DropItemId { get; }
     }
 
     public readonly struct StageCratePointDef
