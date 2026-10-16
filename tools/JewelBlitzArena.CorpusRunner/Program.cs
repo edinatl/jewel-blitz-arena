@@ -202,6 +202,16 @@ static int RecordFixtures(string[] args)
         phaseClockPermille: 100,
         notes: "S8: Sunken Strongroom via S5 catalog; PhaseClock 10% reaches Hull breach (BreachPull hazard)."));
 
+    // Rime Cutworks: 10% clock → Dry yard + Flooding → Crane yard by ~324f.
+    Write(corpus, CorpusRunner.Capture(
+        name: "rime-crane-2p-360",
+        seed: 0x4A42415F52494D31UL, // JBA_RIM1
+        actorCount: 2,
+        stageId: SampleContentFactory.RimeCutworksStageId,
+        p0Log: BuildWalkLog(360),
+        phaseClockPermille: 100,
+        notes: "S8: Rime Cutworks via S5 catalog; PhaseClock 10% reaches Crane yard (magnet sweep + kin)."));
+
     Console.WriteLine($"Recorded fixtures into {Path.GetFullPath(corpus)}");
     return 0;
 }

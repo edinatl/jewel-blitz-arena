@@ -273,6 +273,61 @@ public sealed class StageGraphRuntimeTests
         Assert.That(breach.PhaseDurationFrames, Is.EqualTo(0));
     }
 
+    [Test]
+    public void Rime_Cutworks_compiles_three_phases_with_crane()
+    {
+        ContentCatalog catalog = ContentCompiler.Compile(SampleContentFactory.CreateS5StubPack());
+        Assert.That(
+            catalog.TryGetStage(SampleContentFactory.RimeCutworksStageId, out StageRecord stage),
+            Is.True);
+        Assert.That(stage.Phases.Length, Is.EqualTo(3));
+        Assert.That(stage.Phases[0].Name, Is.EqualTo("Dry yard"));
+        Assert.That(stage.Phases[0].Kinematics.Length, Is.EqualTo(1));
+        Assert.That(stage.Phases[1].Name, Is.EqualTo("Flooding"));
+        Assert.That(stage.Phases[2].Name, Is.EqualTo("Crane yard"));
+        Assert.That(stage.Phases[2].Hazards[0].Damage, Is.EqualTo(100));
+        Assert.That(stage.Phases[2].Kinematics[0].TrackId, Is.EqualTo(32));
+    }
+
+    [Test]
+    public void Rime_phase_timers_reach_Crane_yard()
+    {
+        ContentCatalog catalog = ContentCompiler.Compile(SampleContentFactory.CreateS5StubPack());
+        var config = MatchConfig.CreateDefault(Seed ^ 6UL, actorCount: 2);
+        unsafe
+        {
+            config.StageId = SampleContentFactory.RimeCutworksStageId;
+            config.PhaseClockPermille = 100;
+            config.FighterIds[0] = SampleContentFactory.RookFighterId;
+            config.FighterIds[1] = SampleContentFactory.RookFighterId;
+        }
+
+        var sim = new Simulation();
+        sim.Reset(config, catalog);
+        Assert.That(sim.State.PhaseIndex, Is.EqualTo(0));
+        Assert.That(sim.State.ActiveKinematicCount, Is.EqualTo(1));
+
+        for (int f = 0; f < 150 + 12; f++)
+        {
+            sim.Step(InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral);
+        }
+
+        Assert.That(sim.State.PhaseIndex, Is.EqualTo(1));
+        Assert.That(sim.State.ActiveKinematicCount, Is.EqualTo(1));
+
+        for (int f = 0; f < 150 + 12; f++)
+        {
+            sim.Step(InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral);
+        }
+
+        MatchState crane = sim.Snapshot();
+        Assert.That(crane.PhaseIndex, Is.EqualTo(2));
+        Assert.That((crane.StageFlags & StageFlags.InTransition) == 0, Is.True);
+        Assert.That(crane.ActiveHazardCount, Is.EqualTo(1));
+        Assert.That(crane.ActiveKinematicCount, Is.EqualTo(1));
+        Assert.That(crane.PhaseDurationFrames, Is.EqualTo(0));
+    }
+
     private static ulong RunThroughBreakaway(MatchConfig config, ContentCatalog catalog, bool grantJewels)
     {
         var sim = new Simulation();

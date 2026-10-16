@@ -4,7 +4,7 @@ namespace JewelBlitzArena.Data
 {
     /// <summary>
     /// S5 stub pack: full cast kits (cast.md §6 + kit behaviors), Citrine / Fulgur /
-    /// Sunken Strongroom phase stubs, 25 always-eligible starter items.
+    /// Sunken / Rime Cutworks phase stubs, 25 always-eligible starter items.
     /// </summary>
     public static class SampleContentFactory
     {
@@ -25,6 +25,7 @@ namespace JewelBlitzArena.Data
         public const int CitrineBazaarStageId = 1;
         public const int FulgurCloisterStageId = 2;
         public const int SunkenStrongroomStageId = 3;
+        public const int RimeCutworksStageId = 4;
 
         /// <summary>S5 stub Adhesive Spray — thrown hit applies Slow (matches <c>MatchRules.AdhesiveSprayItemId</c>).</summary>
         public const int AdhesiveSprayItemId = 18;
@@ -65,6 +66,7 @@ namespace JewelBlitzArena.Data
                     CreateCitrineBazaar(),
                     CreateFulgurCloister(),
                     CreateSunkenStrongroom(),
+                    CreateRimeCutworks(),
                 },
                 Items = CreateStarterSet(),
             };
@@ -720,6 +722,146 @@ namespace JewelBlitzArena.Data
                                 CenterX = "4",
                                 CenterZ = "-2",
                                 Radius = "2",
+                            },
+                        },
+                    },
+                },
+            };
+        }
+
+        /// <summary>
+        /// Rime Cutworks greybox stub (stages.md §2.4): Dry yard → Flooding → Crane yard.
+        /// Boardable sleds / ice blocks / raft tip / water volumes deferred; sled rail + crane sweep land now.
+        /// </summary>
+        public static AuthoredStage CreateRimeCutworks()
+        {
+            return new AuthoredStage
+            {
+                StageId = RimeCutworksStageId,
+                Name = "Rime Cutworks",
+                JewelCrateChancePercent = 8,
+                FallIsKo = false,
+                JewelCapOverride = 0,
+                Phases = new List<AuthoredPhase>
+                {
+                    new AuthoredPhase
+                    {
+                        Name = "Dry yard",
+                        DurationSeconds = "25",
+                        GeometrySetId = 0,
+                        CameraRadius = "13",
+                        Hazards = new List<AuthoredHazard>
+                        {
+                            new AuthoredHazard
+                            {
+                                HazardId = 30,
+                                Name = "CutterCannonZone",
+                                Trigger = "timer",
+                                PeriodSeconds = "10",
+                                TelegraphFrames = 30,
+                                Damage = 120,
+                                CenterX = "-2",
+                                CenterZ = "1",
+                                Radius = "1.8",
+                            },
+                        },
+                        Kinematics = new List<AuthoredKinematic>
+                        {
+                            new AuthoredKinematic
+                            {
+                                TrackId = 30,
+                                Name = "CutterSledRail",
+                                PeriodSeconds = "12",
+                                Amplitude = "2.5",
+                                OriginX = "0",
+                                OriginZ = "2",
+                            },
+                        },
+                    },
+                    new AuthoredPhase
+                    {
+                        Name = "Flooding",
+                        DurationSeconds = "25",
+                        GeometrySetId = 1,
+                        TransitionSeconds = "2",
+                        CarryItems = "all",
+                        CarryJewels = "all",
+                        CameraRadius = "14",
+                        ScriptedCamera = new AuthoredScriptedCamera
+                        {
+                            Enabled = true,
+                            EndCenterY = "9",
+                            EndRadius = "16",
+                        },
+                        Hazards = new List<AuthoredHazard>
+                        {
+                            new AuthoredHazard
+                            {
+                                HazardId = 31,
+                                Name = "DriftSledBump",
+                                Trigger = "timer",
+                                PeriodSeconds = "8",
+                                TelegraphFrames = 35,
+                                Damage = 70,
+                                CenterX = "0",
+                                CenterZ = "0",
+                                Radius = "2",
+                            },
+                        },
+                        Kinematics = new List<AuthoredKinematic>
+                        {
+                            new AuthoredKinematic
+                            {
+                                TrackId = 31,
+                                Name = "FloatingSledDrift",
+                                PeriodSeconds = "8",
+                                Amplitude = "3",
+                                OriginX = "1",
+                                OriginZ = "0",
+                            },
+                        },
+                    },
+                    new AuthoredPhase
+                    {
+                        Name = "Crane yard",
+                        DurationSeconds = "0",
+                        GeometrySetId = 2,
+                        TransitionSeconds = "2",
+                        CarryItems = "all",
+                        CarryJewels = "all",
+                        CameraRadius = "16",
+                        ScriptedCamera = new AuthoredScriptedCamera
+                        {
+                            Enabled = true,
+                            StartRadius = "14",
+                            EndCenterY = "10",
+                            EndRadius = "18",
+                        },
+                        Hazards = new List<AuthoredHazard>
+                        {
+                            new AuthoredHazard
+                            {
+                                HazardId = 32,
+                                Name = "MagnetCraneSweep",
+                                Trigger = "phase_enter",
+                                PeriodSeconds = "12",
+                                TelegraphFrames = 45,
+                                Damage = 100,
+                                CenterX = "0",
+                                CenterZ = "-1",
+                                Radius = "2.2",
+                            },
+                        },
+                        Kinematics = new List<AuthoredKinematic>
+                        {
+                            new AuthoredKinematic
+                            {
+                                TrackId = 32,
+                                Name = "OverheadMagnetCrane",
+                                PeriodSeconds = "12",
+                                Amplitude = "4",
+                                OriginX = "0",
+                                OriginZ = "-1",
                             },
                         },
                     },

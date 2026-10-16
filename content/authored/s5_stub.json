@@ -1568,6 +1568,143 @@
           "kinematics": []
         }
       ]
+    },
+    {
+      "stageId": 4,
+      "name": "Rime Cutworks",
+      "jewelCrateChancePercent": 8,
+      "fallIsKo": false,
+      "jewelCapOverride": 0,
+      "phases": [
+        {
+          "name": "Dry yard",
+          "durationSeconds": "25",
+          "geometrySetId": 0,
+          "blitzSuppressed": false,
+          "transitionSeconds": "0",
+          "carryItems": "all",
+          "carryJewels": "all",
+          "carryJewelsDropChance": "0",
+          "cameraCenterX": "0",
+          "cameraCenterY": "8",
+          "cameraCenterZ": "0",
+          "cameraRadius": "13",
+          "hazards": [
+            {
+              "hazardId": 30,
+              "name": "CutterCannonZone",
+              "trigger": "timer",
+              "periodSeconds": "10",
+              "telegraphFrames": 30,
+              "damage": 120,
+              "centerX": "-2",
+              "centerY": "0",
+              "centerZ": "1",
+              "radius": "1.8"
+            }
+          ],
+          "kinematics": [
+            {
+              "trackId": 30,
+              "name": "CutterSledRail",
+              "periodSeconds": "12",
+              "amplitude": "2.5",
+              "originX": "0",
+              "originY": "0",
+              "originZ": "2"
+            }
+          ]
+        },
+        {
+          "name": "Flooding",
+          "durationSeconds": "25",
+          "geometrySetId": 1,
+          "blitzSuppressed": false,
+          "transitionSeconds": "2",
+          "carryItems": "all",
+          "carryJewels": "all",
+          "carryJewelsDropChance": "0",
+          "cameraCenterX": "0",
+          "cameraCenterY": "8",
+          "cameraCenterZ": "0",
+          "cameraRadius": "14",
+          "scriptedCamera": {
+            "enabled": true,
+            "endCenterY": "9",
+            "endRadius": "16"
+          },
+          "hazards": [
+            {
+              "hazardId": 31,
+              "name": "DriftSledBump",
+              "trigger": "timer",
+              "periodSeconds": "8",
+              "telegraphFrames": 35,
+              "damage": 70,
+              "centerX": "0",
+              "centerY": "0",
+              "centerZ": "0",
+              "radius": "2"
+            }
+          ],
+          "kinematics": [
+            {
+              "trackId": 31,
+              "name": "FloatingSledDrift",
+              "periodSeconds": "8",
+              "amplitude": "3",
+              "originX": "1",
+              "originY": "0",
+              "originZ": "0"
+            }
+          ]
+        },
+        {
+          "name": "Crane yard",
+          "durationSeconds": "0",
+          "geometrySetId": 2,
+          "blitzSuppressed": false,
+          "transitionSeconds": "2",
+          "carryItems": "all",
+          "carryJewels": "all",
+          "carryJewelsDropChance": "0",
+          "cameraCenterX": "0",
+          "cameraCenterY": "8",
+          "cameraCenterZ": "0",
+          "cameraRadius": "16",
+          "scriptedCamera": {
+            "enabled": true,
+            "startRadius": "14",
+            "endCenterY": "10",
+            "endRadius": "18"
+          },
+          "hazards": [
+            {
+              "hazardId": 32,
+              "name": "MagnetCraneSweep",
+              "trigger": "phase_enter",
+              "periodSeconds": "12",
+              "telegraphFrames": 45,
+              "damage": 100,
+              "centerX": "0",
+              "centerY": "0",
+              "centerZ": "-1",
+              "radius": "2.2"
+            }
+          ],
+          "kinematics": [
+            {
+              "trackId": 32,
+              "name": "OverheadMagnetCrane",
+              "periodSeconds": "12",
+              "amplitude": "4",
+              "originX": "0",
+              "originY": "0",
+              "originZ": "-1"
+            }
+          ]
+        }
+      ]
     }
   ],
   "items": [
