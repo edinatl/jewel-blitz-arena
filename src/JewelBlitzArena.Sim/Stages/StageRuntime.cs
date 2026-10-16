@@ -97,10 +97,12 @@ namespace JewelBlitzArena.Sim
             {
                 // Final / open-ended phase.
                 state.PhaseElapsedFrames++;
+                BossTimeoutRuntime.Tick(ref state, ref events);
                 return;
             }
 
             state.PhaseElapsedFrames++;
+            BossTimeoutRuntime.Tick(ref state, ref events);
             if (state.PhaseElapsedFrames < state.PhaseDurationFrames)
             {
                 return;
@@ -118,8 +120,9 @@ namespace JewelBlitzArena.Sim
         public static bool IsBlitzSuppressed(in MatchState state) =>
             (state.StageFlags & StageFlags.BlitzSuppressed) != 0;
 
-        /// <summary>Boss timeout / timeout-move hook (content later). Returns remaining frames or 0.</summary>
-        public static int BossTimeoutRemaining(in MatchState state) => 0;
+        /// <summary>Frames until Blade Sweep / Flood (0 if N/A or already fired).</summary>
+        public static int BossTimeoutRemaining(in MatchState state) =>
+            BossTimeoutRuntime.Remaining(in state);
 
         private static void EnterPhase(
             ref MatchState state,

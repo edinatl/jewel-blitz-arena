@@ -586,6 +586,10 @@ namespace JewelBlitzArena.Sim
             }
         }
 
+        /// <summary>Boss timeout / scripted eliminate (Blade Sweep, Flood).</summary>
+        public static void ForceKnockOut(ref MatchState state, int vic) =>
+            KnockOut(ref state, atk: -1, vic);
+
         private static void KnockOut(ref MatchState state, int atk, int vic)
         {
             ref ActorSlot victim = ref MatchStateAccess.Actor(ref state, vic);
