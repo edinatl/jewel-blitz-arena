@@ -37,10 +37,17 @@ public sealed class ExtraArenaMenuTests
         IReadOnlyList<ExtraArenaRuntime.StageCursorEntry> cursor =
             menu.BuildCustomStageCursor(profile, catalog);
 
-        Assert.That(cursor.Count, Is.EqualTo(catalog.Stages.Length + 4));
+        // Story/boss (7) + Extra Arena box (4); extras are not double-listed from catalog.
+        Assert.That(cursor.Count, Is.EqualTo(11));
+        Assert.That(catalog.Stages.Length, Is.EqualTo(11));
         Assert.That(cursor.Count(e => e.IsExtraArenaBox), Is.EqualTo(4));
+        Assert.That(cursor.Count(e => !e.IsExtraArenaBox), Is.EqualTo(7));
         Assert.That(cursor.Count(e => e.IsExtraArenaBox && e.Unlocked), Is.EqualTo(0));
         Assert.That(menu.ExtraArenaSlotsUnlocked(profile), Is.EqualTo(0));
+        Assert.That(
+            catalog.TryGetStage(SampleContentFactory.CascadeStageId, out StageRecord cascade),
+            Is.True);
+        Assert.That(cascade.FallIsKo, Is.True);
     }
 
     [Test]

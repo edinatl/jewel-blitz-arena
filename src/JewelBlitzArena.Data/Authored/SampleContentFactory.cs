@@ -5,8 +5,8 @@ namespace JewelBlitzArena.Data
 {
     /// <summary>
     /// S5 stub pack: full cast kits (cast.md §6 + kit behaviors), five story-arena
-    /// phase stubs (Citrine → Orrery) plus two boss-arena stubs, 25 always-eligible starters
-    /// plus 5 Never-eligible Vein Guard stage weapons.
+    /// phase stubs (Citrine → Orrery), two boss-arena stubs, four Extra Arena stubs,
+    /// 25 always-eligible starters plus 5 Never-eligible Vein Guard stage weapons.
     /// </summary>
     public static class SampleContentFactory
     {
@@ -31,6 +31,12 @@ namespace JewelBlitzArena.Data
         public const int OrreryStageId = 5;
         public const int HarvesterTerracesStageId = 6;
         public const int PressworksStageId = 7;
+
+        /// <summary>Extra Arena stubs (stages.md §4) — Custom unlock ladder slots 1–4.</summary>
+        public const int TerracesNoBossStageId = 101;
+        public const int BehindCounterStageId = 102;
+        public const int SpirewalkStageId = 103;
+        public const int CascadeStageId = 104;
 
         /// <summary>S5 stub Adhesive Spray — thrown hit applies Slow (matches <c>MatchRules.AdhesiveSprayItemId</c>).</summary>
         public const int AdhesiveSprayItemId = 18;
@@ -82,6 +88,10 @@ namespace JewelBlitzArena.Data
                     CreateOrrery(),
                     CreateHarvesterTerraces(),
                     CreatePressworks(),
+                    CreateTerracesNoBoss(),
+                    CreateBehindTheCounter(),
+                    CreateSpirewalk(),
+                    CreateCascade(),
                 },
                 Items = CreateStarterSet(),
             };
@@ -1189,6 +1199,309 @@ namespace JewelBlitzArena.Data
         /// Vein Guards via authored creatures[] + StageCreatureRuntime (gate at 4 / 90 s);
         /// Vitre Life + Overpress via VitreBossRuntime; Flood timeout landed.
         /// </summary>
+        /// <summary>Extra Arena: Harvester geometry without the boss (stages.md §4.1).</summary>
+        public static AuthoredStage CreateTerracesNoBoss()
+        {
+            return new AuthoredStage
+            {
+                StageId = TerracesNoBossStageId,
+                Name = "Terraces (no boss)",
+                JewelCrateChancePercent = 8,
+                FallIsKo = false,
+                JewelCapOverride = 0,
+                Phases = new List<AuthoredPhase>
+                {
+                    new AuthoredPhase
+                    {
+                        Name = "Open terrace",
+                        DurationSeconds = "0",
+                        GeometrySetId = 0,
+                        CameraRadius = "16",
+                        Hazards = new List<AuthoredHazard>
+                        {
+                            // Spine crystals: hit → spine volley stub (damage on contact).
+                            new AuthoredHazard
+                            {
+                                HazardId = 101,
+                                Name = "SpineCrystalN",
+                                Trigger = "proximity",
+                                PeriodSeconds = "0",
+                                TelegraphFrames = 0,
+                                Damage = 25,
+                                CenterX = "0",
+                                CenterZ = "6",
+                                Radius = "1.2",
+                            },
+                            new AuthoredHazard
+                            {
+                                HazardId = 102,
+                                Name = "SpineCrystalS",
+                                Trigger = "proximity",
+                                PeriodSeconds = "0",
+                                TelegraphFrames = 0,
+                                Damage = 25,
+                                CenterX = "0",
+                                CenterZ = "-6",
+                                Radius = "1.2",
+                            },
+                            new AuthoredHazard
+                            {
+                                HazardId = 103,
+                                Name = "SpineCrystalE",
+                                Trigger = "proximity",
+                                PeriodSeconds = "0",
+                                TelegraphFrames = 0,
+                                Damage = 25,
+                                CenterX = "6",
+                                CenterZ = "0",
+                                Radius = "1.2",
+                            },
+                            new AuthoredHazard
+                            {
+                                HazardId = 104,
+                                Name = "SpineCrystalW",
+                                Trigger = "proximity",
+                                PeriodSeconds = "0",
+                                TelegraphFrames = 0,
+                                Damage = 25,
+                                CenterX = "-6",
+                                CenterZ = "0",
+                                Radius = "1.2",
+                            },
+                        },
+                        CratePoints = new List<AuthoredCratePoint>
+                        {
+                            new AuthoredCratePoint { X = "5", Z = "5" },
+                            new AuthoredCratePoint { X = "-5", Z = "5" },
+                            new AuthoredCratePoint { X = "5", Z = "-5" },
+                            new AuthoredCratePoint { X = "-5", Z = "-5" },
+                            new AuthoredCratePoint { X = "0", Z = "0" },
+                            new AuthoredCratePoint { X = "8", Z = "0" },
+                            new AuthoredCratePoint { X = "-8", Z = "0" },
+                        },
+                    },
+                },
+            };
+        }
+
+        /// <summary>Extra Arena: tiny scrap stage (stages.md §4.2).</summary>
+        public static AuthoredStage CreateBehindTheCounter()
+        {
+            return new AuthoredStage
+            {
+                StageId = BehindCounterStageId,
+                Name = "Behind the Counter",
+                JewelCrateChancePercent = 8,
+                FallIsKo = false,
+                JewelCapOverride = 0,
+                Phases = new List<AuthoredPhase>
+                {
+                    new AuthoredPhase
+                    {
+                        Name = "Shop floor",
+                        DurationSeconds = "0",
+                        GeometrySetId = 0,
+                        CameraRadius = "8",
+                        Hazards = new List<AuthoredHazard>
+                        {
+                            new AuthoredHazard
+                            {
+                                HazardId = 110,
+                                Name = "ShelfDropN",
+                                Trigger = "proximity",
+                                PeriodSeconds = "0",
+                                TelegraphFrames = 10,
+                                Damage = 40,
+                                CenterX = "0",
+                                CenterZ = "3",
+                                Radius = "1",
+                            },
+                            new AuthoredHazard
+                            {
+                                HazardId = 111,
+                                Name = "ShelfDropE",
+                                Trigger = "proximity",
+                                PeriodSeconds = "0",
+                                TelegraphFrames = 10,
+                                Damage = 40,
+                                CenterX = "3",
+                                CenterZ = "0",
+                                Radius = "1",
+                            },
+                            new AuthoredHazard
+                            {
+                                HazardId = 112,
+                                Name = "ShelfDropW",
+                                Trigger = "proximity",
+                                PeriodSeconds = "0",
+                                TelegraphFrames = 10,
+                                Damage = 40,
+                                CenterX = "-3",
+                                CenterZ = "0",
+                                Radius = "1",
+                            },
+                        },
+                        Kinematics = new List<AuthoredKinematic>
+                        {
+                            new AuthoredKinematic
+                            {
+                                TrackId = 110,
+                                Name = "LampStandard",
+                                PeriodSeconds = "0",
+                                Amplitude = "0",
+                                OriginX = "0",
+                                OriginZ = "0",
+                            },
+                        },
+                        CratePoints = new List<AuthoredCratePoint>
+                        {
+                            new AuthoredCratePoint { X = "2", Z = "2" },
+                            new AuthoredCratePoint { X = "-2", Z = "2" },
+                            new AuthoredCratePoint { X = "2", Z = "-2" },
+                            new AuthoredCratePoint { X = "-2", Z = "-2" },
+                        },
+                    },
+                },
+            };
+        }
+
+        /// <summary>Extra Arena: spars over star-well, fall_is_ko (stages.md §4.3).</summary>
+        public static AuthoredStage CreateSpirewalk()
+        {
+            return new AuthoredStage
+            {
+                StageId = SpirewalkStageId,
+                Name = "Spirewalk",
+                JewelCrateChancePercent = 8,
+                FallIsKo = true,
+                JewelCapOverride = 0,
+                Phases = new List<AuthoredPhase>
+                {
+                    new AuthoredPhase
+                    {
+                        Name = "Spars",
+                        DurationSeconds = "0",
+                        GeometrySetId = 0,
+                        CameraRadius = "14",
+                        Hazards = new List<AuthoredHazard>
+                        {
+                            new AuthoredHazard
+                            {
+                                HazardId = 120,
+                                Name = "StarWell",
+                                Trigger = "proximity",
+                                PeriodSeconds = "0",
+                                TelegraphFrames = 0,
+                                Damage = 0,
+                                CenterX = "0",
+                                CenterZ = "0",
+                                Radius = "3",
+                            },
+                        },
+                        Kinematics = new List<AuthoredKinematic>
+                        {
+                            new AuthoredKinematic
+                            {
+                                TrackId = 120,
+                                Name = "BannerSpringA",
+                                PeriodSeconds = "0",
+                                Amplitude = "0",
+                                OriginX = "4",
+                                OriginZ = "2",
+                            },
+                            new AuthoredKinematic
+                            {
+                                TrackId = 121,
+                                Name = "BannerSpringB",
+                                PeriodSeconds = "0",
+                                Amplitude = "0",
+                                OriginX = "-4",
+                                OriginZ = "-2",
+                            },
+                        },
+                        CratePoints = new List<AuthoredCratePoint>
+                        {
+                            new AuthoredCratePoint { X = "0", Z = "5" },
+                        },
+                    },
+                },
+            };
+        }
+
+        /// <summary>Extra Arena: cascade crates + water gaps, fall_is_ko (stages.md §4.4).</summary>
+        public static AuthoredStage CreateCascade()
+        {
+            return new AuthoredStage
+            {
+                StageId = CascadeStageId,
+                Name = "The Cascade",
+                JewelCrateChancePercent = 8,
+                FallIsKo = true,
+                JewelCapOverride = 0,
+                Phases = new List<AuthoredPhase>
+                {
+                    new AuthoredPhase
+                    {
+                        Name = "Three tiers",
+                        DurationSeconds = "0",
+                        GeometrySetId = 0,
+                        CameraRadius = "15",
+                        Hazards = new List<AuthoredHazard>
+                        {
+                            new AuthoredHazard
+                            {
+                                HazardId = 130,
+                                Name = "WallSpringL",
+                                Trigger = "proximity",
+                                PeriodSeconds = "0",
+                                TelegraphFrames = 0,
+                                Damage = 0,
+                                CenterX = "-5",
+                                CenterZ = "0",
+                                Radius = "1",
+                            },
+                            new AuthoredHazard
+                            {
+                                HazardId = 131,
+                                Name = "WallSpringR",
+                                Trigger = "proximity",
+                                PeriodSeconds = "0",
+                                TelegraphFrames = 0,
+                                Damage = 0,
+                                CenterX = "5",
+                                CenterZ = "0",
+                                Radius = "1",
+                            },
+                        },
+                        WaterVolumes = new List<AuthoredWaterVolume>
+                        {
+                            new AuthoredWaterVolume
+                            {
+                                CenterX = "0",
+                                CenterZ = "-4",
+                                Radius = "4",
+                            },
+                            new AuthoredWaterVolume
+                            {
+                                CenterX = "0",
+                                CenterZ = "4",
+                                Radius = "3",
+                            },
+                        },
+                        CratePoints = new List<AuthoredCratePoint>
+                        {
+                            new AuthoredCratePoint { X = "-3", Z = "2" },
+                            new AuthoredCratePoint { X = "0", Z = "2" },
+                            new AuthoredCratePoint { X = "3", Z = "2" },
+                            new AuthoredCratePoint { X = "-2", Z = "0" },
+                            new AuthoredCratePoint { X = "2", Z = "0" },
+                            new AuthoredCratePoint { X = "0", Z = "-2" },
+                        },
+                    },
+                },
+            };
+        }
+
         public static AuthoredStage CreatePressworks()
         {
             return new AuthoredStage

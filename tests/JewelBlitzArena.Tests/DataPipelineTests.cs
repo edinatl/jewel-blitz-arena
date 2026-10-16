@@ -15,7 +15,7 @@ public sealed class DataPipelineTests
         Assert.That(result.IsOk, Is.True, string.Join("; ", result.Errors));
         Assert.That(pack.Items.Count, Is.EqualTo(30));
         Assert.That(pack.Fighters.Count, Is.EqualTo(14));
-        Assert.That(pack.Stages.Count, Is.EqualTo(7));
+        Assert.That(pack.Stages.Count, Is.EqualTo(11));
         Assert.That(pack.Stages[0].Phases.Count, Is.EqualTo(3));
         Assert.That(pack.Stages[1].Name, Is.EqualTo("Fulgur Cloister"));
         Assert.That(pack.Stages[1].Phases.Count, Is.EqualTo(2));
@@ -28,6 +28,10 @@ public sealed class DataPipelineTests
         Assert.That(pack.Stages[5].Name, Is.EqualTo("Terraces — The Harvester"));
         Assert.That(pack.Stages[5].JewelCapOverride, Is.EqualTo(6));
         Assert.That(pack.Stages[6].Name, Is.EqualTo("The Pressworks"));
+        Assert.That(pack.Stages[7].StageId, Is.EqualTo(SampleContentFactory.TerracesNoBossStageId));
+        Assert.That(pack.Stages[8].StageId, Is.EqualTo(SampleContentFactory.BehindCounterStageId));
+        Assert.That(pack.Stages[9].FallIsKo, Is.True);
+        Assert.That(pack.Stages[10].FallIsKo, Is.True);
         Assert.That(pack.Stages[6].Phases[0].BlitzSuppressed, Is.True);
     }
 
@@ -53,7 +57,7 @@ public sealed class DataPipelineTests
         Assert.That(loaded.Stages[0].Phases[0].DurationFrames, Is.EqualTo(25 * 60));
         Assert.That(loaded.Stages[0].Phases[1].DurationFrames, Is.EqualTo(25 * 60));
         Assert.That(loaded.Stages[0].Phases[2].DurationFrames, Is.EqualTo(0));
-        Assert.That(loaded.Stages.Length, Is.EqualTo(7));
+        Assert.That(loaded.Stages.Length, Is.EqualTo(11));
         Assert.That(loaded.Stages[1].Name, Is.EqualTo("Fulgur Cloister"));
         Assert.That(loaded.Stages[1].Phases[0].DurationFrames, Is.EqualTo(40 * 60));
         Assert.That(loaded.Stages[1].Phases[1].DurationFrames, Is.EqualTo(0));

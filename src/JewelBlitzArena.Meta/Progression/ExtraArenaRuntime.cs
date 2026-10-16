@@ -6,14 +6,14 @@ namespace JewelBlitzArena.Meta
     /// <summary>
     /// Custom Extra Arena box (modes.md §8 / stages.md §4).
     /// Slots unlock at clears 9 / 11 / 13 / 14; slot 4 needs full cast.
-    /// Stage ids 101–104 are Meta greybox placeholders until S5 authors the arenas.
+    /// Stage graphs live in S5 at ids 101–104; the box lists them after story/boss stages.
     /// </summary>
     public static class ExtraArenaRuntime
     {
-        public const int TerracesNoBossStageId = 101;
-        public const int BehindCounterStageId = 102;
-        public const int SpirewalkStageId = 103;
-        public const int CascadeStageId = 104;
+        public const int TerracesNoBossStageId = SampleContentFactory.TerracesNoBossStageId;
+        public const int BehindCounterStageId = SampleContentFactory.BehindCounterStageId;
+        public const int SpirewalkStageId = SampleContentFactory.SpirewalkStageId;
+        public const int CascadeStageId = SampleContentFactory.CascadeStageId;
 
         public static readonly int[] SlotStageIds =
         {
@@ -87,10 +87,11 @@ namespace JewelBlitzArena.Meta
             var list = new List<ExtraArenaEntry>(SlotStageIds.Length);
             for (int i = 0; i < SlotStageIds.Length; i++)
             {
+                string name = SlotNames[i];
                 list.Add(new ExtraArenaEntry(
                     slot: i + 1,
                     stageId: SlotStageIds[i],
-                    name: SlotNames[i],
+                    name: name,
                     unlocked: (i + 1) <= unlockedSlots));
             }
 
@@ -123,8 +124,8 @@ namespace JewelBlitzArena.Meta
         }
 
         /// <summary>
-        /// Custom stage cursor: story + boss stubs from catalog, then Extra Arena box rows
-        /// (visible locked until unlock — modes.md §4).
+        /// Custom stage cursor: story + boss from catalog (Extra Arenas excluded), then
+        /// Extra Arena box rows (visible locked until unlock — modes.md §4).
         /// </summary>
         public static IReadOnlyList<StageCursorEntry> BuildCustomStageCursor(
             PlayerProfile profile,
@@ -135,6 +136,11 @@ namespace JewelBlitzArena.Meta
             {
                 foreach (StageRecord stage in catalog.Stages)
                 {
+                    if (IsExtraArenaStageId(stage.StageId))
+                    {
+                        continue;
+                    }
+
                     list.Add(new StageCursorEntry(
                         stage.StageId,
                         stage.Name,
@@ -144,7 +150,6 @@ namespace JewelBlitzArena.Meta
             }
             else
             {
-                // Minimal fallback when no catalog loaded.
                 list.Add(new StageCursorEntry(
                     SampleContentFactory.CitrineBazaarStageId,
                     "Citrine Bazaar",
@@ -152,11 +157,20 @@ namespace JewelBlitzArena.Meta
                     isExtraArenaBox: false));
             }
 
-            foreach (ExtraArenaEntry extra in BoxEntries(profile))
+            // Prefer authored names from catalog when present.
+            IReadOnlyList<ExtraArenaEntry> box = BoxEntries(profile);
+            for (int i = 0; i < box.Count; i++)
             {
+                ExtraArenaEntry extra = box[i];
+                string label = extra.Name;
+                if (catalog != null && catalog.TryGetStage(extra.StageId, out StageRecord authored))
+                {
+                    label = authored.Name;
+                }
+
                 list.Add(new StageCursorEntry(
                     extra.StageId,
-                    extra.Name,
+                    label,
                     unlocked: extra.Unlocked,
                     isExtraArenaBox: true));
             }
