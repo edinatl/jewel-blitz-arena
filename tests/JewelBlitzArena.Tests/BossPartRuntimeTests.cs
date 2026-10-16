@@ -14,6 +14,8 @@ public sealed class BossPartRuntimeTests
         MatchState snap = sim.Snapshot();
         Assert.That(BossPartRuntime.CountArmed(ref snap), Is.EqualTo(6));
         Assert.That(BossPartRuntime.IsHeadExposed(ref snap), Is.False);
+        Assert.That(MatchStateAccess.GetBossSub(ref snap, BossPartRuntime.IndexBuck).TypeId,
+            Is.EqualTo(0), "Buck controller arms lazily on first mount");
     }
 
     [Test]
@@ -63,19 +65,110 @@ public sealed class BossPartRuntimeTests
     }
 
     [Test]
-    public void Tail_is_hittable_without_leg_breaks()
+    public void Tail_not_hittable_from_ground_without_mount()
     {
         var sim = ResetHarvester(Seed ^ 3UL);
         MatchState snap = sim.Snapshot();
         Assert.That(BossPartRuntime.IsHeadExposed(ref snap), Is.False);
 
-        // Damage tail once; should accept hit (Param0 drops).
-        int before = MatchStateAccess.GetBossSub(ref snap, 5).Param0;
-        StrikePart(sim, ref snap, partIndex: 5, damage: 90);
+        int before = MatchStateAccess.GetBossSub(ref snap, BossPartRuntime.IndexTail).Param0;
+        StrikePart(sim, ref snap, partIndex: BossPartRuntime.IndexTail, damage: 90);
         MatchState after = sim.Snapshot();
-        int life = MatchStateAccess.GetBossSub(ref after, 5).Param0;
-        Assert.That(life, Is.LessThan(before));
-        Assert.That((MatchStateAccess.GetBossSub(ref after, 5).Flags & BossPartRuntime.FlagActive) != 0, Is.True);
+        int life = MatchStateAccess.GetBossSub(ref after, BossPartRuntime.IndexTail).Param0;
+        Assert.That(life, Is.EqualTo(before), "unmounted ground strikes must not damage the tail");
+    }
+
+    [Test]
+    public void Action_near_broken_leg_mounts_and_can_damage_tail()
+    {
+        var sim = ResetHarvester(Seed ^ 4UL);
+        MatchState snap = sim.Snapshot();
+        BreakPartAt(sim, ref snap, partIndex: 0);
+        snap = sim.Snapshot();
+
+        MountAtBrokenLeg(sim, ref snap, legIndex: 0);
+        snap = sim.Snapshot();
+        Assert.That(MatchStateAccess.Actor(ref snap, 0).IsMounted, Is.True);
+
+        int before = MatchStateAccess.GetBossSub(ref snap, BossPartRuntime.IndexTail).Param0;
+        StrikePart(sim, ref snap, partIndex: BossPartRuntime.IndexTail, damage: 90, keepMounted: true);
+        MatchState after = sim.Snapshot();
+        Assert.That(MatchStateAccess.GetBossSub(ref after, BossPartRuntime.IndexTail).Param0,
+            Is.LessThan(before));
+        Assert.That(MatchStateAccess.Actor(ref after, 0).IsMounted, Is.True);
+    }
+
+    [Test]
+    public void Buck_throws_non_hanging_mounted_fighter()
+    {
+        var sim = ResetHarvester(Seed ^ 5UL);
+        MatchState snap = sim.Snapshot();
+        BreakPartAt(sim, ref snap, partIndex: 0);
+        snap = sim.Snapshot();
+        MountAtBrokenLeg(sim, ref snap, legIndex: 0);
+        snap = sim.Snapshot();
+
+        int lifeBefore = MatchStateAccess.Actor(ref snap, 0).Life;
+        // Force Buck fire on the next tick.
+        GenericPoolSlot buck = MatchStateAccess.GetBossSub(ref snap, BossPartRuntime.IndexBuck);
+        buck.Param0 = 1;
+        MatchStateAccess.SetBossSub(ref snap, BossPartRuntime.IndexBuck, buck);
+        sim.Restore(snap);
+        sim.Step(InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral);
+
+        MatchState after = sim.Snapshot();
+        ref ActorSlot a0 = ref MatchStateAccess.Actor(ref after, 0);
+        Assert.That(a0.IsMounted, Is.False);
+        Assert.That(a0.Life, Is.EqualTo(lifeBefore - BossPartRuntime.BuckDamage));
+        Assert.That(a0.KnockdownFrames, Is.GreaterThan(0));
+    }
+
+    [Test]
+    public void Buck_hanging_on_Action_survives()
+    {
+        var sim = ResetHarvester(Seed ^ 6UL);
+        MatchState snap = sim.Snapshot();
+        BreakPartAt(sim, ref snap, partIndex: 0);
+        snap = sim.Snapshot();
+        MountAtBrokenLeg(sim, ref snap, legIndex: 0);
+        snap = sim.Snapshot();
+
+        int lifeBefore = MatchStateAccess.Actor(ref snap, 0).Life;
+        GenericPoolSlot buck = MatchStateAccess.GetBossSub(ref snap, BossPartRuntime.IndexBuck);
+        buck.Param0 = 1;
+        MatchStateAccess.SetBossSub(ref snap, BossPartRuntime.IndexBuck, buck);
+        sim.Restore(snap);
+
+        var hang = InputFrame.Neutral;
+        hang.Action = true;
+        sim.Step(hang, InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral);
+
+        MatchState after = sim.Snapshot();
+        ref ActorSlot a0 = ref MatchStateAccess.Actor(ref after, 0);
+        Assert.That(a0.IsMounted, Is.True);
+        Assert.That(a0.Life, Is.EqualTo(lifeBefore));
+    }
+
+    [Test]
+    public void Leg_repair_dismounts()
+    {
+        var sim = ResetHarvester(Seed ^ 7UL);
+        MatchState snap = sim.Snapshot();
+        BreakPartAt(sim, ref snap, partIndex: 0);
+        snap = sim.Snapshot();
+        MountAtBrokenLeg(sim, ref snap, legIndex: 0);
+        snap = sim.Snapshot();
+        Assert.That(MatchStateAccess.Actor(ref snap, 0).IsMounted, Is.True);
+
+        GenericPoolSlot leg = MatchStateAccess.GetBossSub(ref snap, 0);
+        leg.Param0 = 1;
+        MatchStateAccess.SetBossSub(ref snap, 0, leg);
+        sim.Restore(snap);
+        sim.Step(InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral);
+
+        MatchState after = sim.Snapshot();
+        Assert.That(BossPartRuntime.CountBrokenLegs(ref after), Is.EqualTo(0));
+        Assert.That(MatchStateAccess.Actor(ref after, 0).IsMounted, Is.False);
     }
 
     private static Simulation ResetHarvester(ulong seed)
@@ -92,6 +185,32 @@ public sealed class BossPartRuntimeTests
         var sim = new Simulation();
         sim.Reset(config, catalog);
         return sim;
+    }
+
+    private static void MountAtBrokenLeg(Simulation sim, ref MatchState snap, int legIndex)
+    {
+        GenericPoolSlot leg = MatchStateAccess.GetBossSub(ref snap, legIndex);
+        {
+            ref ActorSlot a0 = ref MatchStateAccess.Actor(ref snap, 0);
+            a0.PosX = leg.PosX;
+            a0.PosZ = leg.PosZ;
+            a0.PosY = Fix.Zero;
+            a0.IsMounted = false;
+            a0.Action = (byte)ActorAction.Neutral;
+            a0.ActionPhase = (byte)ActionPhase.None;
+            a0.ActionTimer = 0;
+            a0.HitApplied = 0;
+
+            ref ActorSlot a1 = ref MatchStateAccess.Actor(ref snap, 1);
+            a1.PosX = Fix.FromInt(40);
+            a1.PosZ = Fix.FromInt(40);
+        }
+
+        sim.Restore(snap);
+        var mount = InputFrame.Neutral;
+        mount.Action = true;
+        sim.Step(mount, InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral);
+        snap = sim.Snapshot();
     }
 
     private static void BreakPartAt(Simulation sim, ref MatchState snap, int partIndex)
@@ -113,14 +232,24 @@ public sealed class BossPartRuntimeTests
         }
     }
 
-    private static void StrikePart(Simulation sim, ref MatchState snap, int partIndex, int damage)
+    private static void StrikePart(
+        Simulation sim,
+        ref MatchState snap,
+        int partIndex,
+        int damage,
+        bool keepMounted = false)
     {
         GenericPoolSlot part = MatchStateAccess.GetBossSub(ref snap, partIndex);
         {
             ref ActorSlot a0 = ref MatchStateAccess.Actor(ref snap, 0);
             a0.PosX = part.PosX;
             a0.PosZ = part.PosZ;
-            a0.PosY = Fix.Zero;
+            if (!keepMounted)
+            {
+                a0.PosY = Fix.Zero;
+                a0.IsMounted = false;
+            }
+
             a0.Action = (byte)ActorAction.Strong;
             a0.ActionPhase = (byte)ActionPhase.Active;
             // Strong stub total 31; Active when elapsed in [10, 13) → ActionTimer 20 → elapsed 12.

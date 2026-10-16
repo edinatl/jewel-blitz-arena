@@ -51,6 +51,10 @@ namespace JewelBlitzArena.Sim
         BossPartHit = 14,
         /// <summary>Boss part Life reached 0. SlotA = part index, SlotB = kind.</summary>
         BossPartBroken = 15,
+        /// <summary>Fighter mounted Harvester tail. SlotA = actor.</summary>
+        BossMounted = 16,
+        /// <summary>Harvester Buck shake. SlotA = actor thrown (or 255), SlotB = hanging (1) / thrown (0).</summary>
+        BossBuck = 17,
     }
 
     /// <summary>Ephemeral per-step event (not part of <see cref="MatchState"/> hash).</summary>

@@ -175,6 +175,13 @@ namespace JewelBlitzArena.Sim
                 ItemRuntime.ProcessActorButtons(ref _state, a, _lastInputs[a], ref _contacts);
             }
 
+            // Harvester mount: Action near a broken leg climbs to the tail.
+            for (int a = 0; a < _state.ActorCount; a++)
+            {
+                BossPartRuntime.ProcessMountInput(
+                    ref _state, a, _lastInputs[a], ref _contacts);
+            }
+
             IntegrateActorsHorizontal();
             PhysicsWorld.StepActorsJewelsItems(ref _state, ref _contacts);
             ItemRuntime.TickThrownHits(ref _state, ref _contacts);
@@ -189,7 +196,13 @@ namespace JewelBlitzArena.Sim
             BossPartRuntime.ResolveAttackHits(ref _state, _kits, ref _contacts);
             BreakableRuntime.ResolveAttackHits(
                 ref _state, _kits, _stageGraph, _catalog, ref _contacts);
-            BossPartRuntime.Tick(ref _state);
+            BossPartRuntime.Tick(
+                ref _state,
+                _lastInputs[0],
+                _lastInputs[1],
+                _lastInputs[2],
+                _lastInputs[3],
+                ref _contacts);
             WorldPatchRuntime.Tick(ref _state);
             GleamRuntime.Tick(ref _state, ref _contacts);
 

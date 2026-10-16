@@ -80,6 +80,8 @@ namespace JewelBlitzArena.Sim
         public const byte FlagAlive = 1 << 0;
         public const byte FlagBlitzed = 1 << 1;
         public const byte FlagEliminated = 1 << 2;
+        /// <summary>Mounted on Harvester tail (stages.md §3.1 burst route).</summary>
+        public const byte FlagMounted = 1 << 3;
         public const byte NoHeldItem = 255;
 
         public static int SizeOf
@@ -109,6 +111,12 @@ namespace JewelBlitzArena.Sim
         {
             get => (Flags & FlagEliminated) != 0;
             set => SetFlag(FlagEliminated, value);
+        }
+
+        public bool IsMounted
+        {
+            get => (Flags & FlagMounted) != 0;
+            set => SetFlag(FlagMounted, value);
         }
 
         // Ordinal matches KitBehavior.DoubleHold (field name shadows the enum type).
