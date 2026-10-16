@@ -142,7 +142,19 @@ namespace JewelBlitzArena.Sim
 
                 attacker.HitApplied = 1;
                 events.Add(SimEventKind.BossPartHit, (byte)IndexBody, (byte)atk);
-                MatchStateAccess.SetBossSub(ref state, IndexBody, body);
+
+                if (body.Param0 <= 0)
+                {
+                    body.Flags = 0;
+                    MatchStateAccess.SetBossSub(ref state, IndexBody, body);
+                    events.Add(SimEventKind.BossPartBroken, (byte)IndexBody, (byte)KindVitreBody);
+                    MatchWinRuntime.TryBossClear(ref state);
+                }
+                else
+                {
+                    MatchStateAccess.SetBossSub(ref state, IndexBody, body);
+                }
+
                 break;
             }
         }

@@ -74,6 +74,31 @@ public sealed class OverpressRuntimeTests
     }
 
     [Test]
+    public void Zeroing_Vitre_Life_ends_match_with_living_place_1()
+    {
+        var sim = ResetPressworks(Seed ^ 4UL, phaseClockPermille: 100);
+        AdvanceToPress(sim);
+        MatchState snap = sim.Snapshot();
+        Assert.That(snap.MatchOver, Is.False);
+
+        GenericPoolSlot body = MatchStateAccess.GetBossSub(ref snap, VitreBossRuntime.IndexBody);
+        body.Param0 = 80;
+        MatchStateAccess.SetBossSub(ref snap, VitreBossRuntime.IndexBody, body);
+        sim.Restore(snap);
+
+        StrikeBody(sim, ref snap, damage: 80);
+        MatchState after = sim.Snapshot();
+        Assert.That(after.MatchOver, Is.True);
+        Assert.That(VitreBossRuntime.BodyLife(ref after), Is.EqualTo(0));
+        Assert.That(MatchStateAccess.GetPlacement(ref after, 0), Is.EqualTo(1));
+        Assert.That(MatchStateAccess.GetPlacement(ref after, 1), Is.EqualTo(1));
+        Assert.That(
+            (MatchStateAccess.GetBossSub(ref after, VitreBossRuntime.IndexBody).Flags
+                & VitreBossRuntime.FlagActive) == 0,
+            Is.True);
+    }
+
+    [Test]
     public void Overpress_cooldown_blocks_second_arm()
     {
         var sim = ResetPressworks(Seed ^ 3UL, phaseClockPermille: 100);

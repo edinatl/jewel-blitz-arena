@@ -296,7 +296,7 @@ namespace JewelBlitzArena.Sim
                     events.Add(SimEventKind.BossPartBroken, (byte)best, (byte)hit.TypeId);
                     if (hit.TypeId == KindHead || hit.TypeId == KindTail)
                     {
-                        TryWinFromPartBreak(ref state);
+                        MatchWinRuntime.TryBossClear(ref state);
                     }
                 }
                 else
@@ -637,29 +637,6 @@ namespace JewelBlitzArena.Sim
                 part.Flags = FlagBroken;
                 part.Param0 = 0;
             }
-        }
-
-        /// <summary>
-        /// Destroying head or tail clears the Harvester — living fighters place 1
-        /// (Expedition chest keys off actor 0 == 1).
-        /// </summary>
-        private static void TryWinFromPartBreak(ref MatchState state)
-        {
-            if (state.MatchEndFrame != 0)
-            {
-                return;
-            }
-
-            for (int i = 0; i < state.ActorCount; i++)
-            {
-                ref ActorSlot a = ref MatchStateAccess.Actor(ref state, i);
-                if (a.IsAlive && !a.IsEliminated)
-                {
-                    MatchStateAccess.SetPlacement(ref state, i, 1);
-                }
-            }
-
-            state.MatchEndFrame = state.Frame + 1;
         }
 
         private static void ArmPart(
