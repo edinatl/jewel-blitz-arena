@@ -57,6 +57,36 @@ namespace JewelBlitzArena.Data
         public const int StageNetItemId = 29;
         public const int StageFlameItemId = 30;
 
+        /// <summary>Materials (items-and-economy.md §8) — Never crate; one per canonical tag + Scrap.</summary>
+        public const int MaterialFlameItemId = 31;
+        public const int MaterialTideItemId = 32;
+        public const int MaterialStormItemId = 33;
+        public const int MaterialStoneItemId = 34;
+        public const int MaterialStarItemId = 35;
+        public const int MaterialIceItemId = 36;
+        public const int MaterialGunpowderItemId = 37;
+        public const int MaterialIronItemId = 38;
+        public const int MaterialCulletItemId = 39;
+        public const int MaterialPaperItemId = 40;
+        public const int MaterialRationItemId = 41;
+        public const int MaterialScrapItemId = 42;
+
+        /// <summary>Tinctures ×11 — one per tag (Card category).</summary>
+        public const int TinctureFlameItemId = 43;
+        public const int TinctureTideItemId = 44;
+        public const int TinctureStormItemId = 45;
+        public const int TinctureStoneItemId = 46;
+        public const int TinctureStarItemId = 47;
+        public const int TinctureIceItemId = 48;
+        public const int TincturePowderItemId = 49;
+        public const int TinctureMetalItemId = 50;
+        public const int TinctureGlassItemId = 51;
+        public const int TincturePaperItemId = 52;
+        public const int TinctureFoodItemId = 53;
+
+        /// <summary>Blueprint Scrap — lifts Tinker tier cap to 7.</summary>
+        public const int BlueprintScrapItemId = 54;
+
         public static AuthoredContentPack CreateS5StubPack()
         {
             return new AuthoredContentPack
@@ -1698,6 +1728,59 @@ namespace JewelBlitzArena.Data
             AddStageWeapon(StageMalletItemId, "Stage Mallet", 40);
             AddStageWeapon(StageNetItemId, "Stage Net", 20);
             AddStageWeapon(StageFlameItemId, "Stage Flame", 40);
+
+            void AddNever(
+                int itemId,
+                string name,
+                string category,
+                int rarity,
+                int sell,
+                params string[] tags)
+            {
+                items.Add(new AuthoredItem
+                {
+                    ItemId = itemId,
+                    Name = name,
+                    Category = category,
+                    Rarity = rarity,
+                    CrateEligibility = "Never",
+                    Pocketable = false,
+                    DamagePerUse = 0,
+                    HealPerUse = 0,
+                    BuyPrice = 0,
+                    SellPrice = sell,
+                    Tags = new List<string>(tags ?? Array.Empty<string>()),
+                });
+            }
+
+            // Materials — one per canonical tag + Scrap (no tag).
+            AddNever(MaterialFlameItemId, "Flame", "Material", 1, 10, "flame");
+            AddNever(MaterialTideItemId, "Tide", "Material", 1, 10, "tide");
+            AddNever(MaterialStormItemId, "Storm", "Material", 1, 10, "storm");
+            AddNever(MaterialStoneItemId, "Stone", "Material", 1, 10, "stone");
+            AddNever(MaterialStarItemId, "Star", "Material", 1, 10, "star");
+            AddNever(MaterialIceItemId, "Ice", "Material", 1, 10, "ice");
+            AddNever(MaterialGunpowderItemId, "Gunpowder", "Material", 1, 10, "powder");
+            AddNever(MaterialIronItemId, "Iron", "Material", 1, 10, "metal");
+            AddNever(MaterialCulletItemId, "Cullet", "Material", 1, 10, "glass");
+            AddNever(MaterialPaperItemId, "Paper", "Material", 1, 10, "paper");
+            AddNever(MaterialRationItemId, "Ration", "Material", 1, 10, "food");
+            AddNever(MaterialScrapItemId, "Scrap", "Material", 1, 5);
+
+            // Tinctures ×11 — Card inputs for Tinker affinity weight ×4.
+            AddNever(TinctureFlameItemId, "Tincture of Flame", "Card", 2, 20, "flame");
+            AddNever(TinctureTideItemId, "Tincture of Tide", "Card", 2, 20, "tide");
+            AddNever(TinctureStormItemId, "Tincture of Storm", "Card", 2, 20, "storm");
+            AddNever(TinctureStoneItemId, "Tincture of Stone", "Card", 2, 20, "stone");
+            AddNever(TinctureStarItemId, "Tincture of Star", "Card", 2, 20, "star");
+            AddNever(TinctureIceItemId, "Tincture of Ice", "Card", 2, 20, "ice");
+            AddNever(TincturePowderItemId, "Tincture of Powder", "Card", 2, 20, "powder");
+            AddNever(TinctureMetalItemId, "Tincture of Metal", "Card", 2, 20, "metal");
+            AddNever(TinctureGlassItemId, "Tincture of Glass", "Card", 2, 20, "glass");
+            AddNever(TincturePaperItemId, "Tincture of Paper", "Card", 2, 20, "paper");
+            AddNever(TinctureFoodItemId, "Tincture of Food", "Card", 2, 20, "food");
+
+            AddNever(BlueprintScrapItemId, "Blueprint Scrap", "Card", 3, 50);
 
             return items;
         }

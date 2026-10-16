@@ -45,7 +45,8 @@ namespace JewelBlitzArena.Meta
     /// </summary>
     public static class TinkerRuntime
     {
-        public const int ScrapItemId = 900101;
+        /// <summary>Aligns with S5 Material Scrap (<see cref="SampleContentFactory.MaterialScrapItemId"/>).</summary>
+        public const int ScrapItemId = SampleContentFactory.MaterialScrapItemId;
         public const int SuccessPercent = 55;
         public const int DoublePercent = 15;
         public const int FailurePercent = 30;
@@ -299,8 +300,9 @@ namespace JewelBlitzArena.Meta
 
             ItemTag cardTags = card?.Tags ?? ItemTag.None;
             bool blueprint = card != null
-                && card.Category == ItemCategory.Card
-                && (card.Name.IndexOf("Blueprint", System.StringComparison.OrdinalIgnoreCase) >= 0);
+                && (card.ItemId == SampleContentFactory.BlueprintScrapItemId
+                    || (card.Category == ItemCategory.Card
+                        && card.Name.IndexOf("Blueprint", System.StringComparison.OrdinalIgnoreCase) >= 0));
             ItemTag affinity = AffinitySet(a, b, cardTags, out bool shared);
             int tier = TargetTier(a, b, shared, blueprint);
 

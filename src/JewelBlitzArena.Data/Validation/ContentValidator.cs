@@ -386,7 +386,71 @@ namespace JewelBlitzArena.Data
                     $"Starter set has {alwaysCount} always-eligible items; design calls for 25."));
             }
 
+            // items-and-economy.md §1: every canonical tag has exactly one material and one Tincture.
+            ValidateTagMaterialsAndTinctures(pack, result);
+
             return result;
+        }
+
+        private static readonly ItemTag[] CanonicalTags =
+        {
+            ItemTag.Flame, ItemTag.Tide, ItemTag.Storm, ItemTag.Stone, ItemTag.Star,
+            ItemTag.Ice, ItemTag.Powder, ItemTag.Metal, ItemTag.Glass, ItemTag.Paper, ItemTag.Food,
+        };
+
+        private static void ValidateTagMaterialsAndTinctures(
+            AuthoredContentPack pack,
+            ValidationResult result)
+        {
+            foreach (ItemTag tag in CanonicalTags)
+            {
+                int materials = 0;
+                int tinctures = 0;
+                foreach (AuthoredItem item in pack.Items)
+                {
+                    if (!TryParseCategory(item.Category, out ItemCategory cat))
+                    {
+                        continue;
+                    }
+
+                    ItemTag mask = ParseTagMask(item.Tags);
+                    if ((mask & tag) == 0)
+                    {
+                        continue;
+                    }
+
+                    // Single-tag materials / tinctures only count for the "exactly one" rule.
+                    if (mask != tag)
+                    {
+                        continue;
+                    }
+
+                    if (cat == ItemCategory.Material)
+                    {
+                        materials++;
+                    }
+                    else if (cat == ItemCategory.Card
+                        && item.Name != null
+                        && item.Name.IndexOf("Tincture", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        tinctures++;
+                    }
+                }
+
+                if (materials != 1)
+                {
+                    result.Errors.Add(new ValidationIssue(
+                        "tag_material",
+                        $"Tag '{tag}' has {materials} material(s); need exactly 1."));
+                }
+
+                if (tinctures != 1)
+                {
+                    result.Errors.Add(new ValidationIssue(
+                        "tag_tincture",
+                        $"Tag '{tag}' has {tinctures} Tincture(s); need exactly 1."));
+                }
+            }
         }
 
         public static bool TryParseMoveClass(string text, out MoveClass value)
