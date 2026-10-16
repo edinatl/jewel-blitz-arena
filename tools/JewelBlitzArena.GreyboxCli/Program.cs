@@ -20,6 +20,7 @@ internal static class Program
         bool scriptedWalk = true;
         bool useMeta = false;
         bool useLoopback = false;
+        bool useSolitaire = false;
         int deliveryDelay = 2;
         string? benchRoom = null;
 
@@ -58,6 +59,10 @@ internal static class Program
             {
                 useMeta = true;
             }
+            else if (a is "--solitaire")
+            {
+                useSolitaire = true;
+            }
             else if (a is "--bench" && i + 1 < args.Length)
             {
                 benchRoom = args[++i].Trim().ToLowerInvariant();
@@ -82,6 +87,11 @@ internal static class Program
         if (benchRoom != null)
         {
             return RunBench(benchRoom, seed, outPath, catalog);
+        }
+
+        if (useSolitaire)
+        {
+            return RunSolitaire(frames, seed, actors, scriptedWalk, ascii, outPath, catalog);
         }
 
         if (useMeta)
@@ -175,6 +185,122 @@ internal static class Program
                 Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(outPath))!);
                 File.WriteAllText(outPath, render);
                 Console.WriteLine($"wrote {outPath}");
+            }
+
+            return 0;
+        }
+        finally
+        {
+            string? dir = Path.GetDirectoryName(profilePath);
+            if (dir != null && Directory.Exists(dir))
+            {
+                Directory.Delete(dir, recursive: true);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Pocket Solitaire + Custom House Rule → mid-match TryUse → ASCII jewels line.
+    /// </summary>
+    private static int RunSolitaire(
+        int frames,
+        ulong seed,
+        int actors,
+        bool walk,
+        bool ascii,
+        string? outPath,
+        ContentCatalog? catalog)
+    {
+        if (catalog == null)
+        {
+            catalog = ContentCompiler.Compile(SampleContentFactory.CreateS5StubPack());
+        }
+
+        string profilePath = MetaGreyboxFlow.DefaultTempProfilePath("jba-cli-solitaire-");
+        try
+        {
+            var flow = new MetaGreyboxFlow(profilePath);
+            flow.SetCatalog(catalog);
+            flow.BootProfile();
+            flow.Profile.Ledger.Grant(SampleContentFactory.SolitaireItemId);
+            if (!flow.TryPocketItem(SampleContentFactory.SolitaireItemId))
+            {
+                Console.Error.WriteLine("failed to pocket Solitaire");
+                return 2;
+            }
+
+            var request = new ModeRequest
+            {
+                Mode = ModeId.Custom,
+                Seed = seed,
+                ActorCount = actors,
+                HouseRules = new HouseRulesSettings
+                {
+                    PocketItems = true,
+                    LusterTimer = true,
+                    JewelCap = 0,
+                    BlitzedDamageTakenPercent = 50,
+                    BlitzedAttackPercent = 100,
+                    RallySeconds = 9,
+                    PhaseClockPercent = 100,
+                },
+            };
+
+            MatchConfig config = flow.StartCustom(request);
+            if (!config.ContainsPocketItem(SampleContentFactory.SolitaireItemId)
+                || !flow.SolitaireAvailable)
+            {
+                Console.Error.WriteLine("Solitaire not available in MatchConfig pockets");
+                return 2;
+            }
+
+            // Use immediately so opening pickups cannot fill Blitz before Solitaire.
+            int jewelsBefore = flow.Session.Current.Actor0.JewelsHeld;
+            bool used = flow.TryUseSolitaire(0);
+            int jewelsAfterUse = flow.Session.Current.Actor0.JewelsHeld;
+
+            for (int f = 0; f < frames; f++)
+            {
+                InputFrame p0 = InputFrame.Neutral;
+                InputFrame p1 = InputFrame.Neutral;
+                if (walk)
+                {
+                    p0 = InputQuantizer.FromCardinal(1, 0);
+                    p1 = InputQuantizer.FromCardinal(-1, 0);
+                }
+
+                flow.Step(p0, p1);
+            }
+
+            MatchState board = flow.Session.Current;
+            int jewelsAfter = board.Actor0.JewelsHeld;
+            ulong hash = flow.Session.Hash();
+            bool available = flow.Session.SolitaireAvailable;
+            flow.CompleteCustom();
+            string render = GreyboxBoard.Render(ref board);
+            Console.WriteLine(
+                $"solitaire seed=0x{seed:X16} frames={frames} used={used} " +
+                $"jewels={jewelsBefore}->{jewelsAfterUse} (end={jewelsAfter}) " +
+                $"available={available} hash=0x{hash:X16}");
+            if (ascii || outPath != null)
+            {
+                Console.WriteLine(render);
+            }
+
+            if (outPath != null)
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(outPath))!);
+                File.WriteAllText(
+                    outPath,
+                    $"solitaire used={used} jewels={jewelsBefore}->{jewelsAfterUse}\n{render}");
+                Console.WriteLine($"wrote {outPath}");
+            }
+
+            if (!used || jewelsAfterUse != jewelsBefore + 1)
+            {
+                Console.Error.WriteLine(
+                    $"Solitaire use failed used={used} jewels={jewelsBefore}->{jewelsAfterUse}");
+                return 3;
             }
 
             return 0;
@@ -393,6 +519,7 @@ internal static class Program
               --blob PATH         Optional .jba content blob
               --neutral           All-neutral inputs
               --meta              Boot → Custom → profile stamp path
+              --solitaire         Pocket Solitaire + mid-match TryUse smoke
               --bench buy|sell|fitting|ledger|wheel|rooms
                                   Editor-free Bench room ASCII
               --loopback          DualSessionHarness rollback greybox

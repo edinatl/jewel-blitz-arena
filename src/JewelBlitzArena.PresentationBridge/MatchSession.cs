@@ -15,6 +15,7 @@ namespace JewelBlitzArena.PresentationBridge
         private ulong _seed;
         private int _actorCount;
         private ContentCatalog? _catalog;
+        private bool _solitaireAvailable;
 
         public Simulation Sim => _sim;
 
@@ -30,14 +31,41 @@ namespace JewelBlitzArena.PresentationBridge
 
         public bool MatchOver => _sim.MatchOver;
 
+        /// <summary>
+        /// True when MatchConfig carried Solitaire in Pocket Items (Custom/Online House Rule).
+        /// </summary>
+        public bool SolitaireAvailable => _solitaireAvailable;
+
         public void Reset(in MatchConfig config, ContentCatalog? catalog = null)
         {
             _seed = config.Seed;
             _actorCount = config.ActorCount;
             _catalog = catalog;
+            _solitaireAvailable = config.ContainsPocketItem(MatchRules.SolitaireItemId);
             _sim.Reset(config, catalog);
             _current = _sim.Snapshot();
             _previous = _current;
+        }
+
+        /// <summary>
+        /// Activate pocketed Solitaire for <paramref name="actorIndex"/> when available.
+        /// Refreshes presentation snapshots on success.
+        /// </summary>
+        public bool TryUseSolitaire(int actorIndex = 0)
+        {
+            if (!_solitaireAvailable)
+            {
+                return false;
+            }
+
+            if (!_sim.TryUseSolitaire(actorIndex))
+            {
+                return false;
+            }
+
+            _previous = _current;
+            _current = _sim.Snapshot();
+            return true;
         }
 
         public void ResetDefault(ulong seed, int actorCount = 2, ContentCatalog? catalog = null)

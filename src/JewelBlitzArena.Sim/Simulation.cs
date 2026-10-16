@@ -305,6 +305,13 @@ namespace JewelBlitzArena.Sim
         public bool DebugDropOneJewel(int actorIndex) =>
             JewelRuntime.TryDropOneHeldJewel(ref _state, actorIndex);
 
+        /// <summary>
+        /// Solitaire pocket use (items-and-economy.md §6). Presentation/CLI gate on
+        /// MatchConfig pockets; Sim only grants the bonus jewel.
+        /// </summary>
+        public bool TryUseSolitaire(int actorIndex) =>
+            SolitaireRuntime.TryUse(ref _state, actorIndex, ref _contacts);
+
         public int SpawnLooseItem(int itemId, Fix x, Fix y, Fix z) =>
             CrateSpawner.TrySpawnLooseItem(ref _state, itemId, new FixVec3(x, y, z));
 

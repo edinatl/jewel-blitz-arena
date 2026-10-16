@@ -252,6 +252,21 @@ namespace JewelBlitzArena.PresentationBridge
             _session.Step(p0, p1, p2, p3);
         }
 
+        /// <summary>
+        /// Use pocketed Solitaire during a live Custom match (MatchConfig pockets gate).
+        /// </summary>
+        public bool TryUseSolitaire(int actorIndex = 0)
+        {
+            if (!_matchLive)
+            {
+                return false;
+            }
+
+            return _session.TryUseSolitaire(actorIndex);
+        }
+
+        public bool SolitaireAvailable => _matchLive && _session.SolitaireAvailable;
+
         public MatchResult CompleteCustom()
         {
             if (!_matchLive)
