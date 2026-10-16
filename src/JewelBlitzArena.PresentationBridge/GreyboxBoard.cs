@@ -80,6 +80,14 @@ namespace JewelBlitzArena.PresentationBridge
                 Plot(kinematics[i].X, kinematics[i].Z, kinematics[i].BoardGlyph);
             }
 
+            // Vein Guards (G active / x broken) under patches/actors.
+            var creatures = new StageCreatureHudEntry[MatchStageCreatureHud.MaxCreatures];
+            int creatureCount = MatchStageCreatureHud.Collect(ref state, creatures);
+            for (int i = 0; i < creatureCount; i++)
+            {
+                Plot(creatures[i].X, creatures[i].Z, creatures[i].BoardGlyph);
+            }
+
             // World patches under actors/items (Ice ~, Smoke #, Slow =).
             var patches = new WorldPatchHudEntry[MatchWorldPatchHud.MaxEntries];
             int patchCount = MatchWorldPatchHud.Collect(ref state, patches);
@@ -107,7 +115,13 @@ namespace JewelBlitzArena.PresentationBridge
                 .Append(" patches=").Append(patchCount)
                 .Append(" hazards=").Append(hazardCount)
                 .Append(" kin=").Append(kinematicCount)
-                .AppendLine();
+                .Append(" creatures=").Append(creatureCount);
+            if (state.MatchOver)
+            {
+                sb.Append(" MATCH_OVER");
+            }
+
+            sb.AppendLine();
 
             for (int i = 0; i < state.ActorCount; i++)
             {

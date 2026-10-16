@@ -225,4 +225,38 @@ public sealed class PresentationBridgeTests
         // Hazard glyph may be overwritten by actors at the same tile; header counts are authoritative.
         Assert.That(board, Does.Contain("H").Or.Contain("!"));
     }
+
+    [Test]
+    public void MatchStageCreatureHud_reports_Pressworks_Vein_Guards()
+    {
+        ContentCatalog catalog = ContentCompiler.Compile(SampleContentFactory.CreateS5StubPack());
+        var config = MatchConfig.CreateDefault(0x435254485544UL, actorCount: 2);
+        unsafe
+        {
+            config.StageId = SampleContentFactory.PressworksStageId;
+            config.PhaseClockPermille = 1000;
+            config.FighterIds[0] = SampleContentFactory.RookFighterId;
+            config.FighterIds[1] = SampleContentFactory.RookFighterId;
+        }
+
+        var sim = new Simulation();
+        sim.Reset(config, catalog);
+        MatchState sorting = sim.Snapshot();
+
+        var buf = new StageCreatureHudEntry[MatchStageCreatureHud.MaxCreatures];
+        int n = MatchStageCreatureHud.Collect(ref sorting, buf);
+        Assert.That(n, Is.EqualTo(5));
+        Assert.That(buf[0].KindId, Is.EqualTo(StageCreatureRuntime.KindMortar));
+        Assert.That(buf[0].Broken, Is.False);
+        Assert.That(buf[0].BoardGlyph, Is.EqualTo('G'));
+
+        string summary = MatchStageCreatureHud.FormatSummary(ref sorting);
+        Assert.That(summary, Does.StartWith("creatures=5"));
+        Assert.That(summary, Does.Contain("CRT1@"));
+
+        string board = GreyboxBoard.Render(ref sorting);
+        Assert.That(board, Does.Contain("creatures=5"));
+        Assert.That(board, Does.Contain("G"));
+        Assert.That(board, Does.Not.Contain("MATCH_OVER"));
+    }
 }
