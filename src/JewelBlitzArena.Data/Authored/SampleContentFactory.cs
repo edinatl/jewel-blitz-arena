@@ -1151,7 +1151,8 @@ namespace JewelBlitzArena.Data
         /// <summary>
         /// The Pressworks — Chairman Vitre (stages.md §3.2). Jewel cap 6.
         /// Boss AI v1: LiveHandsChase relocates toward nearest fighter; Flood timeout landed.
-        /// Vein Guards via StageCreatureRuntime (gate at 4 destroyed or 90 s); Overpress Life deferred.
+        /// Vein Guards via StageCreatureRuntime (gate at 4 destroyed or 90 s);
+        /// Vitre Life + Overpress via VitreBossRuntime; Flood timeout landed.
         /// </summary>
         public static AuthoredStage CreatePressworks()
         {

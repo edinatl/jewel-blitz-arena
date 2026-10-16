@@ -158,6 +158,7 @@ namespace JewelBlitzArena.Sim
             ClearKinematics(ref state);
             ActivateKinematics(ref state, phase);
             StageCreatureRuntime.OnPhaseEnter(ref state, graph, phaseIndex);
+            VitreBossRuntime.OnPhaseEnter(ref state, graph, phaseIndex);
 
             int transition = 0;
             if (applyEnterTransition)

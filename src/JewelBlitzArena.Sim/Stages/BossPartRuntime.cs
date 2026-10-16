@@ -182,7 +182,7 @@ namespace JewelBlitzArena.Sim
             for (int i = 0; i < PoolCaps.BossSubActors; i++)
             {
                 GenericPoolSlot part = MatchStateAccess.GetBossSub(ref state, i);
-                if (part.TypeId != 0 && part.TypeId != KindBuck)
+                if (IsHarvesterPart(part.TypeId))
                 {
                     any = true;
                     break;
@@ -295,6 +295,9 @@ namespace JewelBlitzArena.Sim
         public static bool IsLeg(int typeId) =>
             typeId == KindLegFL || typeId == KindLegFR
             || typeId == KindLegBL || typeId == KindLegBR;
+
+        public static bool IsHarvesterPart(int typeId) =>
+            IsLeg(typeId) || typeId == KindHead || typeId == KindTail;
 
         public static bool IsBuckTelegraphing(ref MatchState state)
         {
@@ -557,7 +560,7 @@ namespace JewelBlitzArena.Sim
 
         private static bool IsHittable(in GenericPoolSlot part, bool headExposed, bool attackerMounted)
         {
-            if (part.TypeId == 0 || part.TypeId == KindBuck)
+            if (!IsHarvesterPart(part.TypeId))
             {
                 return false;
             }
