@@ -6,6 +6,7 @@ namespace JewelBlitzArena.Sim
     /// Breakable stage props (crates) on the unused <see cref="MatchState.Crates"/> pool.
     /// One Attack hit opens (combat-and-match.md). Jewel vs item roll uses
     /// <see cref="StageGraph.JewelCrateChancePercent"/>. Boss anatomy is <see cref="BossPartRuntime"/>.
+    /// Positions come from authored phase <c>crate_points</c>.
     /// </summary>
     public static class BreakableRuntime
     {
@@ -20,10 +21,28 @@ namespace JewelBlitzArena.Sim
 
         public static void InitializeMatch(ref MatchState state, StageGraph graph)
         {
+            ArmPhaseCrates(ref state, graph);
+        }
+
+        /// <summary>Clear and re-arm crates for the current phase (match init + phase enter).</summary>
+        public static void ArmPhaseCrates(ref MatchState state, StageGraph graph)
+        {
             Clear(ref state);
-            if (graph.StageId == SampleContentFactory.HarvesterTerracesStageId)
+            if (!graph.TryGetPhase(state.PhaseIndex, out StagePhaseDef phase))
             {
-                ArmHarvesterCrates(ref state);
+                return;
+            }
+
+            int n = phase.CratePoints.Length;
+            if (n > PoolCaps.Crates)
+            {
+                n = PoolCaps.Crates;
+            }
+
+            for (int i = 0; i < n; i++)
+            {
+                StageCratePointDef pt = phase.CratePoints[i];
+                SpawnCrate(ref state, i, pt.X, pt.Z);
             }
         }
 
@@ -152,15 +171,6 @@ namespace JewelBlitzArena.Sim
             {
                 CrateSpawner.TrySpawnLooseItem(ref state, itemId, pos);
             }
-        }
-
-        private static void ArmHarvesterCrates(ref MatchState state)
-        {
-            // Terrace crate points outside boss-part hit radii (legs at ±2,±2).
-            SpawnCrate(ref state, 0, Fix.FromInt(6), Fix.FromInt(5));
-            SpawnCrate(ref state, 1, Fix.FromInt(-6), Fix.FromInt(5));
-            SpawnCrate(ref state, 2, Fix.FromInt(6), Fix.FromInt(-5));
-            SpawnCrate(ref state, 3, Fix.FromInt(-6), Fix.FromInt(-5));
         }
 
         private static void SpawnCrate(ref MatchState state, int index, Fix x, Fix z)

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 8,
+  "schemaVersion": 9,
   "fighters": [
     {
       "fighterId": 1,
@@ -1287,7 +1287,9 @@
               "radius": "1.5"
             }
           ],
-          "kinematics": []
+          "kinematics": [],
+          "cratePoints": [],
+          "waterVolumes": []
         },
         {
           "name": "Breakaway",
@@ -1331,7 +1333,9 @@
               "originY": "0",
               "originZ": "0"
             }
-          ]
+          ],
+          "cratePoints": [],
+          "waterVolumes": []
         },
         {
           "name": "Geode shelf",
@@ -1366,7 +1370,9 @@
               "radius": "1.2"
             }
           ],
-          "kinematics": []
+          "kinematics": [],
+          "cratePoints": [],
+          "waterVolumes": []
         }
       ]
     },
@@ -1404,7 +1410,9 @@
               "radius": "2"
             }
           ],
-          "kinematics": []
+          "kinematics": [],
+          "cratePoints": [],
+          "waterVolumes": []
         },
         {
           "name": "Library",
@@ -1448,7 +1456,9 @@
               "originY": "0",
               "originZ": "0"
             }
-          ]
+          ],
+          "cratePoints": [],
+          "waterVolumes": []
         }
       ]
     },
@@ -1486,7 +1496,9 @@
               "radius": "1.5"
             }
           ],
-          "kinematics": []
+          "kinematics": [],
+          "cratePoints": [],
+          "waterVolumes": []
         },
         {
           "name": "Vault door",
@@ -1530,6 +1542,14 @@
               "originY": "0",
               "originZ": "0"
             }
+          ],
+          "cratePoints": [],
+          "waterVolumes": [
+            {
+              "centerX": "0",
+              "centerZ": "0",
+              "radius": "8"
+            }
           ]
         },
         {
@@ -1565,7 +1585,15 @@
               "radius": "2"
             }
           ],
-          "kinematics": []
+          "kinematics": [],
+          "cratePoints": [],
+          "waterVolumes": [
+            {
+              "centerX": "0",
+              "centerZ": "0",
+              "radius": "8"
+            }
+          ]
         }
       ]
     },
@@ -1613,7 +1641,9 @@
               "originY": "0",
               "originZ": "2"
             }
-          ]
+          ],
+          "cratePoints": [],
+          "waterVolumes": []
         },
         {
           "name": "Flooding",
@@ -1656,6 +1686,14 @@
               "originX": "1",
               "originY": "0",
               "originZ": "0"
+            }
+          ],
+          "cratePoints": [],
+          "waterVolumes": [
+            {
+              "centerX": "0",
+              "centerZ": "0",
+              "radius": "8"
             }
           ]
         },
@@ -1702,7 +1740,9 @@
               "originY": "0",
               "originZ": "-1"
             }
-          ]
+          ],
+          "cratePoints": [],
+          "waterVolumes": []
         }
       ]
     },
@@ -1750,7 +1790,9 @@
               "originY": "0",
               "originZ": "0"
             }
-          ]
+          ],
+          "cratePoints": [],
+          "waterVolumes": []
         },
         {
           "name": "Infestation",
@@ -1791,7 +1833,9 @@
               "radius": "2.5"
             }
           ],
-          "kinematics": []
+          "kinematics": [],
+          "cratePoints": [],
+          "waterVolumes": []
         },
         {
           "name": "Planet disc",
@@ -1848,7 +1892,9 @@
               "originY": "0",
               "originZ": "0"
             }
-          ]
+          ],
+          "cratePoints": [],
+          "waterVolumes": []
         }
       ]
     },
@@ -1932,7 +1978,26 @@
               "originY": "0",
               "originZ": "0"
             }
-          ]
+          ],
+          "cratePoints": [
+            {
+              "x": "6",
+              "z": "5"
+            },
+            {
+              "x": "-6",
+              "z": "5"
+            },
+            {
+              "x": "6",
+              "z": "-5"
+            },
+            {
+              "x": "-6",
+              "z": "-5"
+            }
+          ],
+          "waterVolumes": []
         }
       ]
     },
@@ -1980,7 +2045,9 @@
               "originY": "0",
               "originZ": "0"
             }
-          ]
+          ],
+          "cratePoints": [],
+          "waterVolumes": []
         },
         {
           "name": "The Press",
@@ -2048,7 +2115,9 @@
               "originY": "0",
               "originZ": "0"
             }
-          ]
+          ],
+          "cratePoints": [],
+          "waterVolumes": []
         }
       ]
     }

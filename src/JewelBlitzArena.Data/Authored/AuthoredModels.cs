@@ -97,6 +97,25 @@ namespace JewelBlitzArena.Data
 
         public List<AuthoredHazard> Hazards { get; set; } = new List<AuthoredHazard>();
         public List<AuthoredKinematic> Kinematics { get; set; } = new List<AuthoredKinematic>();
+
+        /// <summary>Breakable crate positions (metres, decimal strings). Empty = none.</summary>
+        public List<AuthoredCratePoint> CratePoints { get; set; } = new List<AuthoredCratePoint>();
+
+        /// <summary>Persistent water volumes for this phase. Empty = none.</summary>
+        public List<AuthoredWaterVolume> WaterVolumes { get; set; } = new List<AuthoredWaterVolume>();
+    }
+
+    public sealed class AuthoredCratePoint
+    {
+        public string X { get; set; } = "0";
+        public string Z { get; set; } = "0";
+    }
+
+    public sealed class AuthoredWaterVolume
+    {
+        public string CenterX { get; set; } = "0";
+        public string CenterZ { get; set; } = "0";
+        public string Radius { get; set; } = "8";
     }
 
     /// <summary>Presentation-only scripted camera path for a phase enter-transition.</summary>

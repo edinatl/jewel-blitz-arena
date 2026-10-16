@@ -73,6 +73,14 @@ public sealed class DataPipelineTests
         Assert.That(loaded.Stages[4].Phases[2].Hazards.Length, Is.EqualTo(2));
         Assert.That(loaded.Stages[5].JewelCapOverride, Is.EqualTo(6));
         Assert.That(loaded.Stages[5].Phases[0].Hazards.Length, Is.EqualTo(4));
+        Assert.That(loaded.Stages[5].Phases[0].CratePoints.Length, Is.EqualTo(4));
+        Assert.That(loaded.Stages[5].Phases[0].CratePoints[0].XRaw, Is.EqualTo(Fix.FromInt(6).Raw));
+        Assert.That(loaded.Stages[5].Phases[0].CratePoints[0].ZRaw, Is.EqualTo(Fix.FromInt(5).Raw));
+        Assert.That(loaded.Stages[2].Phases[0].WaterVolumes.Length, Is.EqualTo(0));
+        Assert.That(loaded.Stages[2].Phases[1].WaterVolumes.Length, Is.EqualTo(1));
+        Assert.That(loaded.Stages[2].Phases[1].WaterVolumes[0].RadiusRaw, Is.EqualTo(Fix.FromInt(8).Raw));
+        Assert.That(loaded.Stages[2].Phases[2].WaterVolumes.Length, Is.EqualTo(1));
+        Assert.That(loaded.Stages[3].Phases[1].WaterVolumes.Length, Is.EqualTo(1));
         Assert.That(loaded.Stages[6].Phases[0].BlitzSuppressed, Is.True);
         Assert.That(loaded.Stages[6].Phases[1].Name, Is.EqualTo("The Press"));
         Assert.That(loaded.AlwaysEligibleItems().Count, Is.EqualTo(25));

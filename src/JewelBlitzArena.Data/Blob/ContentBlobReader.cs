@@ -192,6 +192,29 @@ namespace JewelBlitzArena.Data
                     };
                 }
 
+                int crateCount = br.ReadInt32();
+                phase.CratePoints = new StageCratePointRecord[crateCount];
+                for (int c = 0; c < crateCount; c++)
+                {
+                    phase.CratePoints[c] = new StageCratePointRecord
+                    {
+                        XRaw = br.ReadInt64(),
+                        ZRaw = br.ReadInt64(),
+                    };
+                }
+
+                int waterCount = br.ReadInt32();
+                phase.WaterVolumes = new StageWaterVolumeRecord[waterCount];
+                for (int w = 0; w < waterCount; w++)
+                {
+                    phase.WaterVolumes[w] = new StageWaterVolumeRecord
+                    {
+                        CenterXRaw = br.ReadInt64(),
+                        CenterZRaw = br.ReadInt64(),
+                        RadiusRaw = br.ReadInt64(),
+                    };
+                }
+
                 s.Phases[i] = phase;
             }
 

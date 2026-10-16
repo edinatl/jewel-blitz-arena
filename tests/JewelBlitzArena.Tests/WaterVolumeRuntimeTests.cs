@@ -23,9 +23,10 @@ public sealed class WaterVolumeRuntimeTests
         var sim = new Simulation();
         sim.Reset(config, catalog);
 
+        StageGraph graph = sim.StageGraph;
         MatchState floor = sim.Snapshot();
         Assert.That(floor.PhaseIndex, Is.EqualTo(0));
-        Assert.That(WaterVolumeRuntime.IsActorInWater(ref floor, 0), Is.False);
+        Assert.That(WaterVolumeRuntime.IsActorInWater(ref floor, graph, 0), Is.False);
 
         // Vault floor 25s @ 10% clock = 150f + transition 12f → Vault door.
         for (int f = 0; f < 150 + 12; f++)
@@ -41,7 +42,7 @@ public sealed class WaterVolumeRuntimeTests
             a0.PosZ = Fix.Zero;
         }
 
-        Assert.That(WaterVolumeRuntime.IsActorInWater(ref door, 0), Is.True);
+        Assert.That(WaterVolumeRuntime.IsActorInWater(ref door, graph, 0), Is.True);
 
         // Vault door another 150f + 12f transition → Hull breach.
         sim.Restore(door);
@@ -58,7 +59,7 @@ public sealed class WaterVolumeRuntimeTests
             a0.PosZ = Fix.Zero;
         }
 
-        Assert.That(WaterVolumeRuntime.IsActorInWater(ref breach, 0), Is.True);
+        Assert.That(WaterVolumeRuntime.IsActorInWater(ref breach, graph, 0), Is.True);
     }
 
     [Test]
@@ -76,8 +77,9 @@ public sealed class WaterVolumeRuntimeTests
 
         var sim = new Simulation();
         sim.Reset(config, catalog);
+        StageGraph graph = sim.StageGraph;
         MatchState dry = sim.Snapshot();
-        Assert.That(WaterVolumeRuntime.IsActorInWater(ref dry, 0), Is.False);
+        Assert.That(WaterVolumeRuntime.IsActorInWater(ref dry, graph, 0), Is.False);
 
         for (int f = 0; f < 150 + 12; f++)
         {
@@ -92,7 +94,7 @@ public sealed class WaterVolumeRuntimeTests
             a0.PosZ = Fix.Zero;
         }
 
-        Assert.That(WaterVolumeRuntime.IsActorInWater(ref flood, 0), Is.True);
+        Assert.That(WaterVolumeRuntime.IsActorInWater(ref flood, graph, 0), Is.True);
     }
 
     [Test]

@@ -142,6 +142,23 @@ namespace JewelBlitzArena.Data
                     bw.Write(k.OriginYRaw);
                     bw.Write(k.OriginZRaw);
                 }
+
+                StageCratePointRecord[] crates = p.CratePoints ?? System.Array.Empty<StageCratePointRecord>();
+                bw.Write(crates.Length);
+                foreach (StageCratePointRecord c in crates)
+                {
+                    bw.Write(c.XRaw);
+                    bw.Write(c.ZRaw);
+                }
+
+                StageWaterVolumeRecord[] waters = p.WaterVolumes ?? System.Array.Empty<StageWaterVolumeRecord>();
+                bw.Write(waters.Length);
+                foreach (StageWaterVolumeRecord w in waters)
+                {
+                    bw.Write(w.CenterXRaw);
+                    bw.Write(w.CenterZRaw);
+                    bw.Write(w.RadiusRaw);
+                }
             }
         }
 

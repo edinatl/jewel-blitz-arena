@@ -112,6 +112,33 @@ namespace JewelBlitzArena.Data
                         });
                     }
 
+                    var cratePoints = new List<StageCratePointRecord>(p.CratePoints?.Count ?? 0);
+                    if (p.CratePoints != null)
+                    {
+                        foreach (AuthoredCratePoint c in p.CratePoints)
+                        {
+                            cratePoints.Add(new StageCratePointRecord
+                            {
+                                XRaw = DecimalFixParser.ParseToRaw(c.X),
+                                ZRaw = DecimalFixParser.ParseToRaw(c.Z),
+                            });
+                        }
+                    }
+
+                    var waterVolumes = new List<StageWaterVolumeRecord>(p.WaterVolumes?.Count ?? 0);
+                    if (p.WaterVolumes != null)
+                    {
+                        foreach (AuthoredWaterVolume w in p.WaterVolumes)
+                        {
+                            waterVolumes.Add(new StageWaterVolumeRecord
+                            {
+                                CenterXRaw = DecimalFixParser.ParseToRaw(w.CenterX),
+                                CenterZRaw = DecimalFixParser.ParseToRaw(w.CenterZ),
+                                RadiusRaw = DecimalFixParser.ParseToRaw(w.Radius),
+                            });
+                        }
+                    }
+
                     StagePhaseRecord phaseRec = new StagePhaseRecord
                     {
                         Name = p.Name,
@@ -128,6 +155,8 @@ namespace JewelBlitzArena.Data
                         CameraRadiusRaw = DecimalFixParser.ParseToRaw(p.CameraRadius),
                         Hazards = hazards.ToArray(),
                         Kinematics = kinematics.ToArray(),
+                        CratePoints = cratePoints.ToArray(),
+                        WaterVolumes = waterVolumes.ToArray(),
                     };
                     ApplyScriptedCamera(p.ScriptedCamera, phaseRec);
                     phases.Add(phaseRec);

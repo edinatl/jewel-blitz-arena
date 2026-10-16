@@ -73,6 +73,7 @@ namespace JewelBlitzArena.Sim
                     state.StageFlags &= ~StageFlags.InTransition;
                     state.StageFlags |= StageFlags.HazardsEnabled;
                     ArmPhaseHazards(ref state, graph);
+                    BreakableRuntime.ArmPhaseCrates(ref state, graph);
                     if (graph.TryGetPhase(state.PhaseIndex, out StagePhaseDef arrived))
                     {
                         events.Add(SimEventKind.PhaseChanged, (byte)state.PhaseIndex, (byte)arrived.GeometrySetId);
@@ -174,6 +175,7 @@ namespace JewelBlitzArena.Sim
                 state.StageFlags &= ~StageFlags.InTransition;
                 state.StageFlags |= StageFlags.HazardsEnabled;
                 ArmPhaseHazards(ref state, graph);
+                BreakableRuntime.ArmPhaseCrates(ref state, graph);
                 events.Add(SimEventKind.PhaseChanged, (byte)phaseIndex, (byte)phase.GeometrySetId);
             }
         }

@@ -12,7 +12,8 @@ namespace JewelBlitzArena.Sim
             KitRuntime kit,
             Fix dtWalk,
             Fix dtRun,
-            Fix dtFull)
+            Fix dtFull,
+            StageGraph graph)
         {
             ref ActorSlot actor = ref MatchStateAccess.Actor(ref state, index);
             if (!actor.IsAlive || actor.IsEliminated)
@@ -74,7 +75,7 @@ namespace JewelBlitzArena.Sim
                     step = new Fix((step.Raw * 3) / 5);
                 }
 
-                if (step.Raw != 0 && WaterVolumeRuntime.IsActorInWater(ref state, index))
+                if (step.Raw != 0 && WaterVolumeRuntime.IsActorInWater(ref state, graph, index))
                 {
                     // −20% walk while in a stage water volume (stages.md §2.3 / §2.4).
                     step = WaterVolumeRuntime.ApplyWalkSlow(step);

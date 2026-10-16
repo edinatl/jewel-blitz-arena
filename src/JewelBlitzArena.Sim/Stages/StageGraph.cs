@@ -90,6 +90,27 @@ namespace JewelBlitzArena.Sim
                         new Fix(kr.OriginZRaw));
                 }
 
+                StageCratePointRecord[] srcCrates =
+                    src.CratePoints ?? System.Array.Empty<StageCratePointRecord>();
+                var cratePoints = new StageCratePointDef[srcCrates.Length];
+                for (int c = 0; c < srcCrates.Length; c++)
+                {
+                    StageCratePointRecord cr = srcCrates[c];
+                    cratePoints[c] = new StageCratePointDef(new Fix(cr.XRaw), new Fix(cr.ZRaw));
+                }
+
+                StageWaterVolumeRecord[] srcWaters =
+                    src.WaterVolumes ?? System.Array.Empty<StageWaterVolumeRecord>();
+                var waterVolumes = new StageWaterVolumeDef[srcWaters.Length];
+                for (int w = 0; w < srcWaters.Length; w++)
+                {
+                    StageWaterVolumeRecord wr = srcWaters[w];
+                    waterVolumes[w] = new StageWaterVolumeDef(
+                        new Fix(wr.CenterXRaw),
+                        new Fix(wr.CenterZRaw),
+                        new Fix(wr.RadiusRaw));
+                }
+
                 phases[i] = new StagePhaseDef(
                     src.DurationFrames,
                     src.TransitionFrames,
@@ -99,7 +120,9 @@ namespace JewelBlitzArena.Sim
                     (StageCarryJewels)(byte)src.CarryJewels,
                     src.CarryJewelsDropPermille,
                     hazards,
-                    kinematics);
+                    kinematics,
+                    cratePoints,
+                    waterVolumes);
             }
 
             return new StageGraph(
@@ -122,7 +145,9 @@ namespace JewelBlitzArena.Sim
             StageCarryJewels carryJewels,
             int carryJewelsDropPermille,
             StageHazardDef[] hazards,
-            StageKinematicDef[] kinematics)
+            StageKinematicDef[] kinematics,
+            StageCratePointDef[] cratePoints,
+            StageWaterVolumeDef[] waterVolumes)
         {
             DurationFrames = durationFrames;
             TransitionFrames = transitionFrames;
@@ -133,6 +158,8 @@ namespace JewelBlitzArena.Sim
             CarryJewelsDropPermille = carryJewelsDropPermille;
             Hazards = hazards ?? System.Array.Empty<StageHazardDef>();
             Kinematics = kinematics ?? System.Array.Empty<StageKinematicDef>();
+            CratePoints = cratePoints ?? System.Array.Empty<StageCratePointDef>();
+            WaterVolumes = waterVolumes ?? System.Array.Empty<StageWaterVolumeDef>();
         }
 
         public int DurationFrames { get; }
@@ -144,6 +171,34 @@ namespace JewelBlitzArena.Sim
         public int CarryJewelsDropPermille { get; }
         public StageHazardDef[] Hazards { get; }
         public StageKinematicDef[] Kinematics { get; }
+        public StageCratePointDef[] CratePoints { get; }
+        public StageWaterVolumeDef[] WaterVolumes { get; }
+    }
+
+    public readonly struct StageCratePointDef
+    {
+        public StageCratePointDef(Fix x, Fix z)
+        {
+            X = x;
+            Z = z;
+        }
+
+        public Fix X { get; }
+        public Fix Z { get; }
+    }
+
+    public readonly struct StageWaterVolumeDef
+    {
+        public StageWaterVolumeDef(Fix centerX, Fix centerZ, Fix radius)
+        {
+            CenterX = centerX;
+            CenterZ = centerZ;
+            Radius = radius;
+        }
+
+        public Fix CenterX { get; }
+        public Fix CenterZ { get; }
+        public Fix Radius { get; }
     }
 
     public readonly struct StageHazardDef

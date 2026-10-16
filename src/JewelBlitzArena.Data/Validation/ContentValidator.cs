@@ -186,6 +186,20 @@ namespace JewelBlitzArena.Data
                             $"Stage '{stage.Name}' phase '{phase.Name}' exceeds kinematic cap."));
                     }
 
+                    if (phase.CratePoints.Count > ContentSchema.MaxCratePointsPerPhase)
+                    {
+                        result.Errors.Add(new ValidationIssue(
+                            "phase_crate_points",
+                            $"Stage '{stage.Name}' phase '{phase.Name}' exceeds crate point cap."));
+                    }
+
+                    if (phase.WaterVolumes.Count > ContentSchema.MaxWaterVolumesPerPhase)
+                    {
+                        result.Errors.Add(new ValidationIssue(
+                            "phase_water_volumes",
+                            $"Stage '{stage.Name}' phase '{phase.Name}' exceeds water volume cap."));
+                    }
+
                     foreach (AuthoredHazard hazard in phase.Hazards)
                     {
                         if (!TryParseHazardTrigger(hazard.Trigger, out _))
@@ -220,6 +234,39 @@ namespace JewelBlitzArena.Data
                             result.Errors.Add(new ValidationIssue(
                                 "kinematic_fix",
                                 $"Kinematic '{track.Name}': {ex.Message}"));
+                        }
+                    }
+
+                    for (int ci = 0; ci < phase.CratePoints.Count; ci++)
+                    {
+                        AuthoredCratePoint crate = phase.CratePoints[ci];
+                        try
+                        {
+                            _ = DecimalFixParser.ParseToRaw(crate.X);
+                            _ = DecimalFixParser.ParseToRaw(crate.Z);
+                        }
+                        catch (FormatException ex)
+                        {
+                            result.Errors.Add(new ValidationIssue(
+                                "crate_point_fix",
+                                $"Stage '{stage.Name}' phase '{phase.Name}' crate[{ci}]: {ex.Message}"));
+                        }
+                    }
+
+                    for (int wi = 0; wi < phase.WaterVolumes.Count; wi++)
+                    {
+                        AuthoredWaterVolume water = phase.WaterVolumes[wi];
+                        try
+                        {
+                            _ = DecimalFixParser.ParseToRaw(water.CenterX);
+                            _ = DecimalFixParser.ParseToRaw(water.CenterZ);
+                            _ = DecimalFixParser.ParseToRaw(water.Radius);
+                        }
+                        catch (FormatException ex)
+                        {
+                            result.Errors.Add(new ValidationIssue(
+                                "water_volume_fix",
+                                $"Stage '{stage.Name}' phase '{phase.Name}' water[{wi}]: {ex.Message}"));
                         }
                     }
                 }

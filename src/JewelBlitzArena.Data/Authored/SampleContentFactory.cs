@@ -621,7 +621,7 @@ namespace JewelBlitzArena.Data
 
         /// <summary>
         /// Sunken Strongroom greybox stub (stages.md §2.3): Vault floor → Vault door → Hull breach.
-        /// Tidewight / drawers / Teller's Reel deferred; water volumes on phases B/C via WaterVolumeRuntime;
+        /// Tidewight / drawers / Teller's Reel deferred; water volumes authored on phases B/C;
         /// rolling door + breach pulse land now.
         /// </summary>
         public static AuthoredStage CreateSunkenStrongroom()
@@ -699,6 +699,15 @@ namespace JewelBlitzArena.Data
                                 OriginZ = "0",
                             },
                         },
+                        WaterVolumes = new List<AuthoredWaterVolume>
+                        {
+                            new AuthoredWaterVolume
+                            {
+                                CenterX = "0",
+                                CenterZ = "0",
+                                Radius = "8",
+                            },
+                        },
                     },
                     new AuthoredPhase
                     {
@@ -731,6 +740,15 @@ namespace JewelBlitzArena.Data
                                 Radius = "2",
                             },
                         },
+                        WaterVolumes = new List<AuthoredWaterVolume>
+                        {
+                            new AuthoredWaterVolume
+                            {
+                                CenterX = "0",
+                                CenterZ = "0",
+                                Radius = "8",
+                            },
+                        },
                     },
                 },
             };
@@ -738,7 +756,7 @@ namespace JewelBlitzArena.Data
 
         /// <summary>
         /// Rime Cutworks greybox stub (stages.md §2.4): Dry yard → Flooding → Crane yard.
-        /// Boardable sleds / ice blocks / raft tip deferred; flooded-floor water via WaterVolumeRuntime on phase B;
+        /// Boardable sleds / ice blocks / raft tip deferred; flooded-floor water authored on phase B;
         /// sled rail + crane sweep land now.
         /// </summary>
         public static AuthoredStage CreateRimeCutworks()
@@ -826,6 +844,15 @@ namespace JewelBlitzArena.Data
                                 Amplitude = "3",
                                 OriginX = "1",
                                 OriginZ = "0",
+                            },
+                        },
+                        WaterVolumes = new List<AuthoredWaterVolume>
+                        {
+                            new AuthoredWaterVolume
+                            {
+                                CenterX = "0",
+                                CenterZ = "0",
+                                Radius = "8",
                             },
                         },
                     },
@@ -1026,8 +1053,8 @@ namespace JewelBlitzArena.Data
         /// <summary>
         /// Terraces — The Harvester (stages.md §3.1). Jewel cap 6.
         /// Boss AI v1: footfall follows HarvesterPatrol; intake tracks nearest fighter + throw;
-        /// StompShock applies Dizzy (damage 0). Terrace crates via BreakableRuntime;
-        /// legs/head/tail via BossPartRuntime; mount / Cutters / timeout Blade Sweep deferred.
+        /// StompShock applies Dizzy (damage 0). Terrace crates via authored crate_points;
+        /// legs/head/tail via BossPartRuntime; mount / Cutters deferred (timeout Blade Sweep landed).
         /// </summary>
         public static AuthoredStage CreateHarvesterTerraces()
         {
@@ -1108,6 +1135,13 @@ namespace JewelBlitzArena.Data
                                 OriginX = "0",
                                 OriginZ = "0",
                             },
+                        },
+                        CratePoints = new List<AuthoredCratePoint>
+                        {
+                            new AuthoredCratePoint { X = "6", Z = "5" },
+                            new AuthoredCratePoint { X = "-6", Z = "5" },
+                            new AuthoredCratePoint { X = "6", Z = "-5" },
+                            new AuthoredCratePoint { X = "-6", Z = "-5" },
                         },
                     },
                 },
