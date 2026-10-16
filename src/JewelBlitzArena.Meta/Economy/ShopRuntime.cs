@@ -29,6 +29,18 @@ namespace JewelBlitzArena.Meta
             public bool IsNewToProfile { get; }
         }
 
+        public readonly struct SellEntry
+        {
+            public SellEntry(int itemId, int sellPrice)
+            {
+                ItemId = itemId;
+                SellPrice = sellPrice;
+            }
+
+            public int ItemId { get; }
+            public int SellPrice { get; }
+        }
+
         public static bool IsSoldByTilly(ItemRecord item) =>
             item != null
             && item.BuyPrice > 0
@@ -163,6 +175,34 @@ namespace JewelBlitzArena.Meta
         /// Sell pays catalog sell price. Ever-owned stays (Ledger keeps the id).
         /// Returns false if not owned or sell price is 0.
         /// </summary>
+        /// <summary>
+        /// Sell room list: owned catalog items with sell price &gt; 0, sorted by item id.
+        /// Greybox Ledger is ever-owned (no quantity); entries stay after sell.
+        /// </summary>
+        public static IReadOnlyList<SellEntry> BuildSellList(
+            ContentCatalog catalog,
+            PlayerProfile profile)
+        {
+            var result = new List<SellEntry>();
+            if (catalog == null || profile == null)
+            {
+                return result;
+            }
+
+            foreach (int itemId in profile.Ledger.OwnedItemIds)
+            {
+                if (!catalog.TryGetItem(itemId, out ItemRecord item) || item.SellPrice <= 0)
+                {
+                    continue;
+                }
+
+                result.Add(new SellEntry(item.ItemId, item.SellPrice));
+            }
+
+            result.Sort((a, b) => a.ItemId.CompareTo(b.ItemId));
+            return result;
+        }
+
         public static bool TrySell(
             PlayerProfile profile,
             ContentCatalog catalog,

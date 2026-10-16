@@ -69,6 +69,32 @@ namespace JewelBlitzArena.PresentationBridge
             return true;
         }
 
+        /// <summary>
+        /// Host Sell room: bind UI list to <see cref="ShopRuntime.BuildSellList"/>(catalog, profile).
+        /// </summary>
+        public IReadOnlyList<ShopRuntime.SellEntry> OpenSellList()
+        {
+            if (_catalog == null)
+            {
+                return Array.Empty<ShopRuntime.SellEntry>();
+            }
+
+            IReadOnlyList<ShopRuntime.SellEntry> list = _menu.OpenSell(Profile, _catalog);
+            _boot.SaveProfile();
+            return list;
+        }
+
+        public bool TrySellOwnedItem(int itemId)
+        {
+            if (_catalog == null || !_menu.TrySell(Profile, _catalog, itemId))
+            {
+                return false;
+            }
+
+            _boot.SaveProfile();
+            return true;
+        }
+
         /// <summary>Editor-free ASCII for Buy room (stock via BuildStock).</summary>
         public string RenderBuyRoom()
         {

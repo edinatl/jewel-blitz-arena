@@ -101,6 +101,31 @@ namespace JewelBlitzArena.Meta
             && ShopRuntime.TryBuy(profile, catalog, itemId);
 
         /// <summary>
+        /// Sell room: owned items with sell price &gt; 0 via <see cref="ShopRuntime.BuildSellList"/>.
+        /// </summary>
+        public static IReadOnlyList<ShopRuntime.SellEntry> OpenSell(
+            PlayerProfile profile,
+            ContentCatalog catalog)
+        {
+            if (profile == null || catalog == null)
+            {
+                return Array.Empty<ShopRuntime.SellEntry>();
+            }
+
+            profile.SetFlag(ProfileFlags.TouchedSellRoom);
+            return ShopRuntime.BuildSellList(catalog, profile);
+        }
+
+        /// <summary>Sell room: pay catalog sell price for an owned item id.</summary>
+        public static bool TrySell(
+            PlayerProfile profile,
+            ContentCatalog catalog,
+            int itemId) =>
+            profile != null
+            && catalog != null
+            && ShopRuntime.TrySell(profile, catalog, itemId);
+
+        /// <summary>
         /// Fitting Room: equip Regent's Diadem when owned (cosmetic stub — no Sim hitbox change).
         /// </summary>
         public static bool TryEquipDiadem(PlayerProfile profile)

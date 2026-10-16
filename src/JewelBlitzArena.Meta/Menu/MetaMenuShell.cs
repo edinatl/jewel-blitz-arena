@@ -53,6 +53,15 @@ namespace JewelBlitzArena.Meta
 
         public bool TryBuy(PlayerProfile profile, ContentCatalog catalog, int itemId) =>
             BenchRoomsRuntime.TryBuy(profile, catalog, itemId);
+
+        /// <summary>Sell room list via <see cref="ShopRuntime.BuildSellList"/>.</summary>
+        public IReadOnlyList<ShopRuntime.SellEntry> OpenSell(
+            PlayerProfile profile,
+            ContentCatalog catalog) =>
+            BenchRoomsRuntime.OpenSell(profile, catalog);
+
+        public bool TrySell(PlayerProfile profile, ContentCatalog catalog, int itemId) =>
+            BenchRoomsRuntime.TrySell(profile, catalog, itemId);
     }
 
     public readonly struct MetaMenuEntry
