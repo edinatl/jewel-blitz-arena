@@ -44,7 +44,8 @@ namespace JewelBlitzArena.Sim
         public static readonly Fix BuckThrowSpeed = Fix.FromInt(4);
         public static readonly Fix MountHeight = Fix.One;
 
-        public static void InitializeMatch(ref MatchState state, StageGraph graph)
+        public static void InitializeMatch(
+            ref MatchState state, StageGraph graph, int lifeScalePermille = 1000)
         {
             Clear(ref state);
             if (graph.StageId != SampleContentFactory.HarvesterTerracesStageId)
@@ -52,15 +53,40 @@ namespace JewelBlitzArena.Sim
                 return;
             }
 
+            if (lifeScalePermille <= 0)
+            {
+                lifeScalePermille = 1000;
+            }
+
+            int legLife = ScaleLife(LegMaxLife, lifeScalePermille);
+            int headLife = ScaleLife(HeadMaxLife, lifeScalePermille);
+            int tailLife = ScaleLife(TailMaxLife, lifeScalePermille);
+
             // Legs around the body; head forward (+X); tail aft (−X).
-            ArmPart(ref state, 0, KindLegFL, Fix.FromInt(2), Fix.FromInt(2), LegMaxLife);
-            ArmPart(ref state, 1, KindLegFR, Fix.FromInt(2), Fix.FromInt(-2), LegMaxLife);
-            ArmPart(ref state, 2, KindLegBL, Fix.FromInt(-2), Fix.FromInt(2), LegMaxLife);
-            ArmPart(ref state, 3, KindLegBR, Fix.FromInt(-2), Fix.FromInt(-2), LegMaxLife);
-            ArmPart(ref state, 4, KindHead, Fix.FromInt(4), Fix.Zero, HeadMaxLife);
-            ArmPart(ref state, 5, KindTail, Fix.FromInt(-4), Fix.Zero, TailMaxLife);
+            ArmPart(ref state, 0, KindLegFL, Fix.FromInt(2), Fix.FromInt(2), legLife);
+            ArmPart(ref state, 1, KindLegFR, Fix.FromInt(2), Fix.FromInt(-2), legLife);
+            ArmPart(ref state, 2, KindLegBL, Fix.FromInt(-2), Fix.FromInt(2), legLife);
+            ArmPart(ref state, 3, KindLegBR, Fix.FromInt(-2), Fix.FromInt(-2), legLife);
+            ArmPart(ref state, 4, KindHead, Fix.FromInt(4), Fix.Zero, headLife);
+            ArmPart(ref state, 5, KindTail, Fix.FromInt(-4), Fix.Zero, tailLife);
             // Buck controller (BossSub[6]) arms lazily on first mount so idle Harvester
             // corpus hashes stay bit-identical when nobody climbs.
+        }
+
+        private static int ScaleLife(int baseLife, int scalePermille)
+        {
+            long scaled = ((long)baseLife * scalePermille) / 1000L;
+            if (scaled < 1)
+            {
+                return 1;
+            }
+
+            if (scaled > int.MaxValue)
+            {
+                return int.MaxValue;
+            }
+
+            return (int)scaled;
         }
 
         public static int CountBrokenLegs(ref MatchState state)
@@ -337,10 +363,11 @@ namespace JewelBlitzArena.Sim
 
                 if (part.Param0 <= 0)
                 {
-                    // Repair complete.
-                    part.Param0 = LegMaxLife;
+                    // Repair complete — restore scaled max Life from Reserved1.
+                    int maxLife = part.Reserved1 > 0 ? part.Reserved1 : LegMaxLife;
+                    part.Param0 = maxLife;
                     part.Flags = FlagActive;
-                    part.Reserved1 = (ushort)LegMaxLife;
+                    part.Reserved1 = (ushort)(maxLife > 65535 ? 65535 : maxLife);
                 }
 
                 MatchStateAccess.SetBossSub(ref state, i, part);

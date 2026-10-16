@@ -19,6 +19,12 @@ namespace JewelBlitzArena.Meta
         /// <summary>Expedition difficulty 1–8 (default 4). Clamped by the orchestrator.</summary>
         public int Difficulty { get; set; } = ExpeditionChestRuntime.DiffDefault;
 
+        /// <summary>
+        /// Expedition ladder slot 0–4 (FFA1, FFA2, Harvester, FFA4, Pressworks).
+        /// −1 → infer from StageId (bosses exact; story FFAs default to slot 0).
+        /// </summary>
+        public int LadderStageIndex { get; set; } = -1;
+
         /// <summary>Sparring: jewel_mode respawn (Meta flag only until Sim training lands).</summary>
         public bool SparringJewelRespawn { get; set; }
 

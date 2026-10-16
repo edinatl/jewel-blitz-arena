@@ -1,10 +1,10 @@
+using JewelBlitzArena.Data;
 using JewelBlitzArena.Sim;
 
 namespace JewelBlitzArena.Meta
 {
     /// <summary>
-    /// Expedition greybox: gleam budget drops, post-stage chest + time adjustment.
-    /// Full difficulty table (opponents / boss scale / ally) remains deferred.
+    /// Expedition: gleam budget, chest/time, and difficulty table (modes.md §5).
     /// </summary>
     public class ExpeditionModeOrchestrator : IModeOrchestrator
     {
@@ -14,7 +14,17 @@ namespace JewelBlitzArena.Meta
 
         public MatchConfig BuildConfig(PlayerProfile profile, ModeRequest request)
         {
-            int actors = CustomModeOrchestrator.ClampActors(request.ActorCount);
+            int difficulty = ExpeditionChestRuntime.ClampDifficulty(request.Difficulty);
+            int ladder = request.LadderStageIndex;
+            if (ladder < 0 || ladder > 4)
+            {
+                ladder = ExpeditionDifficultyRuntime.InferLadderSlot(request.StageId);
+            }
+
+            int actors = ExpeditionDifficultyRuntime.ActorCountFor(
+                difficulty, request.StageId, ladder);
+            actors = CustomModeOrchestrator.ClampActors(actors);
+
             MatchConfig config = MatchConfig.CreateDefault(request.Seed, actors);
             config.StageId = request.StageId;
             config.HouseRulesBits = HouseRulesBits.ToSimBits(request.HouseRules)
@@ -24,9 +34,30 @@ namespace JewelBlitzArena.Meta
                 config.JewelCap = request.HouseRules.JewelCap;
             }
 
+            config.GleamPickupScalePermille =
+                ExpeditionDifficultyRuntime.GleamScalePermille(difficulty);
+            config.BossLifeScalePermille =
+                ExpeditionDifficultyRuntime.BossLifeScalePermille(difficulty, actors);
+
+            // Boss ally (diff ≥3): player + CPU share a team so Rally works; TeamMode≠0.
+            if (ExpeditionDifficultyRuntime.IsBossStage(request.StageId)
+                && ExpeditionDifficultyRuntime.AllyPresent(difficulty)
+                && actors >= 2)
+            {
+                config.TeamMode = 1;
+                unsafe
+                {
+                    config.Teams[0] = 0;
+                    config.Teams[1] = 0;
+                }
+            }
+
             CustomModeOrchestrator.ApplyFighterIds(ref config, request.FighterIds, actors);
-            // Difficulty is Meta-only for chest sizing until opponent/boss scale lands.
-            _ = ExpeditionChestRuntime.ClampDifficulty(request.Difficulty);
+            for (int i = 0; i < actors; i++)
+            {
+                config.SetCpuLevel(i, difficulty);
+            }
+
             profile.SetFlag(ProfileFlags.TouchedExpeditionStub);
             return config;
         }

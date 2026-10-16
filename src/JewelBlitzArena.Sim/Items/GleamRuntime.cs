@@ -57,8 +57,16 @@ namespace JewelBlitzArena.Sim
         }
 
         /// <summary>Despawn timer + living-actor pickup (carats stashed in Reserved1 until Meta).</summary>
-        public static void Tick(ref MatchState state, ref SimContactBuffer events)
+        public static void Tick(
+            ref MatchState state,
+            ref SimContactBuffer events,
+            int gleamScalePermille = 1000)
         {
+            if (gleamScalePermille <= 0)
+            {
+                gleamScalePermille = 1000;
+            }
+
             for (int i = 0; i < PoolCaps.GleamPickups; i++)
             {
                 GenericPoolSlot gleam = MatchStateAccess.GetWorldPatch(ref state, i);
@@ -83,6 +91,8 @@ namespace JewelBlitzArena.Sim
                         carats = CaratsForKind(gleam.TypeId);
                     }
 
+                    // Expedition difficulty gleam scale (modes.md §5).
+                    carats = (int)(((long)carats * gleamScalePermille) / 1000L);
                     state.CaratsCollected += carats;
                     events.Add(SimEventKind.GleamPickedUp, (byte)picker, (byte)i);
                     MatchStateAccess.SetWorldPatch(ref state, i, default);

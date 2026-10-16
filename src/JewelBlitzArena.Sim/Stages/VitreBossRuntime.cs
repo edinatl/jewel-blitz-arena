@@ -29,6 +29,13 @@ namespace JewelBlitzArena.Sim
 
         public const int HazardOverpress = 72;
 
+        private static int _lifeScalePermille = 1000;
+
+        public static void SetLifeScale(int lifeScalePermille)
+        {
+            _lifeScalePermille = lifeScalePermille > 0 ? lifeScalePermille : 1000;
+        }
+
         public static void InitializeMatch(ref MatchState state, StageGraph graph)
         {
             if (graph.StageId != SampleContentFactory.PressworksStageId)
@@ -77,7 +84,8 @@ namespace JewelBlitzArena.Sim
                 return false;
             }
 
-            int threshold = (VitreMaxLife * OverpressLifePermille) / 1000;
+            int maxLife = body.Reserved1 > 0 ? body.Reserved1 : VitreMaxLife;
+            int threshold = (maxLife * OverpressLifePermille) / 1000;
             return body.Param0 <= threshold;
         }
 
@@ -272,17 +280,34 @@ namespace JewelBlitzArena.Sim
 
         private static void ArmVitreBody(ref MatchState state)
         {
+            int life = ScaleLife(VitreMaxLife, _lifeScalePermille);
             var body = new GenericPoolSlot
             {
                 PosX = Fix.Zero,
                 PosY = Fix.Zero,
                 PosZ = Fix.Zero,
                 TypeId = KindVitreBody,
-                Param0 = VitreMaxLife,
+                Param0 = life,
                 Flags = FlagActive,
-                Reserved1 = (ushort)(VitreMaxLife > 65535 ? 65535 : VitreMaxLife),
+                Reserved1 = (ushort)(life > 65535 ? 65535 : life),
             };
             MatchStateAccess.SetBossSub(ref state, IndexBody, body);
+        }
+
+        private static int ScaleLife(int baseLife, int scalePermille)
+        {
+            long scaled = ((long)baseLife * scalePermille) / 1000L;
+            if (scaled < 1)
+            {
+                return 1;
+            }
+
+            if (scaled > int.MaxValue)
+            {
+                return int.MaxValue;
+            }
+
+            return (int)scaled;
         }
 
         private static void ArmOverpressController(ref MatchState state)

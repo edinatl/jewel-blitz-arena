@@ -28,6 +28,8 @@ namespace JewelBlitzArena.Sim
         private readonly Fix[] _dtFull = new Fix[PoolCaps.Actors];
         private readonly InputFrame[] _lastInputs = new InputFrame[PoolCaps.Actors];
         private readonly byte[] _cpuLevels = new byte[PoolCaps.Actors];
+        private int _gleamPickupScalePermille = 1000;
+        private int _bossLifeScalePermille = 1000;
 
         public int Frame => _state.Frame;
 
@@ -62,6 +64,12 @@ namespace JewelBlitzArena.Sim
                 : MatchRules.HouseLusterTimer;
             _state.NextPlacementFromBottom = _state.ActorCount;
             _state.MatchEndFrame = 0;
+            _gleamPickupScalePermille = config.GleamPickupScalePermille > 0
+                ? config.GleamPickupScalePermille
+                : 1000;
+            _bossLifeScalePermille = config.BossLifeScalePermille > 0
+                ? config.BossLifeScalePermille
+                : 1000;
 
             for (int i = 0; i < PoolCaps.Actors; i++)
             {
@@ -133,6 +141,7 @@ namespace JewelBlitzArena.Sim
             ItemRuntime.InitializeMatch(ref _state);
             WorldPatchRuntime.InitializeMatch(ref _state);
             _stageGraph = StageRuntime.ResolveGraph(catalog, config.StageId);
+            VitreBossRuntime.SetLifeScale(_bossLifeScalePermille);
             int jewelCap = config.JewelCap > 0
                 ? config.JewelCap
                 : (_stageGraph.JewelCapOverride > 0
@@ -145,7 +154,7 @@ namespace JewelBlitzArena.Sim
                 config.PhaseClockPermille,
                 ref _contacts);
             BreakableRuntime.InitializeMatch(ref _state, _stageGraph);
-            BossPartRuntime.InitializeMatch(ref _state, _stageGraph);
+            BossPartRuntime.InitializeMatch(ref _state, _stageGraph, _bossLifeScalePermille);
             StageCreatureRuntime.InitializeMatch(ref _state, _stageGraph);
             VitreBossRuntime.InitializeMatch(ref _state, _stageGraph);
             ProjectileRuntime.InitializeMatch(ref _state);
@@ -212,7 +221,7 @@ namespace JewelBlitzArena.Sim
             VitreBossRuntime.Tick(ref _state, ref _contacts);
             ProjectileRuntime.TickCuttersCadence(ref _state, _stageGraph);
             WorldPatchRuntime.Tick(ref _state);
-            GleamRuntime.Tick(ref _state, ref _contacts);
+            GleamRuntime.Tick(ref _state, ref _contacts, _gleamPickupScalePermille);
 
             // S4 stage graph: timers, transitions, hazards, kinematics.
             StageRuntime.Tick(ref _state, _stageGraph, ref _contacts);

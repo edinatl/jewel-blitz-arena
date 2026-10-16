@@ -25,6 +25,14 @@ namespace JewelBlitzArena.Sim
         /// <summary>House Rule 7 Phase Clock as permille (1000 = 100%). Scales every phase timer.</summary>
         public int PhaseClockPermille;
 
+        /// <summary>Expedition gleam pickup scale (1000 = 1.0). Default 1000 for non-Expedition.</summary>
+        public int GleamPickupScalePermille;
+
+        /// <summary>
+        /// Boss part / Vitre Life scale (1000 = 1.0). Meta premultiplies difficulty × participant.
+        /// </summary>
+        public int BossLifeScalePermille;
+
         public fixed int FighterIds[PoolCaps.Actors];
         public fixed int StartingLife[PoolCaps.Actors];
         public fixed byte Teams[PoolCaps.Actors];
@@ -43,6 +51,8 @@ namespace JewelBlitzArena.Sim
                 HouseRulesBits = MatchRules.HouseLusterTimer,
                 TeamMode = 0,
                 PhaseClockPermille = 1000,
+                GleamPickupScalePermille = 1000,
+                BossLifeScalePermille = 1000,
             };
 
             for (int i = 0; i < PoolCaps.Actors; i++)
