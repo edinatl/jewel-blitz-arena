@@ -32,6 +32,18 @@ namespace JewelBlitzArena.Meta
 
         public int ExtraArenaSlotsUnlocked(PlayerProfile profile) =>
             UnlockLadderRuntime.ExtraArenaSlotCount(profile);
+
+        /// <summary>Tilly's Bench rooms (Buy/Sell/Tinker/Talk/Ledger/Fitting/Wheel).</summary>
+        public IReadOnlyList<BenchRoomsRuntime.BenchRoomEntry> BuildBenchRooms(
+            PlayerProfile profile,
+            ulong visitSeed = 0UL) =>
+            BenchRoomsRuntime.BuildRooms(profile, visitSeed);
+
+        public int OpenTalk(PlayerProfile profile, ulong visitSeed) =>
+            BenchRoomsRuntime.OpenTalk(profile, visitSeed);
+
+        public bool TryEquipDiadem(PlayerProfile profile) =>
+            BenchRoomsRuntime.TryEquipDiadem(profile);
     }
 
     public readonly struct MetaMenuEntry

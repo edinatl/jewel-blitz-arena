@@ -1,0 +1,110 @@
+using System.Collections.Generic;
+
+namespace JewelBlitzArena.Meta
+{
+    /// <summary>Tilly's Bench room ids (modes.md §6 / items-and-economy.md §6).</summary>
+    public enum BenchRoom : byte
+    {
+        Buy = 0,
+        Sell = 1,
+        Tinker = 2,
+        Talk = 3,
+        Ledger = 4,
+        FittingRoom = 5,
+        FacetWheel = 6,
+    }
+
+    /// <summary>
+    /// Bench room list + Talk/Fitting Room greybox actions.
+    /// Talk surfaces "Citrine is at the bench" from <see cref="CitrineGiftsRuntime"/>.
+    /// Fitting Room equips owned cosmetics (Diadem stub).
+    /// </summary>
+    public static class BenchRoomsRuntime
+    {
+        public readonly struct BenchRoomEntry
+        {
+            public BenchRoomEntry(
+                BenchRoom room,
+                string label,
+                bool available,
+                string? badge = null)
+            {
+                Room = room;
+                Label = label;
+                Available = available;
+                Badge = badge;
+            }
+
+            public BenchRoom Room { get; }
+            public string Label { get; }
+            public bool Available { get; }
+            /// <summary>Optional UI badge (e.g. "Citrine is at the bench").</summary>
+            public string? Badge { get; }
+        }
+
+        public static IReadOnlyList<BenchRoomEntry> BuildRooms(
+            PlayerProfile profile,
+            ulong visitSeed)
+        {
+            bool citrineHere = CitrineGiftsRuntime.IsAtBench(profile, visitSeed);
+            string? talkBadge = citrineHere ? "Citrine is at the bench" : null;
+
+            return new[]
+            {
+                new BenchRoomEntry(BenchRoom.Buy, "Buy", available: true),
+                new BenchRoomEntry(BenchRoom.Sell, "Sell", available: true),
+                new BenchRoomEntry(BenchRoom.Tinker, "Tinker", available: true),
+                new BenchRoomEntry(BenchRoom.Talk, "Talk", available: true, badge: talkBadge),
+                new BenchRoomEntry(BenchRoom.Ledger, "Ledger", available: true),
+                new BenchRoomEntry(BenchRoom.FittingRoom, "Fitting Room", available: true),
+                new BenchRoomEntry(BenchRoom.FacetWheel, "Facet Wheel", available: true),
+            };
+        }
+
+        /// <summary>Talk: attempt Citrine gift grant for this visit.</summary>
+        public static int OpenTalk(PlayerProfile profile, ulong visitSeed)
+        {
+            if (profile == null)
+            {
+                return 0;
+            }
+
+            profile.SetFlag(ProfileFlags.TouchedTalkRoom);
+            return CitrineGiftsRuntime.TryGrantGift(profile, visitSeed);
+        }
+
+        /// <summary>
+        /// Fitting Room: equip Regent's Diadem when owned (cosmetic stub — no Sim hitbox change).
+        /// </summary>
+        public static bool TryEquipDiadem(PlayerProfile profile)
+        {
+            if (profile == null)
+            {
+                return false;
+            }
+
+            profile.SetFlag(ProfileFlags.TouchedFittingRoom);
+            if (!profile.Ledger.Owns(CitrineGiftsRuntime.DiademItemId))
+            {
+                return false;
+            }
+
+            profile.SetFlag(ProfileFlags.EquippedDiadem);
+            return true;
+        }
+
+        public static bool TryUnequipDiadem(PlayerProfile profile)
+        {
+            if (profile == null || !profile.HasFlag(ProfileFlags.EquippedDiadem))
+            {
+                return false;
+            }
+
+            profile.SetFlag(ProfileFlags.EquippedDiadem, false);
+            return true;
+        }
+
+        public static bool IsDiademEquipped(PlayerProfile profile) =>
+            profile != null && profile.HasFlag(ProfileFlags.EquippedDiadem);
+    }
+}

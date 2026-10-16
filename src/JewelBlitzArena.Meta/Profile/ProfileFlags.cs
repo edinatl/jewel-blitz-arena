@@ -53,5 +53,14 @@ namespace JewelBlitzArena.Meta
 
         /// <summary>Captain Citrine gift: Regent's Diadem received once.</summary>
         public const int ReceivedDiadem = 1 << 15;
+
+        /// <summary>Opened Talk room at least once.</summary>
+        public const int TouchedTalkRoom = 1 << 16;
+
+        /// <summary>Opened Fitting Room at least once.</summary>
+        public const int TouchedFittingRoom = 1 << 17;
+
+        /// <summary>Fitting Room: Regent's Diadem currently equipped (cosmetic only).</summary>
+        public const int EquippedDiadem = 1 << 18;
     }
 }
