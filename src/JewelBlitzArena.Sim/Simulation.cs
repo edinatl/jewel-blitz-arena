@@ -186,6 +186,7 @@ namespace JewelBlitzArena.Sim
             BreakableRuntime.ResolveAttackHits(
                 ref _state, _kits, _stageGraph, _catalog, ref _contacts);
             WorldPatchRuntime.Tick(ref _state);
+            GleamRuntime.Tick(ref _state, ref _contacts);
 
             // S4 stage graph: timers, transitions, hazards, kinematics.
             StageRuntime.Tick(ref _state, _stageGraph, ref _contacts);
@@ -221,8 +222,15 @@ namespace JewelBlitzArena.Sim
                     break;
                 }
 
-                actor.JewelsHeld++;
-                actor.JewelsCollectedTotal++;
+                // Prefer real owned slots when the jewel cap allows; otherwise bump the
+                // held count only (legacy Blitz-enter tests).
+                if (!JewelRuntime.TryGiveOwnedJewel(ref _state, actorIndex))
+                {
+                    actor.JewelsHeld++;
+                    actor.JewelsCollectedTotal++;
+                }
+
+                actor = ref MatchStateAccess.Actor(ref _state, actorIndex);
                 if (actor.JewelsHeld >= MatchRules.BlitzJewelCount)
                 {
                     JewelSystem.BeginBlitz(ref _state, actorIndex);

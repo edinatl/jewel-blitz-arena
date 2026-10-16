@@ -2,7 +2,7 @@ namespace JewelBlitzArena.Sim
 {
     /// <summary>
     /// Lasting floor patches from thrown Ice Jar / Smoke Jar (items-and-economy.md).
-    /// Stored in the unused GleamPickups generic pool (no MatchState layout growth).
+    /// Shares the GleamPickups pool with <see cref="GleamRuntime"/> (TypeId 1–3 = patches).
     /// </summary>
     public static class WorldPatchRuntime
     {
@@ -10,6 +10,9 @@ namespace JewelBlitzArena.Sim
         public const int KindSmoke = 2;
         public const int KindSlow = 3; // Adhesive Spray puddle
         public const byte FlagActive = 1 << 0;
+
+        public static bool IsPatchKind(int typeId) =>
+            typeId == KindIce || typeId == KindSmoke || typeId == KindSlow;
 
         public static void InitializeMatch(ref MatchState state)
         {
@@ -98,7 +101,7 @@ namespace JewelBlitzArena.Sim
             for (int i = 0; i < PoolCaps.GleamPickups; i++)
             {
                 GenericPoolSlot patch = MatchStateAccess.GetWorldPatch(ref state, i);
-                if ((patch.Flags & FlagActive) == 0)
+                if ((patch.Flags & FlagActive) == 0 || !IsPatchKind(patch.TypeId))
                 {
                     continue;
                 }
@@ -121,7 +124,7 @@ namespace JewelBlitzArena.Sim
             for (int i = 0; i < PoolCaps.GleamPickups; i++)
             {
                 GenericPoolSlot patch = MatchStateAccess.GetWorldPatch(ref state, i);
-                if ((patch.Flags & FlagActive) != 0)
+                if ((patch.Flags & FlagActive) != 0 && IsPatchKind(patch.TypeId))
                 {
                     n++;
                 }
@@ -184,7 +187,7 @@ namespace JewelBlitzArena.Sim
             for (int i = 0; i < PoolCaps.GleamPickups; i++)
             {
                 GenericPoolSlot patch = MatchStateAccess.GetWorldPatch(ref state, i);
-                if ((patch.Flags & FlagActive) == 0)
+                if ((patch.Flags & FlagActive) == 0 || !IsPatchKind(patch.TypeId))
                 {
                     continue;
                 }

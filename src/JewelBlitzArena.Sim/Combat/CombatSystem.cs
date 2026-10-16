@@ -586,6 +586,11 @@ namespace JewelBlitzArena.Sim
         {
             ref ActorSlot victim = ref MatchStateAccess.Actor(ref state, vic);
 
+            // Release held jewels to the field before clearing the count (cap / orphan fix).
+            Fix dropX = victim.PosX;
+            Fix dropZ = victim.PosZ;
+            JewelRuntime.TryDropAllHeldJewels(ref state, vic);
+
             victim.Life = 0;
             victim.IsAlive = false;
             victim.IsEliminated = true;
@@ -599,6 +604,11 @@ namespace JewelBlitzArena.Sim
             if (atk >= 0 && atk < state.ActorCount && atk != vic)
             {
                 MatchStateAccess.Actor(ref state, atk).KosDealt++;
+            }
+
+            if ((state.HouseRulesBits & MatchRules.ExpeditionGleams) != 0)
+            {
+                GleamRuntime.TrySpawnCopper(ref state, dropX, dropZ);
             }
 
             MatchStateAccess.SetPlacement(ref state, vic, state.NextPlacementFromBottom);

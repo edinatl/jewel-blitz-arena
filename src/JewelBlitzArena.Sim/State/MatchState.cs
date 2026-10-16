@@ -217,7 +217,8 @@ namespace JewelBlitzArena.Sim
         }
 
         /// <summary>
-        /// World patches (Ice/Smoke floor) reuse the GleamPickups pool until gleam economy lands.
+        /// World patches (Ice/Smoke/Slow) and Expedition gleams share the GleamPickups pool
+        /// (TypeId ranges; see <see cref="WorldPatchRuntime"/> / <see cref="GleamRuntime"/>).
         /// </summary>
         public static GenericPoolSlot GetWorldPatch(ref MatchState state, int index)
         {

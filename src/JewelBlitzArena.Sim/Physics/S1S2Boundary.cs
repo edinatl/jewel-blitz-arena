@@ -45,6 +45,8 @@ namespace JewelBlitzArena.Sim
         ItemLanded = 11,
         /// <summary>Stage crate / breakable opened. SlotA = crate index.</summary>
         CrateBroken = 12,
+        /// <summary>Expedition gleam collected. SlotA = actor, SlotB = gleam slot.</summary>
+        GleamPickedUp = 13,
     }
 
     /// <summary>Ephemeral per-step event (not part of <see cref="MatchState"/> hash).</summary>

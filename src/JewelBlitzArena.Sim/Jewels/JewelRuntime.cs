@@ -203,17 +203,21 @@ namespace JewelBlitzArena.Sim
 
         public static FixVec3 PickSpawnPointPublic(ref MatchState state) => PickSpawnPoint(ref state);
 
-        private static void GiveJewelToActorSilent(ref MatchState state, int actorIndex)
+        /// <summary>Grant an owned jewel slot without pickup events (opening / debug).</summary>
+        public static bool TryGiveOwnedJewel(ref MatchState state, int actorIndex) =>
+            GiveJewelToActorSilent(ref state, actorIndex);
+
+        private static bool GiveJewelToActorSilent(ref MatchState state, int actorIndex)
         {
             if (CountTowardCap(ref state) >= state.JewelCap)
             {
-                return;
+                return false;
             }
 
             int slot = FindInactiveJewelSlot(ref state);
             if (slot < 0)
             {
-                return;
+                return false;
             }
 
             ref ActorSlot actor = ref MatchStateAccess.Actor(ref state, actorIndex);
@@ -229,6 +233,7 @@ namespace JewelBlitzArena.Sim
             actor.JewelsHeld++;
             actor.JewelsCollectedTotal++;
             state.ActiveJewelCount = CountTowardCap(ref state);
+            return true;
         }
 
         private static void ReleaseJewelToField(

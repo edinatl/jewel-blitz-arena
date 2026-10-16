@@ -33,6 +33,16 @@ namespace JewelBlitzArena.Sim
 
         public const byte HouseLusterTimer = 1 << 0;
 
+        /// <summary>Expedition gleam drops on KO / containers (items-and-economy.md §7).</summary>
+        public const byte ExpeditionGleams = 1 << 1;
+
+        /// <summary>Copper gleam despawn (8 s).</summary>
+        public const int GleamDespawnFrames = 8 * 60;
+
+        public const int GleamCopperCarats = 100;
+        public const int GleamSilverCarats = 500;
+        public const int GleamGoldCarats = 1000;
+
         public static int DefaultJewelCap(int actorCount) =>
             actorCount <= 2 ? 3 : 5;
 
