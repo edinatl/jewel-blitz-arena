@@ -14,7 +14,8 @@ namespace JewelBlitzArena.Meta
 
         public MatchConfig BuildConfig(PlayerProfile profile, ModeRequest request)
         {
-            int difficulty = ExpeditionChestRuntime.ClampDifficulty(request.Difficulty);
+            int difficulty = ExpeditionChestRuntime.ClampDifficultyForProfile(
+                request.Difficulty, profile.BestExpeditionDifficulty);
             int ladder = request.LadderStageIndex;
             if (ladder < 0 || ladder > 4)
             {
@@ -70,18 +71,25 @@ namespace JewelBlitzArena.Meta
                 sum += result.CaratsEarned;
             }
 
+            bool cleared = ExpeditionChestRuntime.PlayerClearedStage(in result);
+            int difficulty = ExpeditionChestRuntime.ClampDifficulty(request.Difficulty);
             int chest = ExpeditionChestRuntime.ResolveChestCarats(
                 request.StageId,
-                request.Difficulty,
+                difficulty,
                 result.FramesPlayed,
                 request.Seed,
-                ExpeditionChestRuntime.PlayerClearedStage(in result));
+                cleared);
             if (chest > 0)
             {
                 sum += chest;
             }
 
             profile.Carats = sum > int.MaxValue ? int.MaxValue : (int)sum;
+
+            if (cleared && difficulty > profile.BestExpeditionDifficulty)
+            {
+                profile.BestExpeditionDifficulty = difficulty;
+            }
         }
     }
 }

@@ -9,16 +9,17 @@ public sealed class MetaSkeletonTests
     private const ulong Seed = 0x53365F4D455441UL; // S6_META
 
     [Test]
-    public void Profile_migrate_v0_to_v1_is_noop_fill()
+    public void Profile_migrate_v0_to_current_fills_defaults()
     {
         PlayerProfile v0 = ProfileStore.CreateV0Fixture();
         Assert.That(v0.SchemaVersion, Is.EqualTo(ProfileSchema.Version0));
 
         ProfileMigrator.MigrateToCurrent(v0);
-        Assert.That(v0.SchemaVersion, Is.EqualTo(ProfileSchema.Version1));
+        Assert.That(v0.SchemaVersion, Is.EqualTo(ProfileSchema.Current));
         Assert.That(v0.DisplayName, Is.EqualTo("Rookie"));
         Assert.That(v0.HouseRulesDefaults.LusterTimer, Is.True);
         Assert.That(v0.UnlockedHouseRulesBits & HouseRulesBits.LusterTimer, Is.Not.EqualTo(0));
+        Assert.That(v0.BestExpeditionDifficulty, Is.EqualTo(0));
     }
 
     [Test]

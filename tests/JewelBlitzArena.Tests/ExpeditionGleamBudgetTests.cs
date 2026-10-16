@@ -28,11 +28,67 @@ public sealed class ExpeditionGleamBudgetTests
         var sim = new Simulation();
         sim.Reset(config, catalog);
         MatchState snap = sim.Snapshot();
-        int total = GleamBudgetRuntime.DefaultFfaBudget;
+        // In-match = 45% of design row 1100 → 495; chest still keys off 1100.
+        int total = GleamBudgetRuntime.BudgetForStage(SampleContentFactory.CitrineBazaarStageId);
+        Assert.That(total, Is.EqualTo(495));
+        Assert.That(
+            GleamBudgetRuntime.DesignTotalForStage(SampleContentFactory.CitrineBazaarStageId),
+            Is.EqualTo(1100));
         Assert.That(
             snap.GleamBudgetKoRemaining + snap.GleamBudgetKdRemaining + snap.GleamBudgetCrateRemaining,
             Is.EqualTo(total));
         Assert.That(snap.GleamBudgetKoRemaining, Is.EqualTo((total * 50) / 100));
+    }
+
+    [Test]
+    public void High_difficulty_gated_until_clear_at_5()
+    {
+        var orch = new ExpeditionModeOrchestrator();
+        var profile = PlayerProfile.CreateNew();
+        var request = new ModeRequest
+        {
+            Mode = ModeId.Expedition,
+            Seed = Seed ^ 9UL,
+            ActorCount = 2,
+            StageId = SampleContentFactory.CitrineBazaarStageId,
+            Difficulty = 8,
+        };
+
+        MatchConfig locked = orch.BuildConfig(profile, request);
+        Assert.That(locked.GetCpuLevel(0), Is.EqualTo(6), "fresh profile clamps 7–8 → 6");
+
+        profile.BestExpeditionDifficulty = 5;
+        MatchConfig unlocked = orch.BuildConfig(profile, request);
+        Assert.That(unlocked.GetCpuLevel(0), Is.EqualTo(8));
+    }
+
+    [Test]
+    public void Clear_at_5_records_best_expedition_difficulty()
+    {
+        var orch = new ExpeditionModeOrchestrator();
+        var profile = PlayerProfile.CreateNew();
+        var request = new ModeRequest
+        {
+            Mode = ModeId.Expedition,
+            Seed = Seed ^ 10UL,
+            StageId = SampleContentFactory.CitrineBazaarStageId,
+            Difficulty = 5,
+        };
+
+        var cleared = new MatchResult
+        {
+            CaratsEarned = 0,
+            ActorCount = 2,
+            FramesPlayed = ExpeditionChestRuntime.ParFrames(request.StageId),
+        };
+        unsafe
+        {
+            cleared.Placements[0] = 1;
+            cleared.Placements[1] = 2;
+        }
+
+        orch.ApplyResult(profile, cleared, request);
+        Assert.That(profile.BestExpeditionDifficulty, Is.EqualTo(5));
     }
 
     [Test]

@@ -6,14 +6,17 @@ namespace JewelBlitzArena.Meta
     /// <summary>
     /// Post-stage Expedition chest + time adjustment (items-and-economy.md §7).
     /// Greybox: chest base is ~55% of the stage design row scaled by difficulty
-    /// full-clear target / 8000, stacked on top of in-match gleam carats (Sim budgets
-    /// stay unchanged for corpus stability).
+    /// full-clear target / 8000, stacked on top of in-match gleam carats (~45% of the
+    /// same design row via <see cref="GleamBudgetRuntime.BudgetForStage"/>).
     /// </summary>
     public static class ExpeditionChestRuntime
     {
         public const int DiffMin = 1;
         public const int DiffMax = 8;
         public const int DiffDefault = 4;
+        /// <summary>Diff 7–8 require a prior clear at this difficulty or higher.</summary>
+        public const int HighDiffUnlockClearMin = 5;
+        public const int HighDiffGateMin = 7;
         public const int FullClearDiff8 = 8000;
         public const int ChestSharePercent = 55;
         public const int PurseValue = 2000;
@@ -61,7 +64,22 @@ namespace JewelBlitzArena.Meta
         }
 
         public static int StageDesignTotal(int stageId) =>
-            GleamBudgetRuntime.BudgetForStage(stageId);
+            GleamBudgetRuntime.DesignTotalForStage(stageId);
+
+        /// <summary>
+        /// Clamp request difficulty and gate 7–8 until
+        /// <paramref name="bestClearedDifficulty"/> ≥ <see cref="HighDiffUnlockClearMin"/>.
+        /// </summary>
+        public static int ClampDifficultyForProfile(int difficulty, int bestClearedDifficulty)
+        {
+            int d = ClampDifficulty(difficulty);
+            if (d >= HighDiffGateMin && bestClearedDifficulty < HighDiffUnlockClearMin)
+            {
+                return HighDiffGateMin - 1;
+            }
+
+            return d;
+        }
 
         public static int ParFrames(int stageId)
         {

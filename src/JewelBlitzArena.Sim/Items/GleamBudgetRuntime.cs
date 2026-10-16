@@ -5,12 +5,22 @@ namespace JewelBlitzArena.Sim
     /// <summary>
     /// Expedition in-match carat budget (items-and-economy.md §7):
     /// KO 50% / knockdowns caused 30% / containers 20%. Spawns denomination gleams.
+    /// In-match pool is ~45% of the stage design row; chest uses the full design row.
     /// </summary>
     public static class GleamBudgetRuntime
     {
-        public const int DefaultFfaBudget = 1100;
-        public const int HarvesterBudget = 2000;
-        public const int PressworksBudget = 2100;
+        /// <summary>Full design-row totals (economy §7). Chest keys off these.</summary>
+        public const int DesignFfaTotal = 1100;
+        public const int DesignHarvesterTotal = 2000;
+        public const int DesignPressworksTotal = 2100;
+
+        /// <summary>Legacy aliases — prefer <see cref="DesignTotalForStage"/> / <see cref="BudgetForStage"/>.</summary>
+        public const int DefaultFfaBudget = DesignFfaTotal;
+        public const int HarvesterBudget = DesignHarvesterTotal;
+        public const int PressworksBudget = DesignPressworksTotal;
+
+        /// <summary>In-match share of the design row (chest keeps the complementary 55%).</summary>
+        public const int InMatchBudgetPercent = 45;
 
         /// <summary>Soft per-event spend caps so one KO cannot dump the whole pool.</summary>
         public const int MaxKoDrop = 400;
@@ -37,20 +47,25 @@ namespace JewelBlitzArena.Sim
                 - state.GleamBudgetKdRemaining;
         }
 
-        public static int BudgetForStage(int stageId)
+        /// <summary>Full economy §7 design row for the stage (chest / Meta).</summary>
+        public static int DesignTotalForStage(int stageId)
         {
             if (stageId == SampleContentFactory.HarvesterTerracesStageId)
             {
-                return HarvesterBudget;
+                return DesignHarvesterTotal;
             }
 
             if (stageId == SampleContentFactory.PressworksStageId)
             {
-                return PressworksBudget;
+                return DesignPressworksTotal;
             }
 
-            return DefaultFfaBudget;
+            return DesignFfaTotal;
         }
+
+        /// <summary>In-match gleam pool (~45% of design row).</summary>
+        public static int BudgetForStage(int stageId) =>
+            (DesignTotalForStage(stageId) * InMatchBudgetPercent) / 100;
 
         public static void OnKo(ref MatchState state, Fix x, Fix z)
         {

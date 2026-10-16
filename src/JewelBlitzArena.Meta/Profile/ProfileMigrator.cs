@@ -19,6 +19,9 @@ namespace JewelBlitzArena.Meta
                     case ProfileSchema.Version0:
                         MigrateV0ToV1(profile);
                         break;
+                    case ProfileSchema.Version1:
+                        MigrateV1ToV2(profile);
+                        break;
                     default:
                         throw new InvalidOperationException(
                             $"Unknown profile schema {profile.SchemaVersion}; cannot migrate.");
@@ -52,6 +55,16 @@ namespace JewelBlitzArena.Meta
             }
 
             profile.SchemaVersion = ProfileSchema.Version1;
+        }
+
+        private static void MigrateV1ToV2(PlayerProfile profile)
+        {
+            if (profile.BestExpeditionDifficulty < 0)
+            {
+                profile.BestExpeditionDifficulty = 0;
+            }
+
+            profile.SchemaVersion = ProfileSchema.Version2;
         }
     }
 }

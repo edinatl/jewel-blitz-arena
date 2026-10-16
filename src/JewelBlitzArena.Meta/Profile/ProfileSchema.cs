@@ -6,9 +6,12 @@ namespace JewelBlitzArena.Meta
         /// <summary>Empty / pre-Meta placeholder (no file or legacy stub).</summary>
         public const int Version0 = 0;
 
-        /// <summary>Current skeletal profile (Ledger + flags + carats).</summary>
+        /// <summary>Skeletal profile (Ledger + flags + carats).</summary>
         public const int Version1 = 1;
 
-        public const int Current = Version1;
+        /// <summary>Adds BestExpeditionDifficulty for unlock ladder (modes.md).</summary>
+        public const int Version2 = 2;
+
+        public const int Current = Version2;
     }
 }

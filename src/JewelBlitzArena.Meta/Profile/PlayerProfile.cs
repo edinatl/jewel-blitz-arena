@@ -17,6 +17,11 @@ namespace JewelBlitzArena.Meta
         /// <summary>Distinct Tournament clears (any fighter) — gates House Rules unlocks later.</summary>
         public int DistinctTournamentClears { get; set; }
 
+        /// <summary>
+        /// Highest Expedition difficulty cleared (0 = never). Gates difficulty 7–8 after ≥5.
+        /// </summary>
+        public int BestExpeditionDifficulty { get; set; }
+
         /// <summary><see cref="ProfileFlags"/> bits.</summary>
         public int Flags { get; set; }
 
@@ -50,6 +55,7 @@ namespace JewelBlitzArena.Meta
                 DisplayName = displayName ?? "Rookie",
                 Carats = 0,
                 DistinctTournamentClears = 0,
+                BestExpeditionDifficulty = 0,
                 Flags = 0,
                 // Fresh profile: Luster timer rule is "unlocked" as the default-editable row 3 data stub.
                 UnlockedHouseRulesBits = HouseRulesBits.LusterTimer,
