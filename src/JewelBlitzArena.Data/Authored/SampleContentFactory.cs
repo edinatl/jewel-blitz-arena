@@ -1150,9 +1150,8 @@ namespace JewelBlitzArena.Data
 
         /// <summary>
         /// The Pressworks — Chairman Vitre (stages.md §3.2). Jewel cap 6.
-        /// Boss AI v1: LiveHandsChase is a timer that relocates toward the nearest fighter.
-        /// Guards-as-creatures / Overpress Life / timeout Flood deferred.
-        /// Sorting duration stubbed to 25 s (design 90 s) for greybox/corpus length.
+        /// Boss AI v1: LiveHandsChase relocates toward nearest fighter; Flood timeout landed.
+        /// Vein Guards via StageCreatureRuntime (gate at 4 destroyed or 90 s); Overpress Life deferred.
         /// </summary>
         public static AuthoredStage CreatePressworks()
         {
@@ -1168,25 +1167,10 @@ namespace JewelBlitzArena.Data
                     new AuthoredPhase
                     {
                         Name = "Sorting line",
-                        DurationSeconds = "25",
+                        DurationSeconds = "90",
                         GeometrySetId = 0,
                         BlitzSuppressed = true,
                         CameraRadius = "14",
-                        Hazards = new List<AuthoredHazard>
-                        {
-                            new AuthoredHazard
-                            {
-                                HazardId = 60,
-                                Name = "VeinGuardPatrol",
-                                Trigger = "timer",
-                                PeriodSeconds = "10",
-                                TelegraphFrames = 30,
-                                Damage = 80,
-                                CenterX = "-2",
-                                CenterZ = "1",
-                                Radius = "1.5",
-                            },
-                        },
                         Kinematics = new List<AuthoredKinematic>
                         {
                             new AuthoredKinematic

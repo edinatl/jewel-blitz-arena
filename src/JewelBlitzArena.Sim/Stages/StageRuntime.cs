@@ -104,7 +104,10 @@ namespace JewelBlitzArena.Sim
 
             state.PhaseElapsedFrames++;
             BossTimeoutRuntime.Tick(ref state, ref events);
-            if (state.PhaseElapsedFrames < state.PhaseDurationFrames)
+
+            // Pressworks Sorting: open gate early when enough Vein Guards are down.
+            bool gateReady = StageCreatureRuntime.SortingGateReady(ref state, graph);
+            if (!gateReady && state.PhaseElapsedFrames < state.PhaseDurationFrames)
             {
                 return;
             }
@@ -154,6 +157,7 @@ namespace JewelBlitzArena.Sim
             ClearHazards(ref state);
             ClearKinematics(ref state);
             ActivateKinematics(ref state, phase);
+            StageCreatureRuntime.OnPhaseEnter(ref state, graph, phaseIndex);
 
             int transition = 0;
             if (applyEnterTransition)

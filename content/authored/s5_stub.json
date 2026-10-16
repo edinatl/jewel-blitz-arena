@@ -2010,7 +2010,7 @@
       "phases": [
         {
           "name": "Sorting line",
-          "durationSeconds": "25",
+          "durationSeconds": "90",
           "geometrySetId": 0,
           "blitzSuppressed": true,
           "transitionSeconds": "0",
@@ -2021,20 +2021,7 @@
           "cameraCenterY": "8",
           "cameraCenterZ": "0",
           "cameraRadius": "14",
-          "hazards": [
-            {
-              "hazardId": 60,
-              "name": "VeinGuardPatrol",
-              "trigger": "timer",
-              "periodSeconds": "10",
-              "telegraphFrames": 30,
-              "damage": 80,
-              "centerX": "-2",
-              "centerY": "0",
-              "centerZ": "1",
-              "radius": "1.5"
-            }
-          ],
+          "hazards": [],
           "kinematics": [
             {
               "trackId": 60,

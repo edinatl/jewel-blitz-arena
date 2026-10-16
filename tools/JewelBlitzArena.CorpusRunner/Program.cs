@@ -231,15 +231,15 @@ static int RecordFixtures(string[] args)
         p0Log: BuildWalkLog(180),
         notes: "S8: Harvester Terraces anatomy + crates (legs/head/tail; footfall/intake/stomp; 4 crates)."));
 
-    // Pressworks: 10% clock → Sorting 150f + transition 12f → The Press (Live Hands chase).
+    // Pressworks: 10% clock → Sorting 540f (90 s) + transition 12f → The Press (Live Hands chase).
     Write(corpus, CorpusRunner.Capture(
         name: "pressworks-press-2p-180",
         seed: 0x4A42415F50525331UL, // JBA_PRS1
         actorCount: 2,
         stageId: SampleContentFactory.PressworksStageId,
-        p0Log: BuildWalkLog(180),
+        p0Log: BuildWalkLog(560),
         phaseClockPermille: 100,
-        notes: "S8: Pressworks boss AI v1; PhaseClock 10% clears Sorting; Live Hands timer-chase on The Press."));
+        notes: "S8: Pressworks Vein Guards + 90 s Sorting gate; PhaseClock 10% clears Sorting; Live Hands on The Press."));
 
     Console.WriteLine($"Recorded fixtures into {Path.GetFullPath(corpus)}");
     return 0;

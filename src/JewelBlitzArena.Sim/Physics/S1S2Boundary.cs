@@ -57,6 +57,10 @@ namespace JewelBlitzArena.Sim
         BossBuck = 17,
         /// <summary>Stage projectile hit actor. SlotA = projectile index, SlotB = actor.</summary>
         ProjectileHitActor = 18,
+        /// <summary>Stage creature took damage. SlotA = creature index, SlotB = attacker.</summary>
+        StageCreatureHit = 19,
+        /// <summary>Stage creature Life reached 0. SlotA = creature index, SlotB = kind.</summary>
+        StageCreatureBroken = 20,
     }
 
     /// <summary>Ephemeral per-step event (not part of <see cref="MatchState"/> hash).</summary>

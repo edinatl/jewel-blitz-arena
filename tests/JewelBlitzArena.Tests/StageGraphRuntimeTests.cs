@@ -439,7 +439,8 @@ public sealed class StageGraphRuntimeTests
         Assert.That(sim.State.JewelCap, Is.EqualTo(6));
         Assert.That((sim.State.StageFlags & StageFlags.BlitzSuppressed) != 0, Is.True);
 
-        for (int f = 0; f < 150 + 12; f++)
+        // Sorting is 90 s @ 10% clock = 540 f + 12 f transition.
+        for (int f = 0; f < 540 + 12; f++)
         {
             sim.Step(InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral);
         }
@@ -450,6 +451,7 @@ public sealed class StageGraphRuntimeTests
         Assert.That((press.StageFlags & StageFlags.BlitzSuppressed) == 0, Is.True);
         Assert.That(press.ActiveHazardCount, Is.EqualTo(3));
         Assert.That(press.ActiveKinematicCount, Is.EqualTo(1));
+        Assert.That(StageCreatureRuntime.CountActive(ref press), Is.EqualTo(0));
     }
 
     [Test]
@@ -561,8 +563,8 @@ public sealed class StageGraphRuntimeTests
         var sim = new Simulation();
         sim.Reset(config, catalog);
 
-        // Clear Sorting (150f) + transition (12f) into The Press.
-        for (int f = 0; f < 150 + 12; f++)
+        // Clear Sorting (540f @ 10% of 90 s) + transition (12f) into The Press.
+        for (int f = 0; f < 540 + 12; f++)
         {
             sim.Step(InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral);
         }

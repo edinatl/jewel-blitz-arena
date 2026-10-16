@@ -79,7 +79,8 @@ public sealed class BossTimeoutRuntimeTests
         sim.Reset(config, catalog);
         Assert.That(StageRuntime.BossTimeoutRemaining(in sim.State), Is.EqualTo(0));
 
-        for (int f = 0; f < 150 + 12; f++)
+        // Sorting 90 s @ 10% clock = 540 f + 12 f transition.
+        for (int f = 0; f < 540 + 12; f++)
         {
             sim.Step(InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral);
         }

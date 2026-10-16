@@ -146,6 +146,7 @@ namespace JewelBlitzArena.Sim
                 ref _contacts);
             BreakableRuntime.InitializeMatch(ref _state, _stageGraph);
             BossPartRuntime.InitializeMatch(ref _state, _stageGraph);
+            StageCreatureRuntime.InitializeMatch(ref _state, _stageGraph);
             ProjectileRuntime.InitializeMatch(ref _state);
             GleamBudgetRuntime.InitializeMatch(ref _state, _stageGraph);
         }
@@ -196,6 +197,7 @@ namespace JewelBlitzArena.Sim
             CombatSystem.TickActors(ref _state, _kits);
             // Boss parts before crates so anatomy takes Attack priority on Harvester.
             BossPartRuntime.ResolveAttackHits(ref _state, _kits, ref _contacts);
+            StageCreatureRuntime.ResolveAttackHits(ref _state, _kits, ref _contacts);
             BreakableRuntime.ResolveAttackHits(
                 ref _state, _kits, _stageGraph, _catalog, ref _contacts);
             BossPartRuntime.Tick(
