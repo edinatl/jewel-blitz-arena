@@ -74,6 +74,12 @@ namespace JewelBlitzArena.Sim
                     step = new Fix((step.Raw * 3) / 5);
                 }
 
+                if (step.Raw != 0 && WaterVolumeRuntime.IsActorInWater(ref state, index))
+                {
+                    // −20% walk while in a stage water volume (stages.md §2.3 / §2.4).
+                    step = WaterVolumeRuntime.ApplyWalkSlow(step);
+                }
+
                 if (step.Raw == 0)
                 {
                     actor.VelX = Fix.Zero;

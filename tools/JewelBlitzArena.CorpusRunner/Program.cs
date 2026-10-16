@@ -200,7 +200,7 @@ static int RecordFixtures(string[] args)
         stageId: SampleContentFactory.SunkenStrongroomStageId,
         p0Log: BuildWalkLog(360),
         phaseClockPermille: 100,
-        notes: "S8: Sunken Strongroom via S5 catalog; PhaseClock 10% reaches Hull breach (BreachPull hazard)."));
+        notes: "S8: Sunken Strongroom; PhaseClock 10% → Hull breach; water volumes (−20% walk) on door/breach."));
 
     // Rime Cutworks: 10% clock → Dry yard + Flooding → Crane yard by ~324f.
     Write(corpus, CorpusRunner.Capture(
@@ -210,7 +210,7 @@ static int RecordFixtures(string[] args)
         stageId: SampleContentFactory.RimeCutworksStageId,
         p0Log: BuildWalkLog(360),
         phaseClockPermille: 100,
-        notes: "S8: Rime Cutworks via S5 catalog; PhaseClock 10% reaches Crane yard (magnet sweep + kin)."));
+        notes: "S8: Rime Cutworks; PhaseClock 10% → Crane yard; flooded-floor water (−20% walk) on phase B."));
 
     // The Orrery: 10% clock → Gear 150f + Infestation 180f + Planet transition 12f → Planet disc by ~342f.
     Write(corpus, CorpusRunner.Capture(

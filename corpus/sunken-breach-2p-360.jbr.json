@@ -1,7 +1,7 @@
 {
   "formatVersion": 3,
   "name": "sunken-breach-2p-360",
-  "notes": "S8: Sunken Strongroom via S5 catalog; PhaseClock 10% reaches Hull breach (BreachPull hazard).",
+  "notes": "S8: Sunken Strongroom; PhaseClock 10% \u2192 Hull breach; water volumes (\u221220% walk) on door/breach.",
   "seed": 5350911184945368625,
   "stageId": 3,
   "actorCount": 2,
@@ -12,7 +12,7 @@
     3,
     4
   ],
-  "expectedHashHex": "0e38dfafc3601a31",
+  "expectedHashHex": "c34652c0665afc78",
   "frames": [
     {
       "p0": 32,

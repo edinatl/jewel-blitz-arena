@@ -621,7 +621,8 @@ namespace JewelBlitzArena.Data
 
         /// <summary>
         /// Sunken Strongroom greybox stub (stages.md §2.3): Vault floor → Vault door → Hull breach.
-        /// Tidewight / drawers / Teller's Reel / water volumes deferred; rolling door + breach pulse land now.
+        /// Tidewight / drawers / Teller's Reel deferred; water volumes on phases B/C via WaterVolumeRuntime;
+        /// rolling door + breach pulse land now.
         /// </summary>
         public static AuthoredStage CreateSunkenStrongroom()
         {
@@ -737,7 +738,8 @@ namespace JewelBlitzArena.Data
 
         /// <summary>
         /// Rime Cutworks greybox stub (stages.md §2.4): Dry yard → Flooding → Crane yard.
-        /// Boardable sleds / ice blocks / raft tip / water volumes deferred; sled rail + crane sweep land now.
+        /// Boardable sleds / ice blocks / raft tip deferred; flooded-floor water via WaterVolumeRuntime on phase B;
+        /// sled rail + crane sweep land now.
         /// </summary>
         public static AuthoredStage CreateRimeCutworks()
         {

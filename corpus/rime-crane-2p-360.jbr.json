@@ -1,7 +1,7 @@
 {
   "formatVersion": 3,
   "name": "rime-crane-2p-360",
-  "notes": "S8: Rime Cutworks via S5 catalog; PhaseClock 10% reaches Crane yard (magnet sweep \u002B kin).",
+  "notes": "S8: Rime Cutworks; PhaseClock 10% \u2192 Crane yard; flooded-floor water (\u221220% walk) on phase B.",
   "seed": 5350911184927804721,
   "stageId": 4,
   "actorCount": 2,
@@ -12,7 +12,7 @@
     3,
     4
   ],
-  "expectedHashHex": "aff3e265bd28957a",
+  "expectedHashHex": "d8c81c849fabad7d",
   "frames": [
     {
       "p0": 32,
