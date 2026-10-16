@@ -216,6 +216,63 @@ public sealed class StageGraphRuntimeTests
         Assert.That(loaded.SchemaVersion, Is.EqualTo(ContentSchema.Version));
     }
 
+    [Test]
+    public void Sunken_Strongroom_compiles_three_phases_with_rolling_door()
+    {
+        ContentCatalog catalog = ContentCompiler.Compile(SampleContentFactory.CreateS5StubPack());
+        Assert.That(
+            catalog.TryGetStage(SampleContentFactory.SunkenStrongroomStageId, out StageRecord stage),
+            Is.True);
+        Assert.That(stage.Phases.Length, Is.EqualTo(3));
+        Assert.That(stage.Phases[0].Name, Is.EqualTo("Vault floor"));
+        Assert.That(stage.Phases[1].Name, Is.EqualTo("Vault door"));
+        Assert.That(stage.Phases[1].Kinematics.Length, Is.EqualTo(1));
+        Assert.That(stage.Phases[1].Hazards[0].Damage, Is.EqualTo(120));
+        Assert.That(stage.Phases[2].Name, Is.EqualTo("Hull breach"));
+        Assert.That(stage.Phases[2].Hazards[0].Damage, Is.EqualTo(150));
+        Assert.That(stage.Phases[2].DurationFrames, Is.EqualTo(0));
+    }
+
+    [Test]
+    public void Sunken_phase_timers_reach_Hull_breach()
+    {
+        ContentCatalog catalog = ContentCompiler.Compile(SampleContentFactory.CreateS5StubPack());
+        var config = MatchConfig.CreateDefault(Seed ^ 5UL, actorCount: 2);
+        unsafe
+        {
+            config.StageId = SampleContentFactory.SunkenStrongroomStageId;
+            config.PhaseClockPermille = 100; // 10% → 150f vault phases
+            config.FighterIds[0] = SampleContentFactory.RookFighterId;
+            config.FighterIds[1] = SampleContentFactory.RookFighterId;
+        }
+
+        var sim = new Simulation();
+        sim.Reset(config, catalog);
+        Assert.That(sim.State.PhaseIndex, Is.EqualTo(0));
+
+        // Vault floor 150f + transition 12f → Vault door.
+        for (int f = 0; f < 150 + 12; f++)
+        {
+            sim.Step(InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral);
+        }
+
+        Assert.That(sim.State.PhaseIndex, Is.EqualTo(1));
+        Assert.That((sim.State.StageFlags & StageFlags.InTransition) == 0, Is.True);
+        Assert.That(sim.State.ActiveKinematicCount, Is.EqualTo(1));
+
+        // Vault door 150f + transition 12f → Hull breach.
+        for (int f = 0; f < 150 + 12; f++)
+        {
+            sim.Step(InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral);
+        }
+
+        MatchState breach = sim.Snapshot();
+        Assert.That(breach.PhaseIndex, Is.EqualTo(2));
+        Assert.That((breach.StageFlags & StageFlags.InTransition) == 0, Is.True);
+        Assert.That(breach.ActiveHazardCount, Is.EqualTo(1));
+        Assert.That(breach.PhaseDurationFrames, Is.EqualTo(0));
+    }
+
     private static ulong RunThroughBreakaway(MatchConfig config, ContentCatalog catalog, bool grantJewels)
     {
         var sim = new Simulation();

@@ -22,7 +22,8 @@ dotnet run --project tools/JewelBlitzArena.ReplayViewer -c Release -- corpus/neu
 
 Fixtures include `cpu-replace-2p-120` (CPU brain takes slot 1 at frame 30),
 `status-patches-2p-120` (format v3 item-spawn handoffs for Ice/Smoke/Adhesive world patches),
-and `fulgur-library-2p-300` (Fulgur Cloister at 10% Phase Clock reaches Library).
+`fulgur-library-2p-300` (Fulgur Cloister at 10% Phase Clock reaches Library), and
+`sunken-breach-2p-360` (Sunken Strongroom at 10% Phase Clock reaches Hull breach).
 
 When a Sim or S5 content change intentionally alters state, re-`record` and commit the updated
 hashes with a clear explanation in the PR.

@@ -192,6 +192,16 @@ static int RecordFixtures(string[] args)
         phaseClockPermille: 100,
         notes: "S8: Fulgur Cloister via S5 catalog; PhaseClock 10% reaches Library with crush hazard + bookcase kin."));
 
+    // Sunken Strongroom: 10% clock → Vault floor 150f + door 150f + transitions → Hull breach by ~324f.
+    Write(corpus, CorpusRunner.Capture(
+        name: "sunken-breach-2p-360",
+        seed: 0x4A42415F53554E31UL, // JBA_SUN1
+        actorCount: 2,
+        stageId: SampleContentFactory.SunkenStrongroomStageId,
+        p0Log: BuildWalkLog(360),
+        phaseClockPermille: 100,
+        notes: "S8: Sunken Strongroom via S5 catalog; PhaseClock 10% reaches Hull breach (BreachPull hazard)."));
+
     Console.WriteLine($"Recorded fixtures into {Path.GetFullPath(corpus)}");
     return 0;
 }

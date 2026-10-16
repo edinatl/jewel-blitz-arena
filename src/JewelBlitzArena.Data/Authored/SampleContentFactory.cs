@@ -3,8 +3,8 @@ using System.Collections.Generic;
 namespace JewelBlitzArena.Data
 {
     /// <summary>
-    /// S5 stub pack: full cast kits (cast.md §6 + kit behaviors), Citrine Bazaar +
-    /// Fulgur Cloister phase stubs, 25 always-eligible starter items.
+    /// S5 stub pack: full cast kits (cast.md §6 + kit behaviors), Citrine / Fulgur /
+    /// Sunken Strongroom phase stubs, 25 always-eligible starter items.
     /// </summary>
     public static class SampleContentFactory
     {
@@ -24,6 +24,7 @@ namespace JewelBlitzArena.Data
         public const int TillyFighterId = 14;
         public const int CitrineBazaarStageId = 1;
         public const int FulgurCloisterStageId = 2;
+        public const int SunkenStrongroomStageId = 3;
 
         /// <summary>S5 stub Adhesive Spray — thrown hit applies Slow (matches <c>MatchRules.AdhesiveSprayItemId</c>).</summary>
         public const int AdhesiveSprayItemId = 18;
@@ -63,6 +64,7 @@ namespace JewelBlitzArena.Data
                 {
                     CreateCitrineBazaar(),
                     CreateFulgurCloister(),
+                    CreateSunkenStrongroom(),
                 },
                 Items = CreateStarterSet(),
             };
@@ -602,6 +604,122 @@ namespace JewelBlitzArena.Data
                                 Amplitude = "3",
                                 OriginX = "-1",
                                 OriginZ = "0",
+                            },
+                        },
+                    },
+                },
+            };
+        }
+
+        /// <summary>
+        /// Sunken Strongroom greybox stub (stages.md §2.3): Vault floor → Vault door → Hull breach.
+        /// Tidewight / drawers / Teller's Reel / water volumes deferred; rolling door + breach pulse land now.
+        /// </summary>
+        public static AuthoredStage CreateSunkenStrongroom()
+        {
+            return new AuthoredStage
+            {
+                StageId = SunkenStrongroomStageId,
+                Name = "Sunken Strongroom",
+                JewelCrateChancePercent = 8,
+                FallIsKo = false,
+                JewelCapOverride = 0,
+                Phases = new List<AuthoredPhase>
+                {
+                    new AuthoredPhase
+                    {
+                        Name = "Vault floor",
+                        DurationSeconds = "25",
+                        GeometrySetId = 0,
+                        CameraRadius = "12",
+                        Hazards = new List<AuthoredHazard>
+                        {
+                            new AuthoredHazard
+                            {
+                                HazardId = 20,
+                                Name = "TidewightZone",
+                                Trigger = "timer",
+                                PeriodSeconds = "12",
+                                TelegraphFrames = 30,
+                                Damage = 0,
+                                CenterX = "2",
+                                CenterZ = "0",
+                                Radius = "1.5",
+                            },
+                        },
+                    },
+                    new AuthoredPhase
+                    {
+                        Name = "Vault door",
+                        DurationSeconds = "25",
+                        GeometrySetId = 1,
+                        TransitionSeconds = "2",
+                        CarryItems = "all",
+                        CarryJewels = "all",
+                        CameraRadius = "14",
+                        ScriptedCamera = new AuthoredScriptedCamera
+                        {
+                            Enabled = true,
+                            EndCenterY = "9",
+                            EndRadius = "16",
+                        },
+                        Hazards = new List<AuthoredHazard>
+                        {
+                            new AuthoredHazard
+                            {
+                                HazardId = 21,
+                                Name = "RollingDoorKnock",
+                                Trigger = "timer",
+                                PeriodSeconds = "8",
+                                TelegraphFrames = 40,
+                                Damage = 120,
+                                CenterX = "0",
+                                CenterZ = "0",
+                                Radius = "2.5",
+                            },
+                        },
+                        Kinematics = new List<AuthoredKinematic>
+                        {
+                            new AuthoredKinematic
+                            {
+                                TrackId = 20,
+                                Name = "RollingVaultDoor",
+                                PeriodSeconds = "8",
+                                Amplitude = "3",
+                                OriginX = "0",
+                                OriginZ = "0",
+                            },
+                        },
+                    },
+                    new AuthoredPhase
+                    {
+                        Name = "Hull breach",
+                        DurationSeconds = "0",
+                        GeometrySetId = 2,
+                        TransitionSeconds = "2",
+                        CarryItems = "all",
+                        CarryJewels = "all",
+                        CameraRadius = "16",
+                        ScriptedCamera = new AuthoredScriptedCamera
+                        {
+                            Enabled = true,
+                            StartRadius = "14",
+                            EndCenterY = "8",
+                            EndRadius = "18",
+                        },
+                        Hazards = new List<AuthoredHazard>
+                        {
+                            new AuthoredHazard
+                            {
+                                HazardId = 22,
+                                Name = "BreachPull",
+                                Trigger = "phase_enter",
+                                PeriodSeconds = "10",
+                                TelegraphFrames = 40,
+                                Damage = 150,
+                                CenterX = "4",
+                                CenterZ = "-2",
+                                Radius = "2",
                             },
                         },
                     },
