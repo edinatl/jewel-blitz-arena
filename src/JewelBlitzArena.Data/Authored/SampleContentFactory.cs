@@ -3,8 +3,8 @@ using System.Collections.Generic;
 namespace JewelBlitzArena.Data
 {
     /// <summary>
-    /// S5 stub pack: full cast kits (cast.md §6 + kit behaviors), Citrine / Fulgur /
-    /// Sunken / Rime Cutworks phase stubs, 25 always-eligible starter items.
+    /// S5 stub pack: full cast kits (cast.md §6 + kit behaviors), five story-arena
+    /// phase stubs (Citrine → Orrery), 25 always-eligible starter items.
     /// </summary>
     public static class SampleContentFactory
     {
@@ -26,6 +26,7 @@ namespace JewelBlitzArena.Data
         public const int FulgurCloisterStageId = 2;
         public const int SunkenStrongroomStageId = 3;
         public const int RimeCutworksStageId = 4;
+        public const int OrreryStageId = 5;
 
         /// <summary>S5 stub Adhesive Spray — thrown hit applies Slow (matches <c>MatchRules.AdhesiveSprayItemId</c>).</summary>
         public const int AdhesiveSprayItemId = 18;
@@ -67,6 +68,7 @@ namespace JewelBlitzArena.Data
                     CreateFulgurCloister(),
                     CreateSunkenStrongroom(),
                     CreateRimeCutworks(),
+                    CreateOrrery(),
                 },
                 Items = CreateStarterSet(),
             };
@@ -862,6 +864,152 @@ namespace JewelBlitzArena.Data
                                 Amplitude = "4",
                                 OriginX = "0",
                                 OriginZ = "-1",
+                            },
+                        },
+                    },
+                },
+            };
+        }
+
+        /// <summary>
+        /// The Orrery greybox stub (stages.md §2.5): Gear floor → Infestation → Planet disc.
+        /// Void beetle AI / egg sacs / gondolas / updraft ride deferred; conveyor + spit/swipe + arm gap land now.
+        /// </summary>
+        public static AuthoredStage CreateOrrery()
+        {
+            return new AuthoredStage
+            {
+                StageId = OrreryStageId,
+                Name = "The Orrery",
+                JewelCrateChancePercent = 8,
+                FallIsKo = false,
+                JewelCapOverride = 0,
+                Phases = new List<AuthoredPhase>
+                {
+                    new AuthoredPhase
+                    {
+                        Name = "Gear floor",
+                        DurationSeconds = "25",
+                        GeometrySetId = 0,
+                        CameraRadius = "13",
+                        Hazards = new List<AuthoredHazard>
+                        {
+                            new AuthoredHazard
+                            {
+                                HazardId = 40,
+                                Name = "UpdraftRing",
+                                Trigger = "timer",
+                                PeriodSeconds = "10",
+                                TelegraphFrames = 30,
+                                Damage = 0,
+                                CenterX = "0",
+                                CenterZ = "2",
+                                Radius = "1.5",
+                            },
+                        },
+                        Kinematics = new List<AuthoredKinematic>
+                        {
+                            new AuthoredKinematic
+                            {
+                                TrackId = 40,
+                                Name = "FloorConveyor",
+                                PeriodSeconds = "10",
+                                Amplitude = "2",
+                                OriginX = "-2",
+                                OriginZ = "0",
+                            },
+                        },
+                    },
+                    new AuthoredPhase
+                    {
+                        Name = "Infestation",
+                        DurationSeconds = "30",
+                        GeometrySetId = 1,
+                        TransitionSeconds = "0",
+                        CarryItems = "all",
+                        CarryJewels = "all",
+                        CameraRadius = "14",
+                        Hazards = new List<AuthoredHazard>
+                        {
+                            new AuthoredHazard
+                            {
+                                HazardId = 41,
+                                Name = "BeetleSpitPuddle",
+                                Trigger = "timer",
+                                PeriodSeconds = "8",
+                                TelegraphFrames = 30,
+                                Damage = 0,
+                                CenterX = "1",
+                                CenterZ = "1",
+                                Radius = "1.8",
+                            },
+                            new AuthoredHazard
+                            {
+                                HazardId = 42,
+                                Name = "BeetleTailSwipe",
+                                Trigger = "timer",
+                                PeriodSeconds = "10",
+                                TelegraphFrames = 40,
+                                Damage = 100,
+                                CenterX = "0",
+                                CenterZ = "0",
+                                Radius = "2.5",
+                            },
+                        },
+                    },
+                    new AuthoredPhase
+                    {
+                        Name = "Planet disc",
+                        DurationSeconds = "0",
+                        GeometrySetId = 2,
+                        TransitionSeconds = "2",
+                        CarryItems = "all",
+                        CarryJewels = "all",
+                        CameraRadius = "16",
+                        ScriptedCamera = new AuthoredScriptedCamera
+                        {
+                            Enabled = true,
+                            StartRadius = "14",
+                            EndCenterY = "11",
+                            EndRadius = "18",
+                        },
+                        Hazards = new List<AuthoredHazard>
+                        {
+                            new AuthoredHazard
+                            {
+                                HazardId = 43,
+                                Name = "ArmGapFallout",
+                                Trigger = "phase_enter",
+                                PeriodSeconds = "12",
+                                TelegraphFrames = 60,
+                                Damage = 150,
+                                CenterX = "4",
+                                CenterZ = "0",
+                                Radius = "1.5",
+                            },
+                            new AuthoredHazard
+                            {
+                                HazardId = 44,
+                                Name = "GustTowardGap",
+                                Trigger = "timer",
+                                PeriodSeconds = "12",
+                                TelegraphFrames = 60,
+                                Damage = 0,
+                                CenterX = "0",
+                                CenterZ = "0",
+                                Radius = "3",
+                            },
+                        },
+                        Kinematics = new List<AuthoredKinematic>
+                        {
+                            new AuthoredKinematic
+                            {
+                                TrackId = 41,
+                                Name = "RotatingArm",
+                                PeriodSeconds = "12",
+                                Amplitude = "3",
+                                OriginX = "0",
+                                OriginZ = "0",
                             },
                         },
                     },

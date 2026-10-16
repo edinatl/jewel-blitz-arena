@@ -212,6 +212,16 @@ static int RecordFixtures(string[] args)
         phaseClockPermille: 100,
         notes: "S8: Rime Cutworks via S5 catalog; PhaseClock 10% reaches Crane yard (magnet sweep + kin)."));
 
+    // The Orrery: 10% clock → Gear 150f + Infestation 180f + Planet transition 12f → Planet disc by ~342f.
+    Write(corpus, CorpusRunner.Capture(
+        name: "orrery-disc-2p-360",
+        seed: 0x4A42415F4F525231UL, // JBA_ORR1
+        actorCount: 2,
+        stageId: SampleContentFactory.OrreryStageId,
+        p0Log: BuildWalkLog(360),
+        phaseClockPermille: 100,
+        notes: "S8: The Orrery via S5 catalog; PhaseClock 10% reaches Planet disc (arm gap + gust + rotating arm)."));
+
     Console.WriteLine($"Recorded fixtures into {Path.GetFullPath(corpus)}");
     return 0;
 }

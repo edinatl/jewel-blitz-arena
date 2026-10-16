@@ -1705,6 +1705,152 @@
           ]
         }
       ]
+    },
+    {
+      "stageId": 5,
+      "name": "The Orrery",
+      "jewelCrateChancePercent": 8,
+      "fallIsKo": false,
+      "jewelCapOverride": 0,
+      "phases": [
+        {
+          "name": "Gear floor",
+          "durationSeconds": "25",
+          "geometrySetId": 0,
+          "blitzSuppressed": false,
+          "transitionSeconds": "0",
+          "carryItems": "all",
+          "carryJewels": "all",
+          "carryJewelsDropChance": "0",
+          "cameraCenterX": "0",
+          "cameraCenterY": "8",
+          "cameraCenterZ": "0",
+          "cameraRadius": "13",
+          "hazards": [
+            {
+              "hazardId": 40,
+              "name": "UpdraftRing",
+              "trigger": "timer",
+              "periodSeconds": "10",
+              "telegraphFrames": 30,
+              "damage": 0,
+              "centerX": "0",
+              "centerY": "0",
+              "centerZ": "2",
+              "radius": "1.5"
+            }
+          ],
+          "kinematics": [
+            {
+              "trackId": 40,
+              "name": "FloorConveyor",
+              "periodSeconds": "10",
+              "amplitude": "2",
+              "originX": "-2",
+              "originY": "0",
+              "originZ": "0"
+            }
+          ]
+        },
+        {
+          "name": "Infestation",
+          "durationSeconds": "30",
+          "geometrySetId": 1,
+          "blitzSuppressed": false,
+          "transitionSeconds": "0",
+          "carryItems": "all",
+          "carryJewels": "all",
+          "carryJewelsDropChance": "0",
+          "cameraCenterX": "0",
+          "cameraCenterY": "8",
+          "cameraCenterZ": "0",
+          "cameraRadius": "14",
+          "hazards": [
+            {
+              "hazardId": 41,
+              "name": "BeetleSpitPuddle",
+              "trigger": "timer",
+              "periodSeconds": "8",
+              "telegraphFrames": 30,
+              "damage": 0,
+              "centerX": "1",
+              "centerY": "0",
+              "centerZ": "1",
+              "radius": "1.8"
+            },
+            {
+              "hazardId": 42,
+              "name": "BeetleTailSwipe",
+              "trigger": "timer",
+              "periodSeconds": "10",
+              "telegraphFrames": 40,
+              "damage": 100,
+              "centerX": "0",
+              "centerY": "0",
+              "centerZ": "0",
+              "radius": "2.5"
+            }
+          ],
+          "kinematics": []
+        },
+        {
+          "name": "Planet disc",
+          "durationSeconds": "0",
+          "geometrySetId": 2,
+          "blitzSuppressed": false,
+          "transitionSeconds": "2",
+          "carryItems": "all",
+          "carryJewels": "all",
+          "carryJewelsDropChance": "0",
+          "cameraCenterX": "0",
+          "cameraCenterY": "8",
+          "cameraCenterZ": "0",
+          "cameraRadius": "16",
+          "scriptedCamera": {
+            "enabled": true,
+            "startRadius": "14",
+            "endCenterY": "11",
+            "endRadius": "18"
+          },
+          "hazards": [
+            {
+              "hazardId": 43,
+              "name": "ArmGapFallout",
+              "trigger": "phase_enter",
+              "periodSeconds": "12",
+              "telegraphFrames": 60,
+              "damage": 150,
+              "centerX": "4",
+              "centerY": "0",
+              "centerZ": "0",
+              "radius": "1.5"
+            },
+            {
+              "hazardId": 44,
+              "name": "GustTowardGap",
+              "trigger": "timer",
+              "periodSeconds": "12",
+              "telegraphFrames": 60,
+              "damage": 0,
+              "centerX": "0",
+              "centerY": "0",
+              "centerZ": "0",
+              "radius": "3"
+            }
+          ],
+          "kinematics": [
+            {
+              "trackId": 41,
+              "name": "RotatingArm",
+              "periodSeconds": "12",
+              "amplitude": "3",
+              "originX": "0",
+              "originY": "0",
+              "originZ": "0"
+            }
+          ]
+        }
+      ]
     }
   ],
   "items": [

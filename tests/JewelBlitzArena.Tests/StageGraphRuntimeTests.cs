@@ -328,6 +328,63 @@ public sealed class StageGraphRuntimeTests
         Assert.That(crane.PhaseDurationFrames, Is.EqualTo(0));
     }
 
+    [Test]
+    public void Orrery_compiles_three_phases_with_beetle_and_arm_gap()
+    {
+        ContentCatalog catalog = ContentCompiler.Compile(SampleContentFactory.CreateS5StubPack());
+        Assert.That(catalog.TryGetStage(SampleContentFactory.OrreryStageId, out StageRecord stage), Is.True);
+        Assert.That(stage.Phases.Length, Is.EqualTo(3));
+        Assert.That(stage.Phases[0].Name, Is.EqualTo("Gear floor"));
+        Assert.That(stage.Phases[0].Kinematics.Length, Is.EqualTo(1));
+        Assert.That(stage.Phases[1].Name, Is.EqualTo("Infestation"));
+        Assert.That(stage.Phases[1].DurationFrames, Is.EqualTo(30 * 60));
+        Assert.That(stage.Phases[1].Hazards.Length, Is.EqualTo(2));
+        Assert.That(stage.Phases[2].Name, Is.EqualTo("Planet disc"));
+        Assert.That(stage.Phases[2].Hazards[0].Damage, Is.EqualTo(150));
+        Assert.That(stage.Phases[2].Kinematics.Length, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void Orrery_phase_timers_reach_Planet_disc()
+    {
+        ContentCatalog catalog = ContentCompiler.Compile(SampleContentFactory.CreateS5StubPack());
+        var config = MatchConfig.CreateDefault(Seed ^ 7UL, actorCount: 2);
+        unsafe
+        {
+            config.StageId = SampleContentFactory.OrreryStageId;
+            config.PhaseClockPermille = 100; // Gear 150f + Infestation 180f → Planet
+            config.FighterIds[0] = SampleContentFactory.RookFighterId;
+            config.FighterIds[1] = SampleContentFactory.RookFighterId;
+        }
+
+        var sim = new Simulation();
+        sim.Reset(config, catalog);
+        Assert.That(sim.State.PhaseIndex, Is.EqualTo(0));
+        Assert.That(sim.State.ActiveKinematicCount, Is.EqualTo(1));
+
+        // Gear floor 150f, transition 0 → Infestation.
+        for (int f = 0; f < 150; f++)
+        {
+            sim.Step(InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral);
+        }
+
+        Assert.That(sim.State.PhaseIndex, Is.EqualTo(1));
+        Assert.That(sim.State.ActiveHazardCount, Is.EqualTo(2));
+
+        // Infestation 180f + Planet transition 12f → Planet disc.
+        for (int f = 0; f < 180 + 12; f++)
+        {
+            sim.Step(InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral);
+        }
+
+        MatchState disc = sim.Snapshot();
+        Assert.That(disc.PhaseIndex, Is.EqualTo(2));
+        Assert.That((disc.StageFlags & StageFlags.InTransition) == 0, Is.True);
+        Assert.That(disc.ActiveHazardCount, Is.EqualTo(2));
+        Assert.That(disc.ActiveKinematicCount, Is.EqualTo(1));
+        Assert.That(disc.PhaseDurationFrames, Is.EqualTo(0));
+    }
+
     private static ulong RunThroughBreakaway(MatchConfig config, ContentCatalog catalog, bool grantJewels)
     {
         var sim = new Simulation();
