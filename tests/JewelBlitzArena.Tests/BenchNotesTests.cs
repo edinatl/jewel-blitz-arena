@@ -53,7 +53,7 @@ public sealed class BenchNotesTests
             store.Save(profile);
 
             PlayerProfile loaded = store.LoadOrCreate();
-            Assert.That(loaded.SchemaVersion, Is.EqualTo(ProfileSchema.Version6));
+            Assert.That(loaded.SchemaVersion, Is.EqualTo(ProfileSchema.Current));
             Assert.That(loaded.BenchNotes.HasSeen(1, 2, TinkerOutcome.Success), Is.True);
             Assert.That(loaded.BenchNotes.IsPoolRevealed(2, 1), Is.True);
         }
