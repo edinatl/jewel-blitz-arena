@@ -145,10 +145,12 @@ namespace JewelBlitzArena.Presentation
                 ActorSlot a = MatchStateAccess.Actor(ref state, i);
                 string blitz = a.IsBlitzed ? " BLITZ" : string.Empty;
                 MatchHoldHud hold = MatchHoldHud.FromActor(ref state, in a);
+                MatchStatusHud status = MatchStatusHud.FromActor(in a);
                 string hands = hold.HasAny ? $"  hands {hold.FormatHands()}" : string.Empty;
-                string freeze = a.FreezeFrames > 0 ? $"  FRZ {a.FreezeFrames}" : string.Empty;
+                string active = status.HasActiveStatus ? $"  {status.FormatActive()}" : string.Empty;
+                string immune = status.HasImmunityHalo ? $"  {status.FormatImmunity()}" : string.Empty;
                 GUILayout.Label(
-                    $"P{i + 1}  Life {a.Life}/{a.MaxLife}  Jewels {a.JewelsHeld}  Luster {a.Luster}{blitz}{hands}{freeze}");
+                    $"P{i + 1}  Life {a.Life}/{a.MaxLife}  Jewels {a.JewelsHeld}  Luster {a.Luster}{blitz}{hands}{active}{immune}");
             }
 
             GUILayout.EndArea();
@@ -205,7 +207,8 @@ namespace JewelBlitzArena.Presentation
                     item = $" L{b.HeldItemIdLeft}";
                 }
 
-                GUI.Label(rect, $"P{b.ActorIndex + 1}{pips}{item}");
+                string halo = b.HasImmunityHalo ? " ◌" : string.Empty;
+                GUI.Label(rect, $"P{b.ActorIndex + 1}{pips}{item}{halo}");
                 GUI.color = prev;
             }
         }

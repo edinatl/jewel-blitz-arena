@@ -92,10 +92,28 @@ namespace JewelBlitzArena.Sim
         public const int FreezeBreakDamage = 100;
 
         /// <summary>
-        /// S5 stub Petrify Gas item id (<see cref="JewelBlitzArena.Data.SampleContentFactory.PetrifyGasItemId"/>).
+        /// S5 stub Adhesive Spray item id (<c>SampleContentFactory.AdhesiveSprayItemId</c>).
+        /// Thrown hit applies Slow.
+        /// </summary>
+        public const int AdhesiveSprayItemId = 18;
+
+        /// <summary>Adhesive Spray Slow duration (item-tuned under Slow max 240 f).</summary>
+        public const int AdhesiveSlowFrames = 120;
+
+        /// <summary>
+        /// S5 stub Petrify Gas item id (<c>SampleContentFactory.PetrifyGasItemId</c>).
         /// Thrown hit applies Freeze.
         /// </summary>
         public const int PetrifyGasItemId = 19;
+
+        /// <summary>
+        /// S5 stub Ice Jar item id (<c>SampleContentFactory.IceJarItemId</c>).
+        /// Thrown hit freezes actors in a short floor-patch radius (stub).
+        /// </summary>
+        public const int IceJarItemId = 21;
+
+        /// <summary>Ice Jar impact freeze radius (floor-patch stub).</summary>
+        public static readonly Fix IceJarFreezeRange = Fix.FromInt(2);
 
         /// <summary>Hard-control cap for stun/dizzy/freeze/pin/grab sources (balance.md §4).</summary>
         public const int HardControlCapFrames = 120;

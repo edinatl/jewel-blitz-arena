@@ -68,6 +68,9 @@ namespace JewelBlitzArena.PresentationBridge
         public bool HasHeldItemLeft { get; }
         public bool HasHeldItem => HasHeldItemRight || HasHeldItemLeft;
 
+        /// <summary>Immunity halo (Dizzy/Pin/Freeze immune) — balance.md §4.</summary>
+        public bool HasImmunityHalo { get; }
+
         public EdgeBubble(
             int actorIndex,
             float edgeU,
@@ -78,7 +81,8 @@ namespace JewelBlitzArena.PresentationBridge
             int heldItemIdRight = -1,
             bool hasHeldItemRight = false,
             int heldItemIdLeft = -1,
-            bool hasHeldItemLeft = false)
+            bool hasHeldItemLeft = false,
+            bool hasImmunityHalo = false)
         {
             ActorIndex = actorIndex;
             EdgeU = edgeU;
@@ -90,6 +94,7 @@ namespace JewelBlitzArena.PresentationBridge
             HasHeldItemRight = hasHeldItemRight;
             HeldItemIdLeft = heldItemIdLeft;
             HasHeldItemLeft = hasHeldItemLeft;
+            HasImmunityHalo = hasImmunityHalo;
         }
     }
 
@@ -447,6 +452,7 @@ namespace JewelBlitzArena.PresentationBridge
                 float edgeU = ox * inv;
                 float edgeV = oz * inv;
                 MatchHoldHud hold = MatchHoldHud.FromActor(ref state, in actor);
+                MatchStatusHud status = MatchStatusHud.FromActor(in actor);
                 var bubble = new EdgeBubble(
                     i,
                     edgeU,
@@ -457,7 +463,8 @@ namespace JewelBlitzArena.PresentationBridge
                     heldItemIdRight: hold.RightItemId,
                     hasHeldItemRight: hold.HasRight,
                     heldItemIdLeft: hold.LeftItemId,
-                    hasHeldItemLeft: hold.HasLeft);
+                    hasHeldItemLeft: hold.HasLeft,
+                    hasImmunityHalo: status.HasImmunityHalo);
                 switch (bubbleCount)
                 {
                     case 0: e0 = bubble; break;

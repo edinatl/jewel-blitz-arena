@@ -53,7 +53,28 @@ namespace JewelBlitzArena.Sim
             Apply(ref state, casterIndex, range, ClampUShort(CapHard(frames)), groundedOnly: false, Kind.Freeze);
         }
 
-        /// <summary>Single-target Freeze / Petrify (Ice Jar / Petrify Gas thrown hits).</summary>
+        /// <summary>Single-target Slow (Adhesive Spray thrown hits).</summary>
+        public static void ApplySlow(ref MatchState state, int victimIndex, int frames)
+        {
+            if (victimIndex < 0 || victimIndex >= state.ActorCount || frames <= 0)
+            {
+                return;
+            }
+
+            ref ActorSlot victim = ref MatchStateAccess.Actor(ref state, victimIndex);
+            if (!victim.IsAlive || victim.IsEliminated || victim.InvulnFrames > 0)
+            {
+                return;
+            }
+
+            int f = ClampUShort(frames);
+            if (f > victim.SlowFrames)
+            {
+                victim.SlowFrames = (ushort)f;
+            }
+        }
+
+        /// <summary>Single-target Freeze / Petrify (Petrify Gas thrown hits).</summary>
         public static void ApplyFreeze(ref MatchState state, int victimIndex, int frames)
         {
             if (victimIndex < 0 || victimIndex >= state.ActorCount || frames <= 0)
@@ -63,6 +84,43 @@ namespace JewelBlitzArena.Sim
 
             ref ActorSlot victim = ref MatchStateAccess.Actor(ref state, victimIndex);
             ApplyFreezeToVictim(ref victim, ClampUShort(CapHard(frames)));
+        }
+
+        /// <summary>
+        /// Freeze all actors in radius of a world point (Ice Jar floor-patch stub).
+        /// Deterministic actor-index order; <paramref name="excludeActor"/> skips the thrower.
+        /// </summary>
+        public static void ApplyFreezeInRadius(
+            ref MatchState state, Fix centerX, Fix centerZ, Fix range, int frames, int excludeActor = -1)
+        {
+            if (frames <= 0 || range.Raw <= 0)
+            {
+                return;
+            }
+
+            int f = ClampUShort(CapHard(frames));
+            long rangeSq = (range.Raw >> 8) * (range.Raw >> 8);
+
+            for (int i = 0; i < state.ActorCount; i++)
+            {
+                if (i == excludeActor)
+                {
+                    continue;
+                }
+
+                ref ActorSlot victim = ref MatchStateAccess.Actor(ref state, i);
+                if (!victim.IsAlive || victim.IsEliminated || victim.InvulnFrames > 0)
+                {
+                    continue;
+                }
+
+                if (DistSqScaled(centerX, centerZ, victim.PosX, victim.PosZ) > rangeSq)
+                {
+                    continue;
+                }
+
+                ApplyFreezeToVictim(ref victim, f);
+            }
         }
 
         private static void Apply(

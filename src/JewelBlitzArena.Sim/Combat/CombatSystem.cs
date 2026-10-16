@@ -481,15 +481,33 @@ namespace JewelBlitzArena.Sim
             }
 
             int itemId = 0;
+            Fix impactX = victim.PosX;
+            Fix impactZ = victim.PosZ;
             if (itemSlot >= 0 && itemSlot < PoolCaps.LooseItems)
             {
                 LooseItemSlot item = MatchStateAccess.GetLooseItem(ref state, itemSlot);
                 itemId = item.ItemId;
+                impactX = item.PosX;
+                impactZ = item.PosZ;
             }
 
-            if (itemId == MatchRules.PetrifyGasItemId)
+            if (itemId == MatchRules.AdhesiveSprayItemId)
+            {
+                StatusRuntime.ApplySlow(ref state, vic, MatchRules.AdhesiveSlowFrames);
+            }
+            else if (itemId == MatchRules.PetrifyGasItemId)
             {
                 StatusRuntime.ApplyFreeze(ref state, vic, MatchRules.FreezeDurationFrames);
+            }
+            else if (itemId == MatchRules.IceJarItemId)
+            {
+                // Floor-patch stub: freeze actors near impact (includes the hit victim).
+                StatusRuntime.ApplyFreezeInRadius(
+                    ref state,
+                    impactX,
+                    impactZ,
+                    MatchRules.IceJarFreezeRange,
+                    MatchRules.FreezeDurationFrames);
             }
 
             const int thrownDamage = 40;
