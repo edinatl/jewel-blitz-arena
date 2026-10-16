@@ -5,7 +5,8 @@ namespace JewelBlitzArena.Sim
     /// <summary>
     /// Harvester anatomy on <see cref="MatchState.BossSubActors"/> (stages.md §3.1).
     /// Four legs @ 500 (repair 30 s), head @ 1200 (exposed after two legs broken),
-    /// mountable tail @ 1000, Buck every 6 s while mounted. Cutters deferred.
+    /// mountable tail @ 1000, Buck every 6 s while mounted, Cutters gravel via
+    /// <see cref="ProjectileRuntime"/>.
     /// </summary>
     public static class BossPartRuntime
     {
@@ -21,9 +22,12 @@ namespace JewelBlitzArena.Sim
         public const int KindTail = 6;
         /// <summary>BossSub[6] Buck countdown controller (not a hittable part).</summary>
         public const int KindBuck = 7;
+        /// <summary>BossSub[7] Cutters cadence controller (not a hittable part).</summary>
+        public const int KindCutters = 8;
 
         public const int IndexTail = 5;
         public const int IndexBuck = 6;
+        public const int IndexCutters = 7;
 
         public const int LegMaxLife = 500;
         public const int HeadMaxLife = 1200;

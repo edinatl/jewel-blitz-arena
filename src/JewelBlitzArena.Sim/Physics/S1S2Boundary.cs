@@ -55,6 +55,8 @@ namespace JewelBlitzArena.Sim
         BossMounted = 16,
         /// <summary>Harvester Buck shake. SlotA = actor thrown (or 255), SlotB = hanging (1) / thrown (0).</summary>
         BossBuck = 17,
+        /// <summary>Stage projectile hit actor. SlotA = projectile index, SlotB = actor.</summary>
+        ProjectileHitActor = 18,
     }
 
     /// <summary>Ephemeral per-step event (not part of <see cref="MatchState"/> hash).</summary>

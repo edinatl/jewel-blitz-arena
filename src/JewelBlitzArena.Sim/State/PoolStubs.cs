@@ -102,7 +102,27 @@ namespace JewelBlitzArena.Sim
         public int Damage;
         public byte OwnerSlot;
         public byte Flags;
+        /// <summary>TTL frames remaining while active.</summary>
         public ushort Reserved;
+
+        public const byte FlagActive = 1 << 0;
+        public const byte NoOwner = 255;
+
+        public bool IsActive
+        {
+            get => (Flags & FlagActive) != 0;
+            set
+            {
+                if (value)
+                {
+                    Flags = (byte)(Flags | FlagActive);
+                }
+                else
+                {
+                    Flags = (byte)(Flags & ~FlagActive);
+                }
+            }
+        }
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]

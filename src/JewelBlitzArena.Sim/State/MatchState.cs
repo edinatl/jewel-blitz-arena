@@ -148,6 +148,28 @@ namespace JewelBlitzArena.Sim
             }
         }
 
+        public static ProjectileSlot GetProjectile(ref MatchState state, int index)
+        {
+            unsafe
+            {
+                fixed (byte* p = state.Projectiles)
+                {
+                    return ((ProjectileSlot*)p)[index];
+                }
+            }
+        }
+
+        public static void SetProjectile(ref MatchState state, int index, in ProjectileSlot slot)
+        {
+            unsafe
+            {
+                fixed (byte* p = state.Projectiles)
+                {
+                    ((ProjectileSlot*)p)[index] = slot;
+                }
+            }
+        }
+
         public static int GetJewelRespawnFrame(ref MatchState state, int index)
         {
             unsafe

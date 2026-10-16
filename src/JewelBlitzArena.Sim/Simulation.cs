@@ -146,6 +146,7 @@ namespace JewelBlitzArena.Sim
                 ref _contacts);
             BreakableRuntime.InitializeMatch(ref _state, _stageGraph);
             BossPartRuntime.InitializeMatch(ref _state, _stageGraph);
+            ProjectileRuntime.InitializeMatch(ref _state);
             GleamBudgetRuntime.InitializeMatch(ref _state, _stageGraph);
         }
 
@@ -185,6 +186,7 @@ namespace JewelBlitzArena.Sim
             IntegrateActorsHorizontal();
             PhysicsWorld.StepActorsJewelsItems(ref _state, ref _contacts);
             ItemRuntime.TickThrownHits(ref _state, ref _contacts);
+            ProjectileRuntime.Tick(ref _state, ref _contacts);
             JewelRuntime.TickPickups(ref _state, ref _contacts);
             JewelRuntime.TickSpawns(ref _state);
             JewelSystem.TickScheduledRespawns(ref _state);
@@ -203,6 +205,7 @@ namespace JewelBlitzArena.Sim
                 _lastInputs[2],
                 _lastInputs[3],
                 ref _contacts);
+            ProjectileRuntime.TickCuttersCadence(ref _state, _stageGraph);
             WorldPatchRuntime.Tick(ref _state);
             GleamRuntime.Tick(ref _state, ref _contacts);
 
@@ -211,6 +214,7 @@ namespace JewelBlitzArena.Sim
 
             _state.ActiveJewelCount = JewelRuntime.CountTowardCap(ref _state);
             _state.ActiveLooseItemCount = CrateSpawner.CountActiveItems(ref _state);
+            _state.ActiveProjectileCount = ProjectileRuntime.CountActive(ref _state);
 
             _ = _state.GameplayRng.NextUInt64();
             _state.Frame++;

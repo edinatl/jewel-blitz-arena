@@ -16,6 +16,8 @@ public sealed class BossPartRuntimeTests
         Assert.That(BossPartRuntime.IsHeadExposed(ref snap), Is.False);
         Assert.That(MatchStateAccess.GetBossSub(ref snap, BossPartRuntime.IndexBuck).TypeId,
             Is.EqualTo(0), "Buck controller arms lazily on first mount");
+        Assert.That(MatchStateAccess.GetBossSub(ref snap, BossPartRuntime.IndexCutters).TypeId,
+            Is.EqualTo(0), "Cutters controller arms lazily on first broken leg");
     }
 
     [Test]
