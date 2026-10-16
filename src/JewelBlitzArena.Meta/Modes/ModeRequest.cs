@@ -16,6 +16,9 @@ namespace JewelBlitzArena.Meta
 
         public HouseRulesSettings HouseRules { get; set; } = HouseRulesSettings.CreateDefaults();
 
+        /// <summary>Expedition difficulty 1–8 (default 4). Clamped by the orchestrator.</summary>
+        public int Difficulty { get; set; } = ExpeditionChestRuntime.DiffDefault;
+
         /// <summary>Sparring: jewel_mode respawn (Meta flag only until Sim training lands).</summary>
         public bool SparringJewelRespawn { get; set; }
 

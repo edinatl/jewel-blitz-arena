@@ -3,8 +3,8 @@ using JewelBlitzArena.Sim;
 namespace JewelBlitzArena.Meta
 {
     /// <summary>
-    /// Expedition greybox: enables gleam budget drops and ingests carats into the profile.
-    /// Full difficulty table / chest / time adjustment remain M2.
+    /// Expedition greybox: gleam budget drops, post-stage chest + time adjustment.
+    /// Full difficulty table (opponents / boss scale / ally) remains deferred.
     /// </summary>
     public class ExpeditionModeOrchestrator : IModeOrchestrator
     {
@@ -25,19 +25,32 @@ namespace JewelBlitzArena.Meta
             }
 
             CustomModeOrchestrator.ApplyFighterIds(ref config, request.FighterIds, actors);
+            // Difficulty is Meta-only for chest sizing until opponent/boss scale lands.
+            _ = ExpeditionChestRuntime.ClampDifficulty(request.Difficulty);
             profile.SetFlag(ProfileFlags.TouchedExpeditionStub);
             return config;
         }
 
         public void ApplyResult(PlayerProfile profile, in MatchResult result, ModeRequest request)
         {
+            long sum = profile.Carats;
             if (result.CaratsEarned > 0)
             {
-                long sum = (long)profile.Carats + result.CaratsEarned;
-                profile.Carats = sum > int.MaxValue ? int.MaxValue : (int)sum;
+                sum += result.CaratsEarned;
             }
 
-            _ = request;
+            int chest = ExpeditionChestRuntime.ResolveChestCarats(
+                request.StageId,
+                request.Difficulty,
+                result.FramesPlayed,
+                request.Seed,
+                ExpeditionChestRuntime.PlayerClearedStage(in result));
+            if (chest > 0)
+            {
+                sum += chest;
+            }
+
+            profile.Carats = sum > int.MaxValue ? int.MaxValue : (int)sum;
         }
     }
 }
