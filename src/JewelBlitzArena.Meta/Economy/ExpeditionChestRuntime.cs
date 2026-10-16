@@ -22,6 +22,10 @@ namespace JewelBlitzArena.Meta
         public const int PurseValue = 2000;
         public const int PurseDifficultyMin = 5;
         public const int PurseChancePercent = 20;
+        /// <summary>Teller's Reel / under-par diff-8 jackpot (items-and-economy.md §7).</summary>
+        public const int CofferValue = 8000;
+        public const int CofferDifficultyMin = 8;
+        public const int CofferChancePercent = 10;
 
         /// <summary>FFA par proxy (mid of balance.md §1 65–80 s).</summary>
         public const int ParFfaSeconds = 72;
@@ -176,11 +180,28 @@ namespace JewelBlitzArena.Meta
                 return false;
             }
 
-            ulong x = seed ^ ((ulong)(uint)stageId << 32) ^ (ulong)(uint)framesPlayed;
-            x ^= x >> 33;
-            x *= 0xff51afd7ed558ccdUL;
-            x ^= x >> 33;
+            ulong x = Mix(seed ^ ((ulong)(uint)stageId << 32) ^ (ulong)(uint)framesPlayed);
             return (int)(x % 100UL) < PurseChancePercent;
+        }
+
+        /// <summary>
+        /// Coffer jackpot: difficulty 8 clear under par, 10% (economy §7). Flat 8,000 carats.
+        /// </summary>
+        public static bool RollCoffer(ulong seed, int stageId, int framesPlayed, int difficulty)
+        {
+            if (ClampDifficulty(difficulty) < CofferDifficultyMin)
+            {
+                return false;
+            }
+
+            if (framesPlayed >= ParFrames(stageId))
+            {
+                return false;
+            }
+
+            // Distinct mix salt so purse and coffer rolls stay independent.
+            ulong x = Mix(seed ^ 0x434F46464552UL ^ ((ulong)(uint)stageId << 17) ^ (ulong)(uint)framesPlayed);
+            return (int)(x % 100UL) < CofferChancePercent;
         }
 
         public static int ResolveChestCarats(
@@ -196,6 +217,11 @@ namespace JewelBlitzArena.Meta
             }
 
             int diff = ClampDifficulty(difficulty);
+            if (RollCoffer(seed, stageId, framesPlayed, diff))
+            {
+                return CofferValue;
+            }
+
             if (RollPurse(seed, stageId, framesPlayed, diff))
             {
                 return ApplyTimeMul(PurseValue, framesPlayed, stageId);
@@ -203,6 +229,14 @@ namespace JewelBlitzArena.Meta
 
             int chest = ChestBaseCarats(stageId, diff);
             return ApplyTimeMul(chest, framesPlayed, stageId);
+        }
+
+        private static ulong Mix(ulong x)
+        {
+            x ^= x >> 33;
+            x *= 0xff51afd7ed558ccdUL;
+            x ^= x >> 33;
+            return x;
         }
 
         public static bool PlayerClearedStage(in MatchResult result)

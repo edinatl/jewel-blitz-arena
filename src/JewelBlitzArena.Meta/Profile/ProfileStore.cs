@@ -80,6 +80,9 @@ namespace JewelBlitzArena.Meta
                 WriteHouseRules(bw, profile.HouseRulesDefaults);
                 // v2+: BestExpeditionDifficulty sits before Ledger so v1 blobs still parse.
                 bw.Write(profile.BestExpeditionDifficulty);
+                // v3+: Chits + FacetWheelWidthLevel.
+                bw.Write(profile.Chits);
+                bw.Write(profile.FacetWheelWidthLevel);
 
                 int[] owned = profile.Ledger.ToArray();
                 bw.Write(owned.Length);
@@ -117,6 +120,12 @@ namespace JewelBlitzArena.Meta
             if (profile.SchemaVersion >= ProfileSchema.Version2)
             {
                 profile.BestExpeditionDifficulty = br.ReadInt32();
+            }
+
+            if (profile.SchemaVersion >= ProfileSchema.Version3)
+            {
+                profile.Chits = br.ReadInt32();
+                profile.FacetWheelWidthLevel = br.ReadInt32();
             }
 
             int count = br.ReadInt32();

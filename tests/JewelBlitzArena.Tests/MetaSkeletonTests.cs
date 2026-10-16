@@ -18,8 +18,10 @@ public sealed class MetaSkeletonTests
         Assert.That(v0.SchemaVersion, Is.EqualTo(ProfileSchema.Current));
         Assert.That(v0.DisplayName, Is.EqualTo("Rookie"));
         Assert.That(v0.HouseRulesDefaults.LusterTimer, Is.True);
-        Assert.That(v0.UnlockedHouseRulesBits & HouseRulesBits.LusterTimer, Is.Not.EqualTo(0));
+        Assert.That(v0.UnlockedHouseRulesBits, Is.EqualTo(0), "no clears → no House Rules unlocked");
         Assert.That(v0.BestExpeditionDifficulty, Is.EqualTo(0));
+        Assert.That(v0.Chits, Is.EqualTo(0));
+        Assert.That(v0.FacetWheelWidthLevel, Is.EqualTo(0));
     }
 
     [Test]

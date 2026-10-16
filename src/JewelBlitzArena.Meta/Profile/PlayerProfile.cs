@@ -22,6 +22,12 @@ namespace JewelBlitzArena.Meta
         /// </summary>
         public int BestExpeditionDifficulty { get; set; }
 
+        /// <summary>Tinker failure Chits — Facet Wheel currency (items-and-economy.md §5).</summary>
+        public int Chits { get; set; }
+
+        /// <summary>Facet Wheel width level 0–5 (cumulative carat widen steps).</summary>
+        public int FacetWheelWidthLevel { get; set; }
+
         /// <summary><see cref="ProfileFlags"/> bits.</summary>
         public int Flags { get; set; }
 
@@ -56,9 +62,11 @@ namespace JewelBlitzArena.Meta
                 Carats = 0,
                 DistinctTournamentClears = 0,
                 BestExpeditionDifficulty = 0,
+                Chits = 0,
+                FacetWheelWidthLevel = 0,
                 Flags = 0,
-                // Fresh profile: Luster timer rule is "unlocked" as the default-editable row 3 data stub.
-                UnlockedHouseRulesBits = HouseRulesBits.LusterTimer,
+                // House Rules rows start locked; defaults still apply via HouseRulesDefaults.
+                UnlockedHouseRulesBits = UnlockLadderRuntime.HouseRulesBitsForClears(0),
                 HouseRulesDefaults = HouseRulesSettings.CreateDefaults(),
             };
             return profile;

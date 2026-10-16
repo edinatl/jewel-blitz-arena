@@ -65,9 +65,9 @@ public sealed class ExpeditionChestTests
         var profile = PlayerProfile.CreateNew();
         profile.Carats = 0;
         orch.ApplyResult(profile, cleared, request);
-        // In-match 100 + chest 605 at par (mul 1.0), unless purse rolls.
+        // In-match 100 + chest 605 at par (mul 1.0), unless purse/coffer rolls.
         Assert.That(profile.Carats, Is.GreaterThanOrEqualTo(100 + 605));
-        // Purse is 2000 * 1.0; if rolled, larger.
+        // Purse ≤2000; Coffer jackpot is 8000 (diff-8 under-par path — this clear is at par so no coffer).
         Assert.That(profile.Carats, Is.LessThanOrEqualTo(100 + 2000));
 
         var failed = cleared;

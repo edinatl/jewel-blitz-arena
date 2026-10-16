@@ -22,6 +22,9 @@ namespace JewelBlitzArena.Meta
                     case ProfileSchema.Version1:
                         MigrateV1ToV2(profile);
                         break;
+                    case ProfileSchema.Version2:
+                        MigrateV2ToV3(profile);
+                        break;
                     default:
                         throw new InvalidOperationException(
                             $"Unknown profile schema {profile.SchemaVersion}; cannot migrate.");
@@ -49,10 +52,9 @@ namespace JewelBlitzArena.Meta
                 profile.HouseRulesDefaults = HouseRulesSettings.CreateDefaults();
             }
 
-            if (profile.UnlockedHouseRulesBits == 0)
-            {
-                profile.UnlockedHouseRulesBits = HouseRulesBits.LusterTimer;
-            }
+            // Unlock bits come from DistinctTournamentClears via UnlockLadder (modes.md §8).
+            profile.UnlockedHouseRulesBits =
+                UnlockLadderRuntime.HouseRulesBitsForClears(profile.DistinctTournamentClears);
 
             profile.SchemaVersion = ProfileSchema.Version1;
         }
@@ -65,6 +67,26 @@ namespace JewelBlitzArena.Meta
             }
 
             profile.SchemaVersion = ProfileSchema.Version2;
+        }
+
+        private static void MigrateV2ToV3(PlayerProfile profile)
+        {
+            if (profile.Chits < 0)
+            {
+                profile.Chits = 0;
+            }
+
+            if (profile.FacetWheelWidthLevel < 0)
+            {
+                profile.FacetWheelWidthLevel = 0;
+            }
+
+            if (profile.FacetWheelWidthLevel > FacetWheelRuntime.MaxWidthLevel)
+            {
+                profile.FacetWheelWidthLevel = FacetWheelRuntime.MaxWidthLevel;
+            }
+
+            profile.SchemaVersion = ProfileSchema.Version3;
         }
     }
 }

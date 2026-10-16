@@ -12,6 +12,9 @@ namespace JewelBlitzArena.Meta
         /// <summary>Adds BestExpeditionDifficulty for unlock ladder (modes.md).</summary>
         public const int Version2 = 2;
 
-        public const int Current = Version2;
+        /// <summary>Adds Chits + FacetWheelWidthLevel for Facet Wheel greybox.</summary>
+        public const int Version3 = 3;
+
+        public const int Current = Version3;
     }
 }
