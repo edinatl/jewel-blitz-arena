@@ -4024,6 +4024,20 @@
       "healPerUse": 0,
       "tags": [],
       "cosmeticSocket": ""
+    },
+    {
+      "itemId": 100,
+      "name": "Solitaire",
+      "category": "Gift",
+      "rarity": 7,
+      "crateEligibility": "Never",
+      "pocketable": true,
+      "buyPrice": 0,
+      "sellPrice": 5000,
+      "damagePerUse": 0,
+      "healPerUse": 0,
+      "tags": [],
+      "cosmeticSocket": ""
     }
   ]
 }

@@ -9,8 +9,8 @@ namespace JewelBlitzArena.Meta
     /// </summary>
     public static class CitrineGiftsRuntime
     {
-        /// <summary>Solitaire — rarity 7, never, pocketable (stub id).</summary>
-        public const int SolitaireItemId = 910001;
+        /// <summary>Solitaire — rarity 7 Gift, never, pocketable (S5 catalog id).</summary>
+        public const int SolitaireItemId = SampleContentFactory.SolitaireItemId;
 
         /// <summary>Regent's Diadem — rarity 7 head cosmetic (S5 catalog id).</summary>
         public const int DiademItemId = SampleContentFactory.RegentsDiademItemId;

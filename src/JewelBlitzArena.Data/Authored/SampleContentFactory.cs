@@ -100,6 +100,9 @@ namespace JewelBlitzArena.Data
         public const int LogbookItemIdMin = 80;
         public const int LogbookItemIdMax = 99;
 
+        /// <summary>Solitaire — rarity 7 Gift, never crate, pocketable (Citrine gift).</summary>
+        public const int SolitaireItemId = 100;
+
         public static AuthoredContentPack CreateS5StubPack()
         {
             return new AuthoredContentPack
@@ -1845,6 +1848,21 @@ namespace JewelBlitzArena.Data
             {
                 AddNever(LogbookItemIdMin + lb, $"Logbook {lb + 1}", "Card", 3, 30);
             }
+
+            // Solitaire — Captain Citrine Gift (items-and-economy.md §6); pocketable match jewel.
+            items.Add(new AuthoredItem
+            {
+                ItemId = SolitaireItemId,
+                Name = "Solitaire",
+                Category = "Gift",
+                Rarity = 7,
+                CrateEligibility = "Never",
+                Pocketable = true,
+                DamagePerUse = 0,
+                HealPerUse = 0,
+                BuyPrice = 0,
+                SellPrice = 5_000,
+            });
 
             return items;
         }
