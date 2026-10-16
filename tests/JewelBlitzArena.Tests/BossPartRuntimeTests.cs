@@ -173,6 +173,78 @@ public sealed class BossPartRuntimeTests
         Assert.That(MatchStateAccess.Actor(ref after, 0).IsMounted, Is.False);
     }
 
+    [Test]
+    public void Breaking_head_ends_match_with_living_place_1()
+    {
+        var sim = ResetHarvester(Seed ^ 8UL);
+        MatchState snap = sim.Snapshot();
+        BreakPartAt(sim, ref snap, partIndex: 0);
+        BreakPartAt(sim, ref snap, partIndex: 1);
+        snap = sim.Snapshot();
+        Assert.That(BossPartRuntime.IsHeadExposed(ref snap), Is.True);
+        Assert.That(snap.MatchOver, Is.False);
+
+        BreakPartAt(sim, ref snap, partIndex: 4); // IndexHead
+        MatchState after = sim.Snapshot();
+        Assert.That(after.MatchOver, Is.True);
+        // MatchEndFrame = Frame+1 at break; Step then increments Frame → equal after snap.
+        Assert.That(after.MatchEndFrame, Is.EqualTo(after.Frame));
+        Assert.That(MatchStateAccess.GetPlacement(ref after, 0), Is.EqualTo(1));
+        Assert.That(MatchStateAccess.GetPlacement(ref after, 1), Is.EqualTo(1));
+        Assert.That(
+            (MatchStateAccess.GetBossSub(ref after, 4).Flags & BossPartRuntime.FlagBroken) != 0,
+            Is.True);
+    }
+
+    [Test]
+    public void Breaking_tail_while_mounted_ends_match()
+    {
+        var sim = ResetHarvester(Seed ^ 9UL);
+        MatchState snap = sim.Snapshot();
+        BreakPartAt(sim, ref snap, partIndex: 0);
+        snap = sim.Snapshot();
+        MountAtBrokenLeg(sim, ref snap, legIndex: 0);
+        snap = sim.Snapshot();
+        Assert.That(MatchStateAccess.Actor(ref snap, 0).IsMounted, Is.True);
+        Assert.That(snap.MatchOver, Is.False);
+
+        BreakPartAt(sim, ref snap, partIndex: BossPartRuntime.IndexTail, keepMounted: true);
+        MatchState after = sim.Snapshot();
+        Assert.That(after.MatchOver, Is.True);
+        Assert.That(MatchStateAccess.GetPlacement(ref after, 0), Is.EqualTo(1));
+        Assert.That(
+            (MatchStateAccess.GetBossSub(ref after, BossPartRuntime.IndexTail).Flags
+                & BossPartRuntime.FlagBroken) != 0,
+            Is.True);
+    }
+
+    [Test]
+    public void Leg_repair_halts_after_match_over()
+    {
+        var sim = ResetHarvester(Seed ^ 10UL);
+        MatchState snap = sim.Snapshot();
+        BreakPartAt(sim, ref snap, partIndex: 0);
+        BreakPartAt(sim, ref snap, partIndex: 1);
+        snap = sim.Snapshot();
+        BreakPartAt(sim, ref snap, partIndex: 4);
+        snap = sim.Snapshot();
+        Assert.That(snap.MatchOver, Is.True);
+
+        GenericPoolSlot leg = MatchStateAccess.GetBossSub(ref snap, 0);
+        Assert.That((leg.Flags & BossPartRuntime.FlagRepairing) != 0, Is.True);
+        leg.Param0 = 1;
+        MatchStateAccess.SetBossSub(ref snap, 0, leg);
+        sim.Restore(snap);
+        sim.Step(InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral);
+        sim.Step(InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral);
+
+        MatchState after = sim.Snapshot();
+        GenericPoolSlot stillBroken = MatchStateAccess.GetBossSub(ref after, 0);
+        Assert.That((stillBroken.Flags & BossPartRuntime.FlagBroken) != 0, Is.True);
+        Assert.That((stillBroken.Flags & BossPartRuntime.FlagActive) == 0, Is.True);
+        Assert.That(stillBroken.Param0, Is.EqualTo(1), "repair countdown must not advance after win");
+    }
+
     private static Simulation ResetHarvester(ulong seed)
     {
         ContentCatalog catalog = ContentCompiler.Compile(SampleContentFactory.CreateS5StubPack());
@@ -215,14 +287,16 @@ public sealed class BossPartRuntimeTests
         snap = sim.Snapshot();
     }
 
-    private static void BreakPartAt(Simulation sim, ref MatchState snap, int partIndex)
+    private static void BreakPartAt(
+        Simulation sim, ref MatchState snap, int partIndex, bool keepMounted = false)
     {
-        // Deal enough Strong damage over several frames to clear LegMaxLife (500).
+        // Deal enough Strong damage over several frames to clear part Life.
         int remaining = MatchStateAccess.GetBossSub(ref snap, partIndex).Param0;
-        while (remaining > 0)
+        int guard = remaining + 32;
+        while (remaining > 0 && guard-- > 0)
         {
             int chunk = remaining > 90 ? 90 : remaining;
-            StrikePart(sim, ref snap, partIndex, chunk);
+            StrikePart(sim, ref snap, partIndex, chunk, keepMounted);
             snap = sim.Snapshot();
             GenericPoolSlot part = MatchStateAccess.GetBossSub(ref snap, partIndex);
             if ((part.Flags & BossPartRuntime.FlagBroken) != 0)
@@ -232,6 +306,8 @@ public sealed class BossPartRuntimeTests
 
             remaining = part.Param0;
         }
+
+        Assert.Fail($"part {partIndex} did not break (life left {remaining})");
     }
 
     private static void StrikePart(
