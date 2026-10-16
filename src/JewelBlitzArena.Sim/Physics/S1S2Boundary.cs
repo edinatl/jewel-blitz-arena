@@ -43,6 +43,8 @@ namespace JewelBlitzArena.Sim
         HazardHitActor = 10,
         /// <summary>Loose item left flight and settled on the field. SlotA = item index.</summary>
         ItemLanded = 11,
+        /// <summary>Stage crate / breakable opened. SlotA = crate index.</summary>
+        CrateBroken = 12,
     }
 
     /// <summary>Ephemeral per-step event (not part of <see cref="MatchState"/> hash).</summary>

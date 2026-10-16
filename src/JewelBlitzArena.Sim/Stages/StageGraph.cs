@@ -12,19 +12,30 @@ namespace JewelBlitzArena.Sim
             stageId: 0,
             fallIsKo: false,
             jewelCapOverride: 0,
+            jewelCrateChancePercent: 8,
             phases: System.Array.Empty<StagePhaseDef>());
 
-        public StageGraph(int stageId, bool fallIsKo, int jewelCapOverride, StagePhaseDef[] phases)
+        public StageGraph(
+            int stageId,
+            bool fallIsKo,
+            int jewelCapOverride,
+            StagePhaseDef[] phases,
+            int jewelCrateChancePercent = 8)
         {
             StageId = stageId;
             FallIsKo = fallIsKo;
             JewelCapOverride = jewelCapOverride;
+            JewelCrateChancePercent = jewelCrateChancePercent < 0
+                ? 0
+                : (jewelCrateChancePercent > 100 ? 100 : jewelCrateChancePercent);
             Phases = phases ?? System.Array.Empty<StagePhaseDef>();
         }
 
         public int StageId { get; }
         public bool FallIsKo { get; }
         public int JewelCapOverride { get; }
+        /// <summary>Percent chance a broken crate drops a jewel (combat-and-match.md). Not hashed.</summary>
+        public int JewelCrateChancePercent { get; }
         public StagePhaseDef[] Phases { get; }
 
         public bool TryGetPhase(int index, out StagePhaseDef phase)
@@ -91,7 +102,12 @@ namespace JewelBlitzArena.Sim
                     kinematics);
             }
 
-            return new StageGraph(record.StageId, record.FallIsKo, record.JewelCapOverride, phases);
+            return new StageGraph(
+                record.StageId,
+                record.FallIsKo,
+                record.JewelCapOverride,
+                phases,
+                record.JewelCrateChancePercent);
         }
     }
 

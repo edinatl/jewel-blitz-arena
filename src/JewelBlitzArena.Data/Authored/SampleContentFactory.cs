@@ -1024,7 +1024,8 @@ namespace JewelBlitzArena.Data
         /// <summary>
         /// Terraces — The Harvester (stages.md §3.1). Jewel cap 6.
         /// Boss AI v1: footfall follows HarvesterPatrol; intake tracks nearest fighter + throw;
-        /// StompShock applies Dizzy (damage 0). Breakables / mount / timeout Blade Sweep deferred.
+        /// StompShock applies Dizzy (damage 0). Terrace crates via BreakableRuntime;
+        /// boss legs/mount / timeout Blade Sweep deferred.
         /// </summary>
         public static AuthoredStage CreateHarvesterTerraces()
         {
