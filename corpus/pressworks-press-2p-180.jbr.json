@@ -1,7 +1,7 @@
 {
   "formatVersion": 3,
   "name": "pressworks-press-2p-180",
-  "notes": "S8: Pressworks boss stub via S5 catalog; PhaseClock 10% clears Blitz-suppressed Sorting into The Press.",
+  "notes": "S8: Pressworks boss AI v1; PhaseClock 10% clears Sorting; Live Hands timer-chase on The Press.",
   "seed": 5350911184894841649,
   "stageId": 7,
   "actorCount": 2,
@@ -12,7 +12,7 @@
     3,
     4
   ],
-  "expectedHashHex": "537acd63b6c97e31",
+  "expectedHashHex": "324e783f6dd2faaf",
   "frames": [
     {
       "p0": 32,

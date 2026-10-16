@@ -1022,8 +1022,9 @@ namespace JewelBlitzArena.Data
         }
 
         /// <summary>
-        /// Terraces — The Harvester greybox stub (stages.md §3.1). Jewel cap 6.
-        /// Boss AI / breakables / mount / timeout Blade Sweep deferred; footfall / intake / beam / stomp pulses land now.
+        /// Terraces — The Harvester (stages.md §3.1). Jewel cap 6.
+        /// Boss AI v1: footfall follows HarvesterPatrol; intake tracks nearest fighter + throw;
+        /// StompShock applies Dizzy (damage 0). Breakables / mount / timeout Blade Sweep deferred.
         /// </summary>
         public static AuthoredStage CreateHarvesterTerraces()
         {
@@ -1111,8 +1112,9 @@ namespace JewelBlitzArena.Data
         }
 
         /// <summary>
-        /// The Pressworks — Chairman Vitre greybox stub (stages.md §3.2). Jewel cap 6.
-        /// Guards / Vitre AI / Overpress / timeout Flood deferred; Sorting line Blitz-suppressed → Press pulses land now.
+        /// The Pressworks — Chairman Vitre (stages.md §3.2). Jewel cap 6.
+        /// Boss AI v1: LiveHandsChase is a timer that relocates toward the nearest fighter.
+        /// Guards-as-creatures / Overpress Life / timeout Flood deferred.
         /// Sorting duration stubbed to 25 s (design 90 s) for greybox/corpus length.
         /// </summary>
         public static AuthoredStage CreatePressworks()
@@ -1207,8 +1209,8 @@ namespace JewelBlitzArena.Data
                             {
                                 HazardId = 63,
                                 Name = "LiveHandsChase",
-                                Trigger = "phase_enter",
-                                PeriodSeconds = "10",
+                                Trigger = "timer",
+                                PeriodSeconds = "6",
                                 TelegraphFrames = 30,
                                 Damage = 120,
                                 CenterX = "-1",

@@ -83,8 +83,10 @@ namespace JewelBlitzArena.Sim
                 return;
             }
 
-            StepHazards(ref state, graph, ref events);
+            // Kinematics first so boss AI can bind hazard centers to patrol tracks.
             StepKinematics(ref state, graph);
+            BossAiRuntime.BindCenters(ref state, graph);
+            StepHazards(ref state, graph, ref events);
 
             if (!graph.TryGetPhase(state.PhaseIndex, out StagePhaseDef phase))
             {
@@ -361,8 +363,11 @@ namespace JewelBlitzArena.Sim
                     slot.Flags = (byte)(slot.Flags & ~HazardFlagTelegraph);
                     if (hazard.Damage > 0)
                     {
-                        ApplyHazardPulse(ref state, hazard, ref events);
+                        ApplyHazardPulse(ref state, in hazard, slot.PosX, slot.PosY, slot.PosZ, ref events);
                     }
+
+                    BossAiRuntime.AfterPulse(
+                        ref state, hazard.HazardId, slot.PosX, slot.PosZ, hazard.Radius, ref events);
 
                     if (hazard.Trigger == StageHazardTrigger.PhaseEnter)
                     {
@@ -391,8 +396,12 @@ namespace JewelBlitzArena.Sim
         private static void ApplyHazardPulse(
             ref MatchState state,
             in StageHazardDef hazard,
+            Fix centerX,
+            Fix centerY,
+            Fix centerZ,
             ref SimContactBuffer events)
         {
+            _ = centerY;
             long radiusSq = MulRaw(hazard.Radius.Raw, hazard.Radius.Raw);
             for (int a = 0; a < state.ActorCount; a++)
             {
@@ -402,8 +411,8 @@ namespace JewelBlitzArena.Sim
                     continue;
                 }
 
-                Fix dx = actor.PosX - hazard.CenterX;
-                Fix dz = actor.PosZ - hazard.CenterZ;
+                Fix dx = actor.PosX - centerX;
+                Fix dz = actor.PosZ - centerZ;
                 long distSq = MulRaw(dx.Raw, dx.Raw) + MulRaw(dz.Raw, dz.Raw);
                 if (distSq > radiusSq)
                 {

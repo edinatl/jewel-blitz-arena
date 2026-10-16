@@ -2028,8 +2028,8 @@
             {
               "hazardId": 63,
               "name": "LiveHandsChase",
-              "trigger": "phase_enter",
-              "periodSeconds": "10",
+              "trigger": "timer",
+              "periodSeconds": "6",
               "telegraphFrames": 30,
               "damage": 120,
               "centerX": "-1",

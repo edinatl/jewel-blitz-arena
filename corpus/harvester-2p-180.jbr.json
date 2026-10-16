@@ -1,7 +1,7 @@
 {
   "formatVersion": 3,
   "name": "harvester-2p-180",
-  "notes": "S8: Harvester Terraces boss stub via S5 catalog (jewel cap 6; footfall/intake/beam/stomp \u002B patrol).",
+  "notes": "S8: Harvester Terraces boss AI v1 via S5 catalog (jewel cap 6; footfall tracks patrol; intake chase; stomp Dizzy).",
   "seed": 5350911184760624689,
   "stageId": 6,
   "actorCount": 2,
@@ -12,7 +12,7 @@
     3,
     4
   ],
-  "expectedHashHex": "dab3304ddd8b99c3",
+  "expectedHashHex": "8f5df3a3a926e374",
   "frames": [
     {
       "p0": 32,

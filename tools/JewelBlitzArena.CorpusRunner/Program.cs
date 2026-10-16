@@ -222,16 +222,16 @@ static int RecordFixtures(string[] args)
         phaseClockPermille: 100,
         notes: "S8: The Orrery via S5 catalog; PhaseClock 10% reaches Planet disc (arm gap + gust + rotating arm)."));
 
-    // Harvester open terrace (jewel cap 6) — hazard/patrol kinematic smoke.
+    // Harvester open terrace (jewel cap 6) — boss AI v1 (footfall↔patrol, intake chase).
     Write(corpus, CorpusRunner.Capture(
         name: "harvester-2p-180",
         seed: 0x4A42415F48525631UL, // JBA_HRV1
         actorCount: 2,
         stageId: SampleContentFactory.HarvesterTerracesStageId,
         p0Log: BuildWalkLog(180),
-        notes: "S8: Harvester Terraces boss stub via S5 catalog (jewel cap 6; footfall/intake/beam/stomp + patrol)."));
+        notes: "S8: Harvester Terraces boss AI v1 via S5 catalog (jewel cap 6; footfall tracks patrol; intake chase; stomp Dizzy)."));
 
-    // Pressworks: 10% clock → Sorting 150f + transition 12f → The Press.
+    // Pressworks: 10% clock → Sorting 150f + transition 12f → The Press (Live Hands chase).
     Write(corpus, CorpusRunner.Capture(
         name: "pressworks-press-2p-180",
         seed: 0x4A42415F50525331UL, // JBA_PRS1
@@ -239,7 +239,7 @@ static int RecordFixtures(string[] args)
         stageId: SampleContentFactory.PressworksStageId,
         p0Log: BuildWalkLog(180),
         phaseClockPermille: 100,
-        notes: "S8: Pressworks boss stub via S5 catalog; PhaseClock 10% clears Blitz-suppressed Sorting into The Press."));
+        notes: "S8: Pressworks boss AI v1; PhaseClock 10% clears Sorting; Live Hands timer-chase on The Press."));
 
     Console.WriteLine($"Recorded fixtures into {Path.GetFullPath(corpus)}");
     return 0;

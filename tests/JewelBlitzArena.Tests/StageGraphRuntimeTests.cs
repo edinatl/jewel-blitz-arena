@@ -452,6 +452,169 @@ public sealed class StageGraphRuntimeTests
         Assert.That(press.ActiveKinematicCount, Is.EqualTo(1));
     }
 
+    [Test]
+    public void Harvester_footfall_tracks_patrol_kinematic()
+    {
+        ContentCatalog catalog = ContentCompiler.Compile(SampleContentFactory.CreateS5StubPack());
+        var config = MatchConfig.CreateDefault(Seed ^ 10UL, actorCount: 2);
+        unsafe
+        {
+            config.StageId = SampleContentFactory.HarvesterTerracesStageId;
+            config.FighterIds[0] = SampleContentFactory.RookFighterId;
+            config.FighterIds[1] = SampleContentFactory.RookFighterId;
+        }
+
+        var sim = new Simulation();
+        sim.Reset(config, catalog);
+
+        // Advance past first kinematic step so patrol leaves origin.
+        for (int f = 0; f < 90; f++)
+        {
+            sim.Step(InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral);
+        }
+
+        MatchState snap = sim.Snapshot();
+        GenericPoolSlot footfall = default;
+        GenericPoolSlot patrol = default;
+        bool foundFoot = false;
+        bool foundPatrol = false;
+        for (int i = 0; i < snap.ActiveHazardCount; i++)
+        {
+            GenericPoolSlot h = MatchStateAccess.GetHazard(ref snap, i);
+            if (h.TypeId == BossAiRuntime.FootfallShadowId)
+            {
+                footfall = h;
+                foundFoot = true;
+            }
+        }
+
+        for (int i = 0; i < snap.ActiveKinematicCount; i++)
+        {
+            GenericPoolSlot k = MatchStateAccess.GetKinematic(ref snap, i);
+            if (k.TypeId == BossAiRuntime.HarvesterPatrolTrackId)
+            {
+                patrol = k;
+                foundPatrol = true;
+            }
+        }
+
+        Assert.That(foundFoot && foundPatrol, Is.True);
+        Assert.That(footfall.PosX.Raw, Is.EqualTo(patrol.PosX.Raw));
+        Assert.That(footfall.PosZ.Raw, Is.EqualTo(patrol.PosZ.Raw));
+        Assert.That(patrol.PosX.Raw, Is.Not.EqualTo(0), "patrol should have left origin by frame 90");
+    }
+
+    [Test]
+    public void Harvester_stomp_applies_dizzy_to_grounded_fighters()
+    {
+        ContentCatalog catalog = ContentCompiler.Compile(SampleContentFactory.CreateS5StubPack());
+        var config = MatchConfig.CreateDefault(Seed ^ 11UL, actorCount: 2);
+        unsafe
+        {
+            config.StageId = SampleContentFactory.HarvesterTerracesStageId;
+            config.FighterIds[0] = SampleContentFactory.RookFighterId;
+            config.FighterIds[1] = SampleContentFactory.RookFighterId;
+        }
+
+        var sim = new Simulation();
+        sim.Reset(config, catalog);
+
+        // StompShock period = 15 s = 900 f. Advance to the frame before the pulse, then
+        // park the fighter at the stomp center so radius 4 covers them.
+        for (int f = 0; f < 899; f++)
+        {
+            sim.Step(InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral);
+        }
+
+        MatchState parked = sim.Snapshot();
+        {
+            ref ActorSlot a0 = ref MatchStateAccess.Actor(ref parked, 0);
+            a0.PosX = Fix.Zero;
+            a0.PosY = Fix.Zero;
+            a0.PosZ = Fix.Zero;
+            a0.DizzyFrames = 0;
+            a0.DizzyImmuneFrames = 0;
+        }
+
+        sim.Restore(parked);
+        sim.Step(InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral);
+
+        MatchState after = sim.Snapshot();
+        ActorSlot victim = MatchStateAccess.Actor(ref after, 0);
+        Assert.That(victim.DizzyFrames, Is.GreaterThan(0));
+        Assert.That(victim.DizzyFrames, Is.LessThanOrEqualTo(MatchRules.DizzyDurationFrames));
+    }
+
+    [Test]
+    public void Pressworks_live_hands_chase_toward_fighter()
+    {
+        ContentCatalog catalog = ContentCompiler.Compile(SampleContentFactory.CreateS5StubPack());
+        var config = MatchConfig.CreateDefault(Seed ^ 12UL, actorCount: 2);
+        unsafe
+        {
+            config.StageId = SampleContentFactory.PressworksStageId;
+            config.PhaseClockPermille = 100;
+            config.FighterIds[0] = SampleContentFactory.RookFighterId;
+            config.FighterIds[1] = SampleContentFactory.RookFighterId;
+        }
+
+        var sim = new Simulation();
+        sim.Reset(config, catalog);
+
+        // Clear Sorting (150f) + transition (12f) into The Press.
+        for (int f = 0; f < 150 + 12; f++)
+        {
+            sim.Step(InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral);
+        }
+
+        MatchState press = sim.Snapshot();
+        Assert.That(press.PhaseIndex, Is.EqualTo(1));
+
+        long startX = 0;
+        bool found = false;
+        for (int i = 0; i < press.ActiveHazardCount; i++)
+        {
+            GenericPoolSlot h = MatchStateAccess.GetHazard(ref press, i);
+            if (h.TypeId == BossAiRuntime.LiveHandsChaseId)
+            {
+                startX = h.PosX.Raw;
+                found = true;
+            }
+        }
+
+        Assert.That(found, Is.True);
+
+        // Park fighters far on +X so chase moves Live Hands rightward.
+        {
+            ref ActorSlot a0 = ref MatchStateAccess.Actor(ref press, 0);
+            a0.PosX = Fix.FromInt(8);
+            a0.PosZ = Fix.FromInt(2);
+            ref ActorSlot a1 = ref MatchStateAccess.Actor(ref press, 1);
+            a1.PosX = Fix.FromInt(8);
+            a1.PosZ = Fix.FromInt(2);
+        }
+
+        sim.Restore(press);
+
+        for (int f = 0; f < 120; f++)
+        {
+            sim.Step(InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral);
+        }
+
+        MatchState chased = sim.Snapshot();
+        long endX = startX;
+        for (int i = 0; i < chased.ActiveHazardCount; i++)
+        {
+            GenericPoolSlot h = MatchStateAccess.GetHazard(ref chased, i);
+            if (h.TypeId == BossAiRuntime.LiveHandsChaseId)
+            {
+                endX = h.PosX.Raw;
+            }
+        }
+
+        Assert.That(endX, Is.GreaterThan(startX), "Live Hands should advance toward +X fighter");
+    }
+
     private static ulong RunThroughBreakaway(MatchConfig config, ContentCatalog catalog, bool grantJewels)
     {
         var sim = new Simulation();
