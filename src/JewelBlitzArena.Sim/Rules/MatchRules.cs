@@ -103,6 +103,12 @@ namespace JewelBlitzArena.Sim
         public const int FreezeBreakDamage = 100;
 
         /// <summary>
+        /// S5 Solitaire Gift id (<c>SampleContentFactory.SolitaireItemId</c>).
+        /// Use grants one bonus jewel (items-and-economy.md §6).
+        /// </summary>
+        public const int SolitaireItemId = 100;
+
+        /// <summary>
         /// S5 stub Adhesive Spray item id (<c>SampleContentFactory.AdhesiveSprayItemId</c>).
         /// Land / hit spawns a lasting Slow floor patch.
         /// </summary>
