@@ -4,13 +4,13 @@ namespace JewelBlitzArena.Meta
 {
     /// <summary>
     /// Bench Notes recording + Logbook give stubs (items-and-economy.md §4).
-    /// Greybox Logbook item ids: 940001–940020.
+    /// Logbook item ids align with S5 Card stubs (<see cref="SampleContentFactory.LogbookItemIdMin"/>).
     /// </summary>
     public static class BenchNotesRuntime
     {
-        public const int LogbookItemIdMin = 940001;
-        public const int LogbookItemIdMax = 940020;
-        public const int LogbookCount = 20;
+        public const int LogbookItemIdMin = SampleContentFactory.LogbookItemIdMin;
+        public const int LogbookItemIdMax = SampleContentFactory.LogbookItemIdMax;
+        public const int LogbookCount = SampleContentFactory.LogbookCount;
 
         public static bool IsLogbookItemId(int itemId) =>
             itemId >= LogbookItemIdMin && itemId <= LogbookItemIdMax;

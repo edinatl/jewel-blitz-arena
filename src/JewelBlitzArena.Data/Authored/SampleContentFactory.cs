@@ -95,6 +95,11 @@ namespace JewelBlitzArena.Data
         /// <summary>Regent's Diadem — rarity 7 head cosmetic (Citrine gift; catalog id).</summary>
         public const int RegentsDiademItemId = 55;
 
+        /// <summary>Logbooks ×20 — Card category; give to Tilly for Tinker pool reveal.</summary>
+        public const int LogbookCount = 20;
+        public const int LogbookItemIdMin = 80;
+        public const int LogbookItemIdMax = 99;
+
         public static AuthoredContentPack CreateS5StubPack()
         {
             return new AuthoredContentPack
@@ -1834,6 +1839,12 @@ namespace JewelBlitzArena.Data
             AddCosmetic(77, "Paper Kite", "Back", 3, 190);
             AddCosmetic(78, "Barrel Pack", "Back", 3, 200);
             AddCosmetic(79, "Soft Tail", "Back", 3, 180);
+
+            // Logbooks ×20 — Expedition Card stubs (items-and-economy.md §4).
+            for (int lb = 0; lb < LogbookCount; lb++)
+            {
+                AddNever(LogbookItemIdMin + lb, $"Logbook {lb + 1}", "Card", 3, 30);
+            }
 
             return items;
         }
