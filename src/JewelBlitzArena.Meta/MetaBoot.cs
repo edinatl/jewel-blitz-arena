@@ -36,6 +36,13 @@ namespace JewelBlitzArena.Meta
             Profile = _store.LoadOrCreate();
         }
 
+        /// <summary>Persist the live profile (bench Buy / Facet Wheel mutations).</summary>
+        public void SaveProfile()
+        {
+            EnsureBooted();
+            _store.Save(Profile);
+        }
+
         public MatchConfig BeginCustom(ModeRequest? request = null)
         {
             EnsureBooted();

@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
 using JewelBlitzArena.Data;
 using JewelBlitzArena.Meta;
@@ -13,6 +15,7 @@ namespace JewelBlitzArena.PresentationBridge
     {
         private readonly MetaBoot _boot;
         private readonly MatchSession _session = new MatchSession();
+        private readonly MetaMenuShell _menu = new MetaMenuShell();
         private ModeRequest? _activeRequest;
         private MatchConfig _activeConfig;
         private ContentCatalog? _catalog;
@@ -33,9 +36,38 @@ namespace JewelBlitzArena.PresentationBridge
 
         public MatchConfig ActiveConfig => _activeConfig;
 
+        public ContentCatalog? Catalog => _catalog;
+
         public void BootProfile() => _boot.Boot();
 
         public void SetCatalog(ContentCatalog? catalog) => _catalog = catalog;
+
+        /// <summary>
+        /// Host Buy room: bind UI stock to <see cref="ShopRuntime.BuildStock"/>(catalog, profile).
+        /// Caller should <see cref="BootProfile"/> first; saves after touching the room.
+        /// </summary>
+        public IReadOnlyList<ShopRuntime.StockEntry> OpenBuyStock()
+        {
+            if (_catalog == null)
+            {
+                return Array.Empty<ShopRuntime.StockEntry>();
+            }
+
+            IReadOnlyList<ShopRuntime.StockEntry> stock = _menu.OpenBuy(Profile, _catalog);
+            _boot.SaveProfile();
+            return stock;
+        }
+
+        public bool TryBuyStockItem(int itemId)
+        {
+            if (_catalog == null || !_menu.TryBuy(Profile, _catalog, itemId))
+            {
+                return false;
+            }
+
+            _boot.SaveProfile();
+            return true;
+        }
 
         public MatchConfig StartCustom(ModeRequest? request = null)
         {

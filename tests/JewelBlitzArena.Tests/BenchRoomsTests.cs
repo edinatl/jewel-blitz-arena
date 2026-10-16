@@ -1,3 +1,4 @@
+using JewelBlitzArena.Data;
 using JewelBlitzArena.Meta;
 
 namespace JewelBlitzArena.Tests;
@@ -75,5 +76,31 @@ public sealed class BenchRoomsTests
         Assert.That(BenchRoomsRuntime.IsDiademEquipped(profile), Is.True);
         Assert.That(BenchRoomsRuntime.TryUnequipDiadem(profile), Is.True);
         Assert.That(BenchRoomsRuntime.IsDiademEquipped(profile), Is.False);
+    }
+
+    [Test]
+    public void OpenBuy_binds_stock_to_BuildStock()
+    {
+        ContentCatalog catalog = ContentCompiler.Compile(SampleContentFactory.CreateS5StubPack());
+        var menu = new MetaMenuShell();
+        var profile = PlayerProfile.CreateNew();
+        profile.ShopStockSeed = 0x42555953544F434BUL;
+        profile.Carats = 10_000;
+
+        IReadOnlyList<ShopRuntime.StockEntry> viaRoom = menu.OpenBuy(profile, catalog);
+        IReadOnlyList<ShopRuntime.StockEntry> viaShop = ShopRuntime.BuildStock(catalog, profile);
+        Assert.That(profile.HasFlag(ProfileFlags.TouchedBuyRoom), Is.True);
+        Assert.That(viaRoom.Count, Is.EqualTo(viaShop.Count));
+        Assert.That(viaRoom.Count, Is.EqualTo(
+            ShopRuntime.AlwaysStockCount + ShopRuntime.RotatingStockCount));
+        for (int i = 0; i < viaRoom.Count; i++)
+        {
+            Assert.That(viaRoom[i].ItemId, Is.EqualTo(viaShop[i].ItemId));
+            Assert.That(viaRoom[i].BuyPrice, Is.EqualTo(viaShop[i].BuyPrice));
+        }
+
+        int first = viaRoom[0].ItemId;
+        Assert.That(menu.TryBuy(profile, catalog, first), Is.True);
+        Assert.That(profile.Ledger.Owns(first), Is.True);
     }
 }

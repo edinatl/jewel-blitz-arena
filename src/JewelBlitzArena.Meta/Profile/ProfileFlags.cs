@@ -62,5 +62,8 @@ namespace JewelBlitzArena.Meta
 
         /// <summary>Fitting Room: Regent's Diadem currently equipped (cosmetic only).</summary>
         public const int EquippedDiadem = 1 << 18;
+
+        /// <summary>Opened Buy room at least once (stock bound via ShopRuntime.BuildStock).</summary>
+        public const int TouchedBuyRoom = 1 << 19;
     }
 }

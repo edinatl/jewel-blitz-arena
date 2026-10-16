@@ -44,6 +44,15 @@ namespace JewelBlitzArena.Meta
 
         public bool TryEquipDiadem(PlayerProfile profile) =>
             BenchRoomsRuntime.TryEquipDiadem(profile);
+
+        /// <summary>Buy room stock via <see cref="ShopRuntime.BuildStock"/>.</summary>
+        public IReadOnlyList<ShopRuntime.StockEntry> OpenBuy(
+            PlayerProfile profile,
+            ContentCatalog catalog) =>
+            BenchRoomsRuntime.OpenBuy(profile, catalog);
+
+        public bool TryBuy(PlayerProfile profile, ContentCatalog catalog, int itemId) =>
+            BenchRoomsRuntime.TryBuy(profile, catalog, itemId);
     }
 
     public readonly struct MetaMenuEntry
