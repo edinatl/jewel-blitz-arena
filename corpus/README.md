@@ -16,7 +16,8 @@ dotnet run --project tools/JewelBlitzArena.CorpusRunner -c Release -- run --corp
 dotnet run --project tools/JewelBlitzArena.ReplayViewer -c Release -- corpus/neutral-2p-180.jbr.json
 ```
 
-Fixtures include `cpu-replace-2p-120` (CPU brain takes slot 1 at frame 30).
+Fixtures include `cpu-replace-2p-120` (CPU brain takes slot 1 at frame 30) and
+`status-patches-2p-120` (format v3 item-spawn handoffs for Ice/Smoke/Adhesive world patches).
 
 When a Sim change intentionally alters state, re-`record` and commit the updated hashes with a
 clear explanation in the PR.

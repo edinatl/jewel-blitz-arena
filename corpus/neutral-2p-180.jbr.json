@@ -1,5 +1,5 @@
 {
-  "formatVersion": 2,
+  "formatVersion": 3,
   "name": "neutral-2p-180",
   "notes": "S0-style two-actor walk for 3 seconds.",
   "seed": 5350911184942948145,
@@ -1094,5 +1094,6 @@
       "p3": 0
     }
   ],
-  "cpuHandoffs": []
+  "cpuHandoffs": [],
+  "itemSpawns": []
 }

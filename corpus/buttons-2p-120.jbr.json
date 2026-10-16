@@ -1,5 +1,5 @@
 {
-  "formatVersion": 2,
+  "formatVersion": 3,
   "name": "buttons-2p-120",
   "notes": "Stick \u002B Jump/Attack bits exercised.",
   "seed": 5350911184942948147,
@@ -734,5 +734,6 @@
       "p3": 0
     }
   ],
-  "cpuHandoffs": []
+  "cpuHandoffs": [],
+  "itemSpawns": []
 }

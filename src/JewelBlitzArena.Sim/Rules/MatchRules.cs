@@ -93,12 +93,18 @@ namespace JewelBlitzArena.Sim
 
         /// <summary>
         /// S5 stub Adhesive Spray item id (<c>SampleContentFactory.AdhesiveSprayItemId</c>).
-        /// Thrown hit applies Slow.
+        /// Land / hit spawns a lasting Slow floor patch.
         /// </summary>
         public const int AdhesiveSprayItemId = 18;
 
-        /// <summary>Adhesive Spray Slow duration (item-tuned under Slow max 240 f).</summary>
+        /// <summary>Legacy single-target Slow duration (still used by direct ApplySlow callers).</summary>
         public const int AdhesiveSlowFrames = 120;
+
+        /// <summary>Adhesive Spray patch radius.</summary>
+        public static readonly Fix AdhesiveSlowRange = Fix.FromInt(2);
+
+        /// <summary>Adhesive Spray lasting patch lifetime (2 s).</summary>
+        public const int AdhesivePatchLifetimeFrames = 120;
 
         /// <summary>
         /// S5 stub Petrify Gas item id (<c>SampleContentFactory.PetrifyGasItemId</c>).

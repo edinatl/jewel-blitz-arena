@@ -32,6 +32,7 @@ public static class ReplayIo
         }
 
         recording.CpuHandoffs ??= Array.Empty<ReplayRecording.CpuHandoff>();
+        recording.ItemSpawns ??= Array.Empty<ReplayRecording.ItemSpawn>();
         return recording;
     }
 

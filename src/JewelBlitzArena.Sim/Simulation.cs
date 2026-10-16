@@ -234,6 +234,21 @@ namespace JewelBlitzArena.Sim
         public int SpawnLooseItem(int itemId, Fix x, Fix y, Fix z) =>
             CrateSpawner.TrySpawnLooseItem(ref _state, itemId, new FixVec3(x, y, z));
 
+        /// <summary>
+        /// Spawn a field item and immediately arm its Ice/Smoke/Adhesive world patch
+        /// (corpus / authored status-item scenarios).
+        /// </summary>
+        public int SpawnLooseItemWithWorldPatch(int itemId, Fix x, Fix y, Fix z)
+        {
+            int slot = SpawnLooseItem(itemId, x, y, z);
+            if (slot >= 0)
+            {
+                WorldPatchRuntime.TrySpawnFromItem(ref _state, itemId, x, z);
+            }
+
+            return slot;
+        }
+
         public int SpawnCrateItemAt(Fix x, Fix z)
         {
             int id = CrateSpawner.RollAlwaysEligible(ref _state, _catalog);

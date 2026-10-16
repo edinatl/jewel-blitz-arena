@@ -142,6 +142,45 @@ static int RecordFixtures(string[] args)
         },
         notes: "S8: CPU handoff at frame 30; Sim brain drives P1 thereafter (disconnect replace)."));
 
+    // Status world patches: Ice / Smoke / Adhesive jars + walk through them.
+    Write(corpus, CorpusRunner.Capture(
+        name: "status-patches-2p-120",
+        seed: 0x4A42415F53545031UL, // JBA_STP1
+        actorCount: 2,
+        stageId: 0,
+        p0Log: BuildWalkLog(120),
+        itemSpawns: new[]
+        {
+            new ReplayRecording.ItemSpawn
+            {
+                Frame = 0,
+                ItemId = MatchRules.IceJarItemId,
+                X = 1,
+                Y = 0,
+                Z = 0,
+                SpawnWorldPatch = true,
+            },
+            new ReplayRecording.ItemSpawn
+            {
+                Frame = 0,
+                ItemId = MatchRules.SmokeJarItemId,
+                X = 2,
+                Y = 0,
+                Z = 0,
+                SpawnWorldPatch = true,
+            },
+            new ReplayRecording.ItemSpawn
+            {
+                Frame = 10,
+                ItemId = MatchRules.AdhesiveSprayItemId,
+                X = 0,
+                Y = 0,
+                Z = 1,
+                SpawnWorldPatch = true,
+            },
+        },
+        notes: "S8: Ice/Smoke/Adhesive world patches via item-spawn handoffs (format v3)."));
+
     Console.WriteLine($"Recorded fixtures into {Path.GetFullPath(corpus)}");
     return 0;
 }

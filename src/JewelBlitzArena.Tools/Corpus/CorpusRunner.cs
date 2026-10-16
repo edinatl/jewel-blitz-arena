@@ -82,10 +82,12 @@ public static class CorpusRunner
         sim.Reset(config);
 
         ReplayRecording.CpuHandoff[] handoffs = recording.CpuHandoffs ?? Array.Empty<ReplayRecording.CpuHandoff>();
+        ReplayRecording.ItemSpawn[] spawns = recording.ItemSpawns ?? Array.Empty<ReplayRecording.ItemSpawn>();
 
         for (int f = 0; f < recording.Frames.Length; f++)
         {
             ApplyHandoffsAtFrame(sim, handoffs, f);
+            ApplyItemSpawnsAtFrame(sim, spawns, f);
             ReplayRecording.FrameInputs frame = recording.Frames[f];
             sim.Step(
                 new InputFrame { Bits = frame.P0 },
@@ -109,6 +111,33 @@ public static class CorpusRunner
         }
     }
 
+    private static void ApplyItemSpawnsAtFrame(Simulation sim, ReplayRecording.ItemSpawn[] spawns, int frameIndex)
+    {
+        for (int i = 0; i < spawns.Length; i++)
+        {
+            ReplayRecording.ItemSpawn s = spawns[i];
+            if (s.Frame == frameIndex)
+            {
+                if (s.SpawnWorldPatch)
+                {
+                    sim.SpawnLooseItemWithWorldPatch(
+                        s.ItemId,
+                        Fix.FromInt(s.X),
+                        Fix.FromInt(s.Y),
+                        Fix.FromInt(s.Z));
+                }
+                else
+                {
+                    sim.SpawnLooseItem(
+                        s.ItemId,
+                        Fix.FromInt(s.X),
+                        Fix.FromInt(s.Y),
+                        Fix.FromInt(s.Z));
+                }
+            }
+        }
+    }
+
     /// <summary>Build a recording from a procedural log and stamp the live hash (for corpus authoring).</summary>
     public static ReplayRecording Capture(
         string name,
@@ -120,6 +149,7 @@ public static class CorpusRunner
         Func<int, InputFrame, InputFrame>? p2ForFrame = null,
         Func<int, InputFrame, InputFrame>? p3ForFrame = null,
         ReplayRecording.CpuHandoff[]? cpuHandoffs = null,
+        ReplayRecording.ItemSpawn[]? itemSpawns = null,
         string? notes = null)
     {
         var frames = new ReplayRecording.FrameInputs[p0Log.Length];
@@ -159,6 +189,7 @@ public static class CorpusRunner
             FighterIds = Enumerable.Range(0, PoolCaps.Actors).ToArray(),
             Frames = frames,
             CpuHandoffs = cpuHandoffs ?? Array.Empty<ReplayRecording.CpuHandoff>(),
+            ItemSpawns = itemSpawns ?? Array.Empty<ReplayRecording.ItemSpawn>(),
             ExpectedHashHex = "0",
         };
 

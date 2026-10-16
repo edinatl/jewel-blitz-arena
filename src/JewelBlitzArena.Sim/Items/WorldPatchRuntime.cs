@@ -8,6 +8,7 @@ namespace JewelBlitzArena.Sim
     {
         public const int KindIce = 1;
         public const int KindSmoke = 2;
+        public const int KindSlow = 3; // Adhesive Spray puddle
         public const byte FlagActive = 1 << 0;
 
         public static void InitializeMatch(ref MatchState state)
@@ -22,7 +23,9 @@ namespace JewelBlitzArena.Sim
         public static int Spawn(
             ref MatchState state, int kind, Fix centerX, Fix centerZ, Fix radius, int lifetimeFrames)
         {
-            if (kind != KindIce && kind != KindSmoke || lifetimeFrames <= 0 || radius.Raw <= 0)
+            if ((kind != KindIce && kind != KindSmoke && kind != KindSlow)
+                || lifetimeFrames <= 0
+                || radius.Raw <= 0)
             {
                 return -1;
             }
@@ -73,6 +76,16 @@ namespace JewelBlitzArena.Sim
                     z,
                     MatchRules.SmokeJarBlindRange,
                     MatchRules.SmokePatchLifetimeFrames);
+            }
+            else if (itemId == MatchRules.AdhesiveSprayItemId)
+            {
+                Spawn(
+                    ref state,
+                    KindSlow,
+                    x,
+                    z,
+                    MatchRules.AdhesiveSlowRange,
+                    MatchRules.AdhesivePatchLifetimeFrames);
             }
         }
 
@@ -142,6 +155,10 @@ namespace JewelBlitzArena.Sim
                 else if (patch.TypeId == KindSmoke)
                 {
                     StatusRuntime.ApplyBlind(ref state, a, MatchRules.WorldPatchStatusPulseFrames);
+                }
+                else if (patch.TypeId == KindSlow)
+                {
+                    StatusRuntime.ApplySlow(ref state, a, MatchRules.WorldPatchStatusPulseFrames);
                 }
             }
         }

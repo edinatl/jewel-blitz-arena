@@ -1,5 +1,5 @@
 {
-  "formatVersion": 2,
+  "formatVersion": 3,
   "name": "idle-2p-60",
   "notes": "Neutral inputs still advance RNG and frame counter.",
   "seed": 5350911184942948148,
@@ -374,5 +374,6 @@
       "p3": 0
     }
   ],
-  "cpuHandoffs": []
+  "cpuHandoffs": [],
+  "itemSpawns": []
 }

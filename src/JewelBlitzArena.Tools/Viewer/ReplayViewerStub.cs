@@ -29,6 +29,7 @@ public static class ReplayViewerStub
 
         var dumps = new List<FrameDump> { Dump(sim) };
         ReplayRecording.CpuHandoff[] handoffs = recording.CpuHandoffs ?? Array.Empty<ReplayRecording.CpuHandoff>();
+        ReplayRecording.ItemSpawn[] spawns = recording.ItemSpawns ?? Array.Empty<ReplayRecording.ItemSpawn>();
 
         for (int f = 0; f < recording.Frames.Length; f++)
         {
@@ -37,6 +38,29 @@ public static class ReplayViewerStub
                 if (handoffs[h].Frame == f)
                 {
                     sim.SetCpuControlled(handoffs[h].PlayerIndex, controlled: true);
+                }
+            }
+
+            for (int s = 0; s < spawns.Length; s++)
+            {
+                if (spawns[s].Frame == f)
+                {
+                    if (spawns[s].SpawnWorldPatch)
+                    {
+                        sim.SpawnLooseItemWithWorldPatch(
+                            spawns[s].ItemId,
+                            Fix.FromInt(spawns[s].X),
+                            Fix.FromInt(spawns[s].Y),
+                            Fix.FromInt(spawns[s].Z));
+                    }
+                    else
+                    {
+                        sim.SpawnLooseItem(
+                            spawns[s].ItemId,
+                            Fix.FromInt(spawns[s].X),
+                            Fix.FromInt(spawns[s].Y),
+                            Fix.FromInt(spawns[s].Z));
+                    }
                 }
             }
 

@@ -1,5 +1,5 @@
 {
-  "formatVersion": 2,
+  "formatVersion": 3,
   "name": "ffa-4p-240",
   "notes": "Four-actor free-for-all input surface, 4 seconds.",
   "seed": 5350911184942948146,
@@ -1454,5 +1454,6 @@
       "p3": 67
     }
   ],
-  "cpuHandoffs": []
+  "cpuHandoffs": [],
+  "itemSpawns": []
 }

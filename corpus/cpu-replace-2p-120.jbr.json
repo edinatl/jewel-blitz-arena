@@ -1,5 +1,5 @@
 {
-  "formatVersion": 2,
+  "formatVersion": 3,
   "name": "cpu-replace-2p-120",
   "notes": "S8: CPU handoff at frame 30; Sim brain drives P1 thereafter (disconnect replace).",
   "seed": 5350911184676607281,
@@ -739,5 +739,6 @@
       "frame": 30,
       "playerIndex": 1
     }
-  ]
+  ],
+  "itemSpawns": []
 }

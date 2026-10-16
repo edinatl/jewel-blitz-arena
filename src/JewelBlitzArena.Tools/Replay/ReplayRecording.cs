@@ -8,7 +8,8 @@ namespace JewelBlitzArena.Tools.Replay;
 /// </summary>
 public sealed class ReplayRecording
 {
-    public const int CurrentFormatVersion = 2;
+    /// <summary>v2: CPU handoffs. v3: optional item spawn handoffs for status-patch corpus.</summary>
+    public const int CurrentFormatVersion = 3;
     public const int MinSupportedFormatVersion = 1;
 
     public int FormatVersion { get; set; } = CurrentFormatVersion;
@@ -37,6 +38,12 @@ public sealed class ReplayRecording
     /// </summary>
     public CpuHandoff[] CpuHandoffs { get; set; } = Array.Empty<CpuHandoff>();
 
+    /// <summary>
+    /// Loose-item spawns applied before stepping the given frame index (format v3).
+    /// Used to seed Ice/Smoke/Adhesive jars for world-patch determinism corpus.
+    /// </summary>
+    public ItemSpawn[] ItemSpawns { get; set; } = Array.Empty<ItemSpawn>();
+
     public sealed class FrameInputs
     {
         public ushort P0 { get; set; }
@@ -51,6 +58,27 @@ public sealed class ReplayRecording
         public int Frame { get; set; }
 
         public int PlayerIndex { get; set; }
+    }
+
+    public sealed class ItemSpawn
+    {
+        /// <summary>0-based frame index in <see cref="Frames"/> (before Step).</summary>
+        public int Frame { get; set; }
+
+        public int ItemId { get; set; }
+
+        /// <summary>Integer metres (converted to Fix at spawn).</summary>
+        public int X { get; set; }
+
+        public int Y { get; set; }
+
+        public int Z { get; set; }
+
+        /// <summary>
+        /// When true, also arms the Ice/Smoke/Adhesive world patch at spawn
+        /// (status-item corpus; avoids depending on flight settle timing).
+        /// </summary>
+        public bool SpawnWorldPatch { get; set; }
     }
 
     public MatchConfig ToMatchConfig()

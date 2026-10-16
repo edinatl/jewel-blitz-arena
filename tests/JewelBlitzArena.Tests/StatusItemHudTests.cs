@@ -43,8 +43,10 @@ public sealed class StatusItemHudTests
         sim.Restore(snap);
 
         sim.Step(InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral);
-        // Same Step applies Slow then ticks timers once.
-        Assert.That(sim.Snapshot().Actor1.SlowFrames, Is.EqualTo(MatchRules.AdhesiveSlowFrames - 1));
+        MatchState after = sim.Snapshot();
+        // Hit arms Slow patch; pulse after TickActors leaves full pulse this frame.
+        Assert.That(WorldPatchRuntime.CountActive(ref after), Is.EqualTo(1));
+        Assert.That(after.Actor1.SlowFrames, Is.EqualTo(MatchRules.WorldPatchStatusPulseFrames));
     }
 
     [Test]

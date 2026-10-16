@@ -29,11 +29,15 @@ public sealed class CorpusTests
     {
         Assert.That(Directory.Exists(CorpusRoot), Is.True, $"Missing corpus at {CorpusRoot}");
         var files = CorpusRunner.Discover(CorpusRoot);
-        Assert.That(files, Has.Count.GreaterThanOrEqualTo(5));
+        Assert.That(files, Has.Count.GreaterThanOrEqualTo(6));
         Assert.That(
             files.Any(f => Path.GetFileName(f).StartsWith("cpu-replace", StringComparison.Ordinal)),
             Is.True,
             "expected cpu-replace corpus fixture");
+        Assert.That(
+            files.Any(f => Path.GetFileName(f).StartsWith("status-patches", StringComparison.Ordinal)),
+            Is.True,
+            "expected status-patches corpus fixture");
     }
 
     [Test]

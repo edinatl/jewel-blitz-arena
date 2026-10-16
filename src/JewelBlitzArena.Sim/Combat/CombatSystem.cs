@@ -505,15 +505,13 @@ namespace JewelBlitzArena.Sim
                 impactZ = item.PosZ;
             }
 
-            if (itemId == MatchRules.AdhesiveSprayItemId)
-            {
-                StatusRuntime.ApplySlow(ref state, vic, MatchRules.AdhesiveSlowFrames);
-            }
-            else if (itemId == MatchRules.PetrifyGasItemId)
+            if (itemId == MatchRules.PetrifyGasItemId)
             {
                 StatusRuntime.ApplyFreeze(ref state, vic, MatchRules.FreezeDurationFrames);
             }
-            else if (itemId == MatchRules.IceJarItemId || itemId == MatchRules.SmokeJarItemId)
+            else if (itemId == MatchRules.IceJarItemId
+                || itemId == MatchRules.SmokeJarItemId
+                || itemId == MatchRules.AdhesiveSprayItemId)
             {
                 // Lasting floor patch at impact; first pulse applies this frame via Tick.
                 WorldPatchRuntime.TrySpawnFromItem(ref state, itemId, impactX, impactZ);
