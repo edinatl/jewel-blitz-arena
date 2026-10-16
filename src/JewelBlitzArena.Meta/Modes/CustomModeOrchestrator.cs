@@ -33,8 +33,26 @@ namespace JewelBlitzArena.Meta
             }
 
             ApplyFighterIds(ref config, request.FighterIds, actors);
+            ApplyPockets(ref config, profile, request.HouseRules);
             profile.HouseRulesDefaults = request.HouseRules;
             return config;
+        }
+
+        /// <summary>
+        /// Custom/Online: when House Rule Pocket Items is on, copy profile pockets into
+        /// <see cref="MatchConfig"/> for ×3 crate weight (items-and-economy.md §2.3).
+        /// Expedition must not call this.
+        /// </summary>
+        internal static void ApplyPockets(
+            ref MatchConfig config, PlayerProfile profile, in HouseRulesSettings houseRules)
+        {
+            if (!houseRules.PocketItems)
+            {
+                config.SetPocketItems(null);
+                return;
+            }
+
+            config.SetPocketItems(profile.Pockets.ToArray());
         }
 
         public void ApplyResult(PlayerProfile profile, in MatchResult result, ModeRequest request)

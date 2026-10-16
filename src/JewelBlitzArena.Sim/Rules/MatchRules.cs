@@ -103,6 +103,11 @@ namespace JewelBlitzArena.Sim
         public const int FreezeBreakDamage = 100;
 
         /// <summary>
+        /// Max Pocket Items handed to Sim via <see cref="MatchConfig"/> (items-and-economy.md §2.3).
+        /// </summary>
+        public const int MaxPocketItems = 5;
+
+        /// <summary>
         /// S5 Solitaire Gift id (<c>SampleContentFactory.SolitaireItemId</c>).
         /// Use grants one bonus jewel (items-and-economy.md §6).
         /// </summary>

@@ -28,6 +28,8 @@ namespace JewelBlitzArena.Sim
         private readonly Fix[] _dtFull = new Fix[PoolCaps.Actors];
         private readonly InputFrame[] _lastInputs = new InputFrame[PoolCaps.Actors];
         private readonly byte[] _cpuLevels = new byte[PoolCaps.Actors];
+        private readonly int[] _pocketItemIds = new int[MatchRules.MaxPocketItems];
+        private int _pocketItemCount;
         private int _gleamPickupScalePermille = 1000;
         private int _bossLifeScalePermille = 1000;
 
@@ -70,6 +72,25 @@ namespace JewelBlitzArena.Sim
             _bossLifeScalePermille = config.BossLifeScalePermille > 0
                 ? config.BossLifeScalePermille
                 : 1000;
+
+            _pocketItemCount = config.PocketItemCount;
+            if (_pocketItemCount < 0)
+            {
+                _pocketItemCount = 0;
+            }
+
+            if (_pocketItemCount > MatchRules.MaxPocketItems)
+            {
+                _pocketItemCount = MatchRules.MaxPocketItems;
+            }
+
+            unsafe
+            {
+                for (int i = 0; i < MatchRules.MaxPocketItems; i++)
+                {
+                    _pocketItemIds[i] = i < _pocketItemCount ? config.PocketItemIds[i] : 0;
+                }
+            }
 
             for (int i = 0; i < PoolCaps.Actors; i++)
             {
@@ -210,7 +231,13 @@ namespace JewelBlitzArena.Sim
             VitreBossRuntime.ResolveAttackHits(ref _state, _kits, ref _contacts);
             StageCreatureRuntime.ResolveAttackHits(ref _state, _kits, ref _contacts);
             BreakableRuntime.ResolveAttackHits(
-                ref _state, _kits, _stageGraph, _catalog, ref _contacts);
+                ref _state,
+                _kits,
+                _stageGraph,
+                _catalog,
+                ref _contacts,
+                _pocketItemIds,
+                _pocketItemCount);
             BossPartRuntime.Tick(
                 ref _state,
                 _lastInputs[0],
@@ -298,7 +325,8 @@ namespace JewelBlitzArena.Sim
 
         public int SpawnCrateItemAt(Fix x, Fix z)
         {
-            int id = CrateSpawner.RollAlwaysEligible(ref _state, _catalog);
+            int id = CrateSpawner.RollAlwaysEligible(
+                ref _state, _catalog, _pocketItemIds, _pocketItemCount);
             return CrateSpawner.TrySpawnLooseItem(ref _state, id, new FixVec3(x, Fix.Zero, z));
         }
 

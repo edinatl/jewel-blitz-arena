@@ -40,6 +40,15 @@ namespace JewelBlitzArena.Sim
         /// <summary>Per-slot CPU level 1–8 (combat §10.1). Default 4. Used when a slot is CPU-filled.</summary>
         public fixed byte CpuLevels[PoolCaps.Actors];
 
+        /// <summary>
+        /// Pocket Items count (0–<see cref="MatchRules.MaxPocketItems"/>). Custom/Online only;
+        /// Meta fills when House Rule Pocket Items is on (items-and-economy.md §2.3).
+        /// </summary>
+        public int PocketItemCount;
+
+        /// <summary>Pocketed item ids joining the crate pool at ×3 rarity weight.</summary>
+        public fixed int PocketItemIds[MatchRules.MaxPocketItems];
+
         public static MatchConfig CreateDefault(ulong seed, int actorCount = 2)
         {
             var config = new MatchConfig
@@ -53,6 +62,7 @@ namespace JewelBlitzArena.Sim
                 PhaseClockPermille = 1000,
                 GleamPickupScalePermille = 1000,
                 BossLifeScalePermille = 1000,
+                PocketItemCount = 0,
             };
 
             for (int i = 0; i < PoolCaps.Actors; i++)
@@ -63,7 +73,66 @@ namespace JewelBlitzArena.Sim
                 config.CpuLevels[i] = (byte)CpuBrainRuntime.DefaultLevel;
             }
 
+            for (int i = 0; i < MatchRules.MaxPocketItems; i++)
+            {
+                config.PocketItemIds[i] = 0;
+            }
+
             return config;
+        }
+
+        /// <summary>Copy up to <see cref="MatchRules.MaxPocketItems"/> pocket ids (zeros skipped).</summary>
+        public void SetPocketItems(int[]? itemIds)
+        {
+            for (int i = 0; i < MatchRules.MaxPocketItems; i++)
+            {
+                PocketItemIds[i] = 0;
+            }
+
+            PocketItemCount = 0;
+            if (itemIds == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < itemIds.Length && PocketItemCount < MatchRules.MaxPocketItems; i++)
+            {
+                int id = itemIds[i];
+                if (id == 0 || ContainsPocketItem(id))
+                {
+                    continue;
+                }
+
+                PocketItemIds[PocketItemCount++] = id;
+            }
+        }
+
+        public bool ContainsPocketItem(int itemId)
+        {
+            if (itemId == 0)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < PocketItemCount && i < MatchRules.MaxPocketItems; i++)
+            {
+                if (PocketItemIds[i] == itemId)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public int GetPocketItemId(int index)
+        {
+            if ((uint)index >= (uint)PocketItemCount || index >= MatchRules.MaxPocketItems)
+            {
+                return 0;
+            }
+
+            return PocketItemIds[index];
         }
 
         public void SetFighterId(int slot, int fighterId)

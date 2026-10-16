@@ -69,7 +69,9 @@ namespace JewelBlitzArena.Sim
             KitRuntime[] kits,
             StageGraph graph,
             ContentCatalog? catalog,
-            ref SimContactBuffer events)
+            ref SimContactBuffer events,
+            int[]? pocketItemIds = null,
+            int pocketItemCount = 0)
         {
             if (CountActive(ref state) <= 0)
             {
@@ -129,7 +131,16 @@ namespace JewelBlitzArena.Sim
                         crate.Flags = 0;
                         crate.Param0 = 0;
                         MatchStateAccess.SetCrate(ref state, c, crate);
-                        OnBroken(ref state, c, crate.PosX, crate.PosZ, jewelChance, catalog, ref events);
+                        OnBroken(
+                            ref state,
+                            c,
+                            crate.PosX,
+                            crate.PosZ,
+                            jewelChance,
+                            catalog,
+                            ref events,
+                            pocketItemIds,
+                            pocketItemCount);
                     }
                     else
                     {
@@ -148,7 +159,9 @@ namespace JewelBlitzArena.Sim
             Fix z,
             int jewelChancePercent,
             ContentCatalog? catalog,
-            ref SimContactBuffer events)
+            ref SimContactBuffer events,
+            int[]? pocketItemIds,
+            int pocketItemCount)
         {
             events.Add(SimEventKind.CrateBroken, (byte)crateIndex, 0);
             if ((state.HouseRulesBits & MatchRules.ExpeditionGleams) != 0)
@@ -166,7 +179,8 @@ namespace JewelBlitzArena.Sim
                 }
             }
 
-            int itemId = CrateSpawner.RollAlwaysEligible(ref state, catalog);
+            int itemId = CrateSpawner.RollAlwaysEligible(
+                ref state, catalog, pocketItemIds, pocketItemCount);
             if (itemId >= 0)
             {
                 CrateSpawner.TrySpawnLooseItem(ref state, itemId, pos);
