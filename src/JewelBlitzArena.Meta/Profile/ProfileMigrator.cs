@@ -28,6 +28,9 @@ namespace JewelBlitzArena.Meta
                     case ProfileSchema.Version3:
                         MigrateV3ToV4(profile);
                         break;
+                    case ProfileSchema.Version4:
+                        MigrateV4ToV5(profile);
+                        break;
                     default:
                         throw new InvalidOperationException(
                             $"Unknown profile schema {profile.SchemaVersion}; cannot migrate.");
@@ -105,6 +108,17 @@ namespace JewelBlitzArena.Meta
             }
 
             profile.SchemaVersion = ProfileSchema.Version4;
+        }
+
+        private static void MigrateV4ToV5(PlayerProfile profile)
+        {
+            if (profile.TinkerCounter < 0)
+            {
+                profile.TinkerCounter = 0;
+            }
+
+            // Salt stays 0 until first Bench open / craft (EnsureSalt).
+            profile.SchemaVersion = ProfileSchema.Version5;
         }
     }
 }

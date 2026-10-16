@@ -34,6 +34,12 @@ namespace JewelBlitzArena.Meta
         /// <summary>Lifetime carats spent in shop/widen — feeds Citrine gift appearance.</summary>
         public int CaratsSpentLifetime { get; set; }
 
+        /// <summary>Tinker craft salt (economy §4). Assigned on first craft / Bench open.</summary>
+        public ulong ProfileSalt { get; set; }
+
+        /// <summary>Monotonic Tinker attempt counter — part of craft seed; never reused.</summary>
+        public int TinkerCounter { get; set; }
+
         /// <summary><see cref="ProfileFlags"/> bits.</summary>
         public int Flags { get; set; }
 
@@ -72,6 +78,8 @@ namespace JewelBlitzArena.Meta
                 FacetWheelWidthLevel = 0,
                 PlaytimeSeconds = 0,
                 CaratsSpentLifetime = 0,
+                ProfileSalt = 0UL,
+                TinkerCounter = 0,
                 Flags = 0,
                 // House Rules rows start locked; defaults still apply via HouseRulesDefaults.
                 UnlockedHouseRulesBits = UnlockLadderRuntime.HouseRulesBitsForClears(0),

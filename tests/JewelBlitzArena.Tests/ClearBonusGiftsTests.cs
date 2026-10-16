@@ -187,7 +187,7 @@ public sealed class ClearBonusGiftsTests
             store.Save(profile);
 
             PlayerProfile loaded = store.LoadOrCreate();
-            Assert.That(loaded.SchemaVersion, Is.EqualTo(ProfileSchema.Version4));
+            Assert.That(loaded.SchemaVersion, Is.EqualTo(ProfileSchema.Current));
             Assert.That(loaded.PlaytimeSeconds, Is.EqualTo(3600));
             Assert.That(loaded.CaratsSpentLifetime, Is.EqualTo(12_500));
         }

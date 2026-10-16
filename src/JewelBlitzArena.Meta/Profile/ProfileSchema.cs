@@ -18,6 +18,9 @@ namespace JewelBlitzArena.Meta
         /// <summary>Adds PlaytimeSeconds + CaratsSpentLifetime for Citrine gifts.</summary>
         public const int Version4 = 4;
 
-        public const int Current = Version4;
+        /// <summary>Adds ProfileSalt + TinkerCounter for Tinker craft seeding.</summary>
+        public const int Version5 = 5;
+
+        public const int Current = Version5;
     }
 }

@@ -86,6 +86,9 @@ namespace JewelBlitzArena.Meta
                 // v4+: PlaytimeSeconds + CaratsSpentLifetime.
                 bw.Write(profile.PlaytimeSeconds);
                 bw.Write(profile.CaratsSpentLifetime);
+                // v5+: ProfileSalt + TinkerCounter.
+                bw.Write(profile.ProfileSalt);
+                bw.Write(profile.TinkerCounter);
 
                 int[] owned = profile.Ledger.ToArray();
                 bw.Write(owned.Length);
@@ -135,6 +138,12 @@ namespace JewelBlitzArena.Meta
             {
                 profile.PlaytimeSeconds = br.ReadInt32();
                 profile.CaratsSpentLifetime = br.ReadInt32();
+            }
+
+            if (profile.SchemaVersion >= ProfileSchema.Version5)
+            {
+                profile.ProfileSalt = br.ReadUInt64();
+                profile.TinkerCounter = br.ReadInt32();
             }
 
             int count = br.ReadInt32();
