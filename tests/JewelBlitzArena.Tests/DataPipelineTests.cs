@@ -15,7 +15,7 @@ public sealed class DataPipelineTests
         Assert.That(result.IsOk, Is.True, string.Join("; ", result.Errors));
         Assert.That(pack.Items.Count, Is.EqualTo(25));
         Assert.That(pack.Fighters.Count, Is.EqualTo(14));
-        Assert.That(pack.Stages.Count, Is.EqualTo(5));
+        Assert.That(pack.Stages.Count, Is.EqualTo(7));
         Assert.That(pack.Stages[0].Phases.Count, Is.EqualTo(3));
         Assert.That(pack.Stages[1].Name, Is.EqualTo("Fulgur Cloister"));
         Assert.That(pack.Stages[1].Phases.Count, Is.EqualTo(2));
@@ -25,6 +25,10 @@ public sealed class DataPipelineTests
         Assert.That(pack.Stages[3].Phases.Count, Is.EqualTo(3));
         Assert.That(pack.Stages[4].Name, Is.EqualTo("The Orrery"));
         Assert.That(pack.Stages[4].Phases.Count, Is.EqualTo(3));
+        Assert.That(pack.Stages[5].Name, Is.EqualTo("Terraces — The Harvester"));
+        Assert.That(pack.Stages[5].JewelCapOverride, Is.EqualTo(6));
+        Assert.That(pack.Stages[6].Name, Is.EqualTo("The Pressworks"));
+        Assert.That(pack.Stages[6].Phases[0].BlitzSuppressed, Is.True);
     }
 
     [Test]
@@ -49,7 +53,7 @@ public sealed class DataPipelineTests
         Assert.That(loaded.Stages[0].Phases[0].DurationFrames, Is.EqualTo(25 * 60));
         Assert.That(loaded.Stages[0].Phases[1].DurationFrames, Is.EqualTo(25 * 60));
         Assert.That(loaded.Stages[0].Phases[2].DurationFrames, Is.EqualTo(0));
-        Assert.That(loaded.Stages.Length, Is.EqualTo(5));
+        Assert.That(loaded.Stages.Length, Is.EqualTo(7));
         Assert.That(loaded.Stages[1].Name, Is.EqualTo("Fulgur Cloister"));
         Assert.That(loaded.Stages[1].Phases[0].DurationFrames, Is.EqualTo(40 * 60));
         Assert.That(loaded.Stages[1].Phases[1].DurationFrames, Is.EqualTo(0));
@@ -67,6 +71,10 @@ public sealed class DataPipelineTests
         Assert.That(loaded.Stages[4].Phases[1].DurationFrames, Is.EqualTo(30 * 60));
         Assert.That(loaded.Stages[4].Phases[2].Name, Is.EqualTo("Planet disc"));
         Assert.That(loaded.Stages[4].Phases[2].Hazards.Length, Is.EqualTo(2));
+        Assert.That(loaded.Stages[5].JewelCapOverride, Is.EqualTo(6));
+        Assert.That(loaded.Stages[5].Phases[0].Hazards.Length, Is.EqualTo(4));
+        Assert.That(loaded.Stages[6].Phases[0].BlitzSuppressed, Is.True);
+        Assert.That(loaded.Stages[6].Phases[1].Name, Is.EqualTo("The Press"));
         Assert.That(loaded.AlwaysEligibleItems().Count, Is.EqualTo(25));
     }
 

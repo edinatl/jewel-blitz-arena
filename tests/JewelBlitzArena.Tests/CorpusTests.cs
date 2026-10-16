@@ -29,7 +29,7 @@ public sealed class CorpusTests
     {
         Assert.That(Directory.Exists(CorpusRoot), Is.True, $"Missing corpus at {CorpusRoot}");
         var files = CorpusRunner.Discover(CorpusRoot);
-        Assert.That(files, Has.Count.GreaterThanOrEqualTo(10));
+        Assert.That(files, Has.Count.GreaterThanOrEqualTo(12));
         Assert.That(
             files.Any(f => Path.GetFileName(f).StartsWith("cpu-replace", StringComparison.Ordinal)),
             Is.True,
@@ -54,6 +54,14 @@ public sealed class CorpusTests
             files.Any(f => Path.GetFileName(f).StartsWith("orrery-disc", StringComparison.Ordinal)),
             Is.True,
             "expected orrery-disc corpus fixture (S5 catalog stage graph)");
+        Assert.That(
+            files.Any(f => Path.GetFileName(f).StartsWith("harvester-", StringComparison.Ordinal)),
+            Is.True,
+            "expected harvester corpus fixture (boss stub)");
+        Assert.That(
+            files.Any(f => Path.GetFileName(f).StartsWith("pressworks-", StringComparison.Ordinal)),
+            Is.True,
+            "expected pressworks corpus fixture (boss stub)");
     }
 
     [Test]

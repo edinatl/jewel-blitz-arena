@@ -22,10 +22,9 @@ dotnet run --project tools/JewelBlitzArena.ReplayViewer -c Release -- corpus/neu
 
 Fixtures include `cpu-replace-2p-120` (CPU brain takes slot 1 at frame 30),
 `status-patches-2p-120` (format v3 item-spawn handoffs for Ice/Smoke/Adhesive world patches),
-`fulgur-library-2p-300` (Fulgur Cloister at 10% Phase Clock reaches Library),
-`sunken-breach-2p-360` (Sunken Strongroom at 10% Phase Clock reaches Hull breach),
-`rime-crane-2p-360` (Rime Cutworks at 10% Phase Clock reaches Crane yard), and
-`orrery-disc-2p-360` (The Orrery at 10% Phase Clock reaches Planet disc).
+story-arena phase advances (`fulgur-library`, `sunken-breach`, `rime-crane`, `orrery-disc`),
+and boss stubs `harvester-2p-180` / `pressworks-press-2p-180` (jewel cap 6; Press clears
+Blitz-suppressed Sorting at 10% Phase Clock).
 
 When a Sim or S5 content change intentionally alters state, re-`record` and commit the updated
 hashes with a clear explanation in the PR.

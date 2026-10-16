@@ -222,6 +222,25 @@ static int RecordFixtures(string[] args)
         phaseClockPermille: 100,
         notes: "S8: The Orrery via S5 catalog; PhaseClock 10% reaches Planet disc (arm gap + gust + rotating arm)."));
 
+    // Harvester open terrace (jewel cap 6) — hazard/patrol kinematic smoke.
+    Write(corpus, CorpusRunner.Capture(
+        name: "harvester-2p-180",
+        seed: 0x4A42415F48525631UL, // JBA_HRV1
+        actorCount: 2,
+        stageId: SampleContentFactory.HarvesterTerracesStageId,
+        p0Log: BuildWalkLog(180),
+        notes: "S8: Harvester Terraces boss stub via S5 catalog (jewel cap 6; footfall/intake/beam/stomp + patrol)."));
+
+    // Pressworks: 10% clock → Sorting 150f + transition 12f → The Press.
+    Write(corpus, CorpusRunner.Capture(
+        name: "pressworks-press-2p-180",
+        seed: 0x4A42415F50525331UL, // JBA_PRS1
+        actorCount: 2,
+        stageId: SampleContentFactory.PressworksStageId,
+        p0Log: BuildWalkLog(180),
+        phaseClockPermille: 100,
+        notes: "S8: Pressworks boss stub via S5 catalog; PhaseClock 10% clears Blitz-suppressed Sorting into The Press."));
+
     Console.WriteLine($"Recorded fixtures into {Path.GetFullPath(corpus)}");
     return 0;
 }

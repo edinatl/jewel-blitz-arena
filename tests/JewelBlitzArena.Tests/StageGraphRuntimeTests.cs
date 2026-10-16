@@ -385,6 +385,73 @@ public sealed class StageGraphRuntimeTests
         Assert.That(disc.PhaseDurationFrames, Is.EqualTo(0));
     }
 
+    [Test]
+    public void Harvester_compiles_open_terrace_with_jewel_cap_6()
+    {
+        ContentCatalog catalog = ContentCompiler.Compile(SampleContentFactory.CreateS5StubPack());
+        Assert.That(
+            catalog.TryGetStage(SampleContentFactory.HarvesterTerracesStageId, out StageRecord stage),
+            Is.True);
+        Assert.That(stage.JewelCapOverride, Is.EqualTo(6));
+        Assert.That(stage.Phases.Length, Is.EqualTo(1));
+        Assert.That(stage.Phases[0].Name, Is.EqualTo("Terrace hunt"));
+        Assert.That(stage.Phases[0].DurationFrames, Is.EqualTo(0));
+        Assert.That(stage.Phases[0].Hazards.Length, Is.EqualTo(4));
+        Assert.That(stage.Phases[0].Kinematics.Length, Is.EqualTo(1));
+
+        var config = MatchConfig.CreateDefault(Seed ^ 8UL, actorCount: 2);
+        unsafe
+        {
+            config.StageId = SampleContentFactory.HarvesterTerracesStageId;
+            config.FighterIds[0] = SampleContentFactory.RookFighterId;
+            config.FighterIds[1] = SampleContentFactory.RookFighterId;
+        }
+
+        var sim = new Simulation();
+        sim.Reset(config, catalog);
+        Assert.That(sim.State.JewelCap, Is.EqualTo(6));
+        Assert.That(sim.State.ActiveHazardCount, Is.EqualTo(4));
+        Assert.That(sim.State.ActiveKinematicCount, Is.EqualTo(1));
+    }
+
+    [Test]
+    public void Pressworks_Sorting_is_Blitz_suppressed_then_Press()
+    {
+        ContentCatalog catalog = ContentCompiler.Compile(SampleContentFactory.CreateS5StubPack());
+        Assert.That(
+            catalog.TryGetStage(SampleContentFactory.PressworksStageId, out StageRecord stage),
+            Is.True);
+        Assert.That(stage.JewelCapOverride, Is.EqualTo(6));
+        Assert.That(stage.Phases[0].BlitzSuppressed, Is.True);
+        Assert.That(stage.Phases[1].Name, Is.EqualTo("The Press"));
+
+        var config = MatchConfig.CreateDefault(Seed ^ 9UL, actorCount: 2);
+        unsafe
+        {
+            config.StageId = SampleContentFactory.PressworksStageId;
+            config.PhaseClockPermille = 100;
+            config.FighterIds[0] = SampleContentFactory.RookFighterId;
+            config.FighterIds[1] = SampleContentFactory.RookFighterId;
+        }
+
+        var sim = new Simulation();
+        sim.Reset(config, catalog);
+        Assert.That(sim.State.JewelCap, Is.EqualTo(6));
+        Assert.That((sim.State.StageFlags & StageFlags.BlitzSuppressed) != 0, Is.True);
+
+        for (int f = 0; f < 150 + 12; f++)
+        {
+            sim.Step(InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral);
+        }
+
+        MatchState press = sim.Snapshot();
+        Assert.That(press.PhaseIndex, Is.EqualTo(1));
+        Assert.That((press.StageFlags & StageFlags.InTransition) == 0, Is.True);
+        Assert.That((press.StageFlags & StageFlags.BlitzSuppressed) == 0, Is.True);
+        Assert.That(press.ActiveHazardCount, Is.EqualTo(3));
+        Assert.That(press.ActiveKinematicCount, Is.EqualTo(1));
+    }
+
     private static ulong RunThroughBreakaway(MatchConfig config, ContentCatalog catalog, bool grantJewels)
     {
         var sim = new Simulation();

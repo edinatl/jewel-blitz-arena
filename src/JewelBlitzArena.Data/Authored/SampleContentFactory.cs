@@ -4,7 +4,7 @@ namespace JewelBlitzArena.Data
 {
     /// <summary>
     /// S5 stub pack: full cast kits (cast.md §6 + kit behaviors), five story-arena
-    /// phase stubs (Citrine → Orrery), 25 always-eligible starter items.
+    /// phase stubs (Citrine → Orrery) plus two boss-arena stubs, 25 always-eligible starter items.
     /// </summary>
     public static class SampleContentFactory
     {
@@ -27,6 +27,8 @@ namespace JewelBlitzArena.Data
         public const int SunkenStrongroomStageId = 3;
         public const int RimeCutworksStageId = 4;
         public const int OrreryStageId = 5;
+        public const int HarvesterTerracesStageId = 6;
+        public const int PressworksStageId = 7;
 
         /// <summary>S5 stub Adhesive Spray — thrown hit applies Slow (matches <c>MatchRules.AdhesiveSprayItemId</c>).</summary>
         public const int AdhesiveSprayItemId = 18;
@@ -69,6 +71,8 @@ namespace JewelBlitzArena.Data
                     CreateSunkenStrongroom(),
                     CreateRimeCutworks(),
                     CreateOrrery(),
+                    CreateHarvesterTerraces(),
+                    CreatePressworks(),
                 },
                 Items = CreateStarterSet(),
             };
@@ -1008,6 +1012,218 @@ namespace JewelBlitzArena.Data
                                 Name = "RotatingArm",
                                 PeriodSeconds = "12",
                                 Amplitude = "3",
+                                OriginX = "0",
+                                OriginZ = "0",
+                            },
+                        },
+                    },
+                },
+            };
+        }
+
+        /// <summary>
+        /// Terraces — The Harvester greybox stub (stages.md §3.1). Jewel cap 6.
+        /// Boss AI / breakables / mount / timeout Blade Sweep deferred; footfall / intake / beam / stomp pulses land now.
+        /// </summary>
+        public static AuthoredStage CreateHarvesterTerraces()
+        {
+            return new AuthoredStage
+            {
+                StageId = HarvesterTerracesStageId,
+                Name = "Terraces — The Harvester",
+                JewelCrateChancePercent = 8,
+                FallIsKo = false,
+                JewelCapOverride = 6,
+                Phases = new List<AuthoredPhase>
+                {
+                    new AuthoredPhase
+                    {
+                        Name = "Terrace hunt",
+                        DurationSeconds = "0",
+                        GeometrySetId = 0,
+                        CameraRadius = "16",
+                        Hazards = new List<AuthoredHazard>
+                        {
+                            new AuthoredHazard
+                            {
+                                HazardId = 50,
+                                Name = "FootfallShadow",
+                                Trigger = "timer",
+                                PeriodSeconds = "8",
+                                TelegraphFrames = 30,
+                                Damage = 400,
+                                CenterX = "0",
+                                CenterZ = "2",
+                                Radius = "2",
+                            },
+                            new AuthoredHazard
+                            {
+                                HazardId = 51,
+                                Name = "IntakeCone",
+                                Trigger = "timer",
+                                PeriodSeconds = "12",
+                                TelegraphFrames = 40,
+                                Damage = 300,
+                                CenterX = "3",
+                                CenterZ = "0",
+                                Radius = "2.5",
+                            },
+                            new AuthoredHazard
+                            {
+                                HazardId = 52,
+                                Name = "CuttingBeamLine",
+                                Trigger = "timer",
+                                PeriodSeconds = "20",
+                                TelegraphFrames = 60,
+                                Damage = 500,
+                                CenterX = "0",
+                                CenterZ = "0",
+                                Radius = "1.2",
+                            },
+                            new AuthoredHazard
+                            {
+                                HazardId = 53,
+                                Name = "StompShock",
+                                Trigger = "timer",
+                                PeriodSeconds = "15",
+                                TelegraphFrames = 40,
+                                Damage = 0,
+                                CenterX = "0",
+                                CenterZ = "0",
+                                Radius = "4",
+                            },
+                        },
+                        Kinematics = new List<AuthoredKinematic>
+                        {
+                            new AuthoredKinematic
+                            {
+                                TrackId = 50,
+                                Name = "HarvesterPatrol",
+                                PeriodSeconds = "16",
+                                Amplitude = "4",
+                                OriginX = "0",
+                                OriginZ = "0",
+                            },
+                        },
+                    },
+                },
+            };
+        }
+
+        /// <summary>
+        /// The Pressworks — Chairman Vitre greybox stub (stages.md §3.2). Jewel cap 6.
+        /// Guards / Vitre AI / Overpress / timeout Flood deferred; Sorting line Blitz-suppressed → Press pulses land now.
+        /// Sorting duration stubbed to 25 s (design 90 s) for greybox/corpus length.
+        /// </summary>
+        public static AuthoredStage CreatePressworks()
+        {
+            return new AuthoredStage
+            {
+                StageId = PressworksStageId,
+                Name = "The Pressworks",
+                JewelCrateChancePercent = 8,
+                FallIsKo = false,
+                JewelCapOverride = 6,
+                Phases = new List<AuthoredPhase>
+                {
+                    new AuthoredPhase
+                    {
+                        Name = "Sorting line",
+                        DurationSeconds = "25",
+                        GeometrySetId = 0,
+                        BlitzSuppressed = true,
+                        CameraRadius = "14",
+                        Hazards = new List<AuthoredHazard>
+                        {
+                            new AuthoredHazard
+                            {
+                                HazardId = 60,
+                                Name = "VeinGuardPatrol",
+                                Trigger = "timer",
+                                PeriodSeconds = "10",
+                                TelegraphFrames = 30,
+                                Damage = 80,
+                                CenterX = "-2",
+                                CenterZ = "1",
+                                Radius = "1.5",
+                            },
+                        },
+                        Kinematics = new List<AuthoredKinematic>
+                        {
+                            new AuthoredKinematic
+                            {
+                                TrackId = 60,
+                                Name = "SortingConveyor",
+                                PeriodSeconds = "10",
+                                Amplitude = "2",
+                                OriginX = "0",
+                                OriginZ = "0",
+                            },
+                        },
+                    },
+                    new AuthoredPhase
+                    {
+                        Name = "The Press",
+                        DurationSeconds = "0",
+                        GeometrySetId = 1,
+                        TransitionSeconds = "2",
+                        BlitzSuppressed = false,
+                        CarryItems = "all",
+                        CarryJewels = "all",
+                        CameraRadius = "16",
+                        ScriptedCamera = new AuthoredScriptedCamera
+                        {
+                            Enabled = true,
+                            EndCenterY = "10",
+                            EndRadius = "18",
+                        },
+                        Hazards = new List<AuthoredHazard>
+                        {
+                            new AuthoredHazard
+                            {
+                                HazardId = 61,
+                                Name = "PistonStabs",
+                                Trigger = "timer",
+                                PeriodSeconds = "8",
+                                TelegraphFrames = 45,
+                                Damage = 150,
+                                CenterX = "0",
+                                CenterZ = "0",
+                                Radius = "2",
+                            },
+                            new AuthoredHazard
+                            {
+                                HazardId = 62,
+                                Name = "PoisonSpewPool",
+                                Trigger = "timer",
+                                PeriodSeconds = "12",
+                                TelegraphFrames = 40,
+                                Damage = 40,
+                                CenterX = "2",
+                                CenterZ = "-1",
+                                Radius = "2",
+                            },
+                            new AuthoredHazard
+                            {
+                                HazardId = 63,
+                                Name = "LiveHandsChase",
+                                Trigger = "phase_enter",
+                                PeriodSeconds = "10",
+                                TelegraphFrames = 30,
+                                Damage = 120,
+                                CenterX = "-1",
+                                CenterZ = "2",
+                                Radius = "1.5",
+                            },
+                        },
+                        Kinematics = new List<AuthoredKinematic>
+                        {
+                            new AuthoredKinematic
+                            {
+                                TrackId = 61,
+                                Name = "PressHeadRing",
+                                PeriodSeconds = "12",
+                                Amplitude = "2.5",
                                 OriginX = "0",
                                 OriginZ = "0",
                             },
