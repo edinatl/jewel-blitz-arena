@@ -77,8 +77,13 @@ namespace JewelBlitzArena.Sim
                 int picker = FindPicker(ref state, gleam.PosX, gleam.PosZ);
                 if (picker >= 0)
                 {
-                    // Carats are ephemeral until MatchResult / Meta Expedition ingest.
-                    // Reserved0 on actor unused; encode collected carats into ComboDamage? Prefer event only.
+                    int carats = gleam.Reserved1;
+                    if (carats <= 0)
+                    {
+                        carats = CaratsForKind(gleam.TypeId);
+                    }
+
+                    state.CaratsCollected += carats;
                     events.Add(SimEventKind.GleamPickedUp, (byte)picker, (byte)i);
                     MatchStateAccess.SetWorldPatch(ref state, i, default);
                     continue;
@@ -105,8 +110,11 @@ namespace JewelBlitzArena.Sim
 
         private static int FindPicker(ref MatchState state, Fix x, Fix z)
         {
-            // Lowest living slot in radius (player-only filter lands with Expedition mode).
-            for (int a = 0; a < state.ActorCount; a++)
+            // Expedition: only slot 0 (player) may collect. Tournament path unused without flag.
+            bool expedition = (state.HouseRulesBits & MatchRules.ExpeditionGleams) != 0;
+            int start = expedition ? 0 : 0;
+            int end = expedition ? 1 : state.ActorCount;
+            for (int a = start; a < end && a < state.ActorCount; a++)
             {
                 ref ActorSlot actor = ref MatchStateAccess.Actor(ref state, a);
                 if (!actor.IsAlive || actor.IsEliminated)

@@ -59,6 +59,14 @@ namespace JewelBlitzArena.Sim
         public int ActiveHazardCount;
         public int ActiveKinematicCount;
 
+        /// <summary>Expedition carats collected this match (gleam pickups).</summary>
+        public int CaratsCollected;
+
+        /// <summary>Remaining gleam budget pools (items-and-economy.md §7 split).</summary>
+        public int GleamBudgetKoRemaining;
+        public int GleamBudgetKdRemaining;
+        public int GleamBudgetCrateRemaining;
+
         public const int JewelStride = 52;
         public const int LooseItemStride = 56; // S2: includes velocities
         public const int ProjectileStride = 56;

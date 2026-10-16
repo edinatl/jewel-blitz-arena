@@ -15,7 +15,7 @@ namespace JewelBlitzArena.Meta
                 new MetaMenuEntry(ModeId.Sparring, "Sparring", available: true),
                 new MetaMenuEntry(ModeId.Duel, "Duel", available: false, reason: "M2"),
                 new MetaMenuEntry(ModeId.Tournament, "Tournament", available: false, reason: "M2"),
-                new MetaMenuEntry(ModeId.Expedition, "Expedition", available: false, reason: "M2 stub"),
+                new MetaMenuEntry(ModeId.Expedition, "Expedition", available: true),
                 new MetaMenuEntry(ModeId.TillysBench, _tinker.MenuLabel, available: true),
                 new MetaMenuEntry(ModeId.Online, "Online", available: false, reason: "S7"),
             };

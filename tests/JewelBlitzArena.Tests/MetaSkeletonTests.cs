@@ -181,17 +181,19 @@ public sealed class MetaSkeletonTests
         IReadOnlyList<MetaMenuEntry> entries = menu.BuildEntries(profile);
         Assert.That(entries.Any(e => e.Mode == ModeId.Custom && e.Available), Is.True);
         Assert.That(entries.Any(e => e.Mode == ModeId.Sparring && e.Available), Is.True);
-        Assert.That(entries.Any(e => e.Mode == ModeId.Expedition && !e.Available), Is.True);
+        Assert.That(entries.Any(e => e.Mode == ModeId.Expedition && e.Available), Is.True);
 
         menu.OpenTinker(profile);
         Assert.That(profile.HasFlag(ProfileFlags.TouchedTinkerStub), Is.True);
     }
 
     [Test]
-    public void Expedition_stub_throws()
+    public void Expedition_orchestrator_builds_config_with_gleam_bit()
     {
-        var stub = new ExpeditionModeStub();
-        Assert.Throws<NotImplementedException>(() =>
-            stub.BuildConfig(PlayerProfile.CreateNew(), new ModeRequest()));
+        var orch = new ExpeditionModeOrchestrator();
+        MatchConfig config = orch.BuildConfig(
+            PlayerProfile.CreateNew(),
+            new ModeRequest { Mode = ModeId.Expedition, Seed = Seed, ActorCount = 2 });
+        Assert.That(config.HouseRulesBits & MatchRules.ExpeditionGleams, Is.Not.EqualTo(0));
     }
 }

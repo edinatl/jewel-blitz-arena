@@ -146,6 +146,7 @@ namespace JewelBlitzArena.Sim
                 ref _contacts);
             BreakableRuntime.InitializeMatch(ref _state, _stageGraph);
             BossPartRuntime.InitializeMatch(ref _state, _stageGraph);
+            GleamBudgetRuntime.InitializeMatch(ref _state, _stageGraph);
         }
 
         public void Step(InputFrame i0, InputFrame i1, InputFrame i2, InputFrame i3)
@@ -322,6 +323,7 @@ namespace JewelBlitzArena.Sim
             {
                 FramesPlayed = _state.Frame,
                 ActorCount = _state.ActorCount,
+                CaratsEarned = _state.CaratsCollected,
             };
 
             unsafe

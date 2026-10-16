@@ -132,6 +132,10 @@ namespace JewelBlitzArena.Sim
             ref SimContactBuffer events)
         {
             events.Add(SimEventKind.CrateBroken, (byte)crateIndex, 0);
+            if ((state.HouseRulesBits & MatchRules.ExpeditionGleams) != 0)
+            {
+                GleamBudgetRuntime.OnContainerBroken(ref state, x, z);
+            }
 
             var pos = new FixVec3(x, Fix.Zero, z);
             int roll = state.GameplayRng.NextInt(100);

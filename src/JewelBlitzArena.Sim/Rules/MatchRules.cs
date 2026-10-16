@@ -34,7 +34,8 @@ namespace JewelBlitzArena.Sim
         public const byte HouseLusterTimer = 1 << 0;
 
         /// <summary>Expedition gleam drops on KO / containers (items-and-economy.md §7).</summary>
-        public const byte ExpeditionGleams = 1 << 1;
+        /// <remarks>Bit 8 — avoids Meta HouseRulesBits PocketItems (bit 1) collision.</remarks>
+        public const int ExpeditionGleams = 1 << 8;
 
         /// <summary>Copper gleam despawn (8 s).</summary>
         public const int GleamDespawnFrames = 8 * 60;

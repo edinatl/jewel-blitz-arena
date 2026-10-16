@@ -570,6 +570,10 @@ namespace JewelBlitzArena.Sim
                 victim.ActionTimer = MatchRules.KnockdownMaxFrames;
                 victim.ActionPhase = (byte)ActionPhase.Recovery;
                 JewelSystem.OnKnockdownJewelDrop(ref state, vic);
+                if ((state.HouseRulesBits & MatchRules.ExpeditionGleams) != 0 && atk >= 0)
+                {
+                    GleamBudgetRuntime.OnKnockdownCaused(ref state, victim.PosX, victim.PosZ);
+                }
             }
 
             // Light hits nudge; Strong/Throw use a larger shove. S2 replaces with physics impulses.
@@ -608,7 +612,7 @@ namespace JewelBlitzArena.Sim
 
             if ((state.HouseRulesBits & MatchRules.ExpeditionGleams) != 0)
             {
-                GleamRuntime.TrySpawnCopper(ref state, dropX, dropZ);
+                GleamBudgetRuntime.OnKo(ref state, dropX, dropZ);
             }
 
             MatchStateAccess.SetPlacement(ref state, vic, state.NextPlacementFromBottom);

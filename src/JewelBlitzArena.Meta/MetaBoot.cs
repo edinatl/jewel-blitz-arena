@@ -13,6 +13,7 @@ namespace JewelBlitzArena.Meta
         private readonly ProfileStore _store;
         private readonly CustomModeOrchestrator _custom = new CustomModeOrchestrator();
         private readonly SparringModeOrchestrator _sparring = new SparringModeOrchestrator();
+        private readonly ExpeditionModeOrchestrator _expedition = new ExpeditionModeOrchestrator();
         private readonly MetaMenuShell _menu = new MetaMenuShell();
 
         public MetaBoot(ProfileStore store)
@@ -27,6 +28,8 @@ namespace JewelBlitzArena.Meta
         public CustomModeOrchestrator Custom => _custom;
 
         public SparringModeOrchestrator Sparring => _sparring;
+
+        public ExpeditionModeOrchestrator Expedition => _expedition;
 
         public void Boot()
         {
@@ -49,6 +52,14 @@ namespace JewelBlitzArena.Meta
             return _sparring.BuildConfig(Profile, req);
         }
 
+        public MatchConfig BeginExpedition(ModeRequest? request = null)
+        {
+            EnsureBooted();
+            ModeRequest req = request ?? new ModeRequest { Mode = ModeId.Expedition, ActorCount = 2 };
+            req.Mode = ModeId.Expedition;
+            return _expedition.BuildConfig(Profile, req);
+        }
+
         public void CompleteCustom(in MatchResult result, ModeRequest? request = null)
         {
             EnsureBooted();
@@ -65,12 +76,24 @@ namespace JewelBlitzArena.Meta
             _store.Save(Profile);
         }
 
+        public void CompleteExpedition(in MatchResult result, ModeRequest? request = null)
+        {
+            EnsureBooted();
+            ModeRequest req = request ?? new ModeRequest { Mode = ModeId.Expedition };
+            _expedition.ApplyResult(Profile, result, req);
+            _store.Save(Profile);
+        }
+
         /// <summary>Dispatch result to the active mode orchestrator and save profile.</summary>
         public void CompleteMode(ModeId mode, in MatchResult result, ModeRequest? request = null)
         {
             if (mode == ModeId.Sparring)
             {
                 CompleteSparring(result, request);
+            }
+            else if (mode == ModeId.Expedition)
+            {
+                CompleteExpedition(result, request);
             }
             else
             {

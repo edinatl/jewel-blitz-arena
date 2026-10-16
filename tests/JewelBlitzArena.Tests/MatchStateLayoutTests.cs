@@ -47,7 +47,7 @@ public sealed class MatchStateLayoutTests
                 + sizeof(int) // NextPlacementFromBottom
                 + sizeof(int) * PoolCaps.Actors // PlacementBySlot
                 + sizeof(int) * PoolCaps.Jewels // JewelRespawnFrame
-                + sizeof(int) * 9; // S4 phase/transition/geometry/flags/clock/hazard/kinematic counters
+                + sizeof(int) * 13; // S4 counters + CaratsCollected + 3 gleam budget pools
 
             Assert.That(sizeof(MatchState), Is.EqualTo(expected),
                 "Padding detected — Pack=1 layout drifted. Reorder or pad fields explicitly.");
