@@ -15,8 +15,10 @@ public sealed class DataPipelineTests
         Assert.That(result.IsOk, Is.True, string.Join("; ", result.Errors));
         Assert.That(pack.Items.Count, Is.EqualTo(25));
         Assert.That(pack.Fighters.Count, Is.EqualTo(14));
-        Assert.That(pack.Stages.Count, Is.EqualTo(1));
+        Assert.That(pack.Stages.Count, Is.EqualTo(2));
         Assert.That(pack.Stages[0].Phases.Count, Is.EqualTo(3));
+        Assert.That(pack.Stages[1].Name, Is.EqualTo("Fulgur Cloister"));
+        Assert.That(pack.Stages[1].Phases.Count, Is.EqualTo(2));
     }
 
     [Test]
@@ -41,6 +43,12 @@ public sealed class DataPipelineTests
         Assert.That(loaded.Stages[0].Phases[0].DurationFrames, Is.EqualTo(25 * 60));
         Assert.That(loaded.Stages[0].Phases[1].DurationFrames, Is.EqualTo(25 * 60));
         Assert.That(loaded.Stages[0].Phases[2].DurationFrames, Is.EqualTo(0));
+        Assert.That(loaded.Stages.Length, Is.EqualTo(2));
+        Assert.That(loaded.Stages[1].Name, Is.EqualTo("Fulgur Cloister"));
+        Assert.That(loaded.Stages[1].Phases[0].DurationFrames, Is.EqualTo(40 * 60));
+        Assert.That(loaded.Stages[1].Phases[1].DurationFrames, Is.EqualTo(0));
+        Assert.That(loaded.Stages[1].Phases[1].TransitionFrames, Is.EqualTo(4 * 60));
+        Assert.That(loaded.Stages[1].Phases[1].CarryItems, Is.EqualTo(CarryItemsMode.HeldOnly));
         Assert.That(loaded.AlwaysEligibleItems().Count, Is.EqualTo(25));
     }
 

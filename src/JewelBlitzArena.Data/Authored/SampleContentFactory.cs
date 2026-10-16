@@ -3,8 +3,8 @@ using System.Collections.Generic;
 namespace JewelBlitzArena.Data
 {
     /// <summary>
-    /// S5 stub pack: full cast kits (cast.md §6 + kit behaviors), Citrine Bazaar phases,
-    /// 25 always-eligible starter items.
+    /// S5 stub pack: full cast kits (cast.md §6 + kit behaviors), Citrine Bazaar +
+    /// Fulgur Cloister phase stubs, 25 always-eligible starter items.
     /// </summary>
     public static class SampleContentFactory
     {
@@ -23,6 +23,7 @@ namespace JewelBlitzArena.Data
         public const int CaptainCitrineFighterId = 13;
         public const int TillyFighterId = 14;
         public const int CitrineBazaarStageId = 1;
+        public const int FulgurCloisterStageId = 2;
 
         /// <summary>S5 stub Adhesive Spray — thrown hit applies Slow (matches <c>MatchRules.AdhesiveSprayItemId</c>).</summary>
         public const int AdhesiveSprayItemId = 18;
@@ -58,7 +59,11 @@ namespace JewelBlitzArena.Data
                     CreateCaptainCitrine(),
                     CreateTilly(),
                 },
-                Stages = new List<AuthoredStage> { CreateCitrineBazaar() },
+                Stages = new List<AuthoredStage>
+                {
+                    CreateCitrineBazaar(),
+                    CreateFulgurCloister(),
+                },
                 Items = CreateStarterSet(),
             };
         }
@@ -513,6 +518,90 @@ namespace JewelBlitzArena.Data
                                 CenterX = "3",
                                 CenterZ = "-2",
                                 Radius = "1.2",
+                            },
+                        },
+                    },
+                },
+            };
+        }
+
+        /// <summary>
+        /// Fulgur Cloister greybox stub (stages.md §2.2): Courtyard → Landslide → Library.
+        /// Gong / lantern spirits / bridge collapse deferred; crush track + gutter hazard land now.
+        /// </summary>
+        public static AuthoredStage CreateFulgurCloister()
+        {
+            return new AuthoredStage
+            {
+                StageId = FulgurCloisterStageId,
+                Name = "Fulgur Cloister",
+                JewelCrateChancePercent = 8,
+                FallIsKo = false,
+                JewelCapOverride = 0,
+                Phases = new List<AuthoredPhase>
+                {
+                    new AuthoredPhase
+                    {
+                        Name = "Courtyard",
+                        DurationSeconds = "40",
+                        GeometrySetId = 0,
+                        CameraRadius = "14",
+                        Hazards = new List<AuthoredHazard>
+                        {
+                            new AuthoredHazard
+                            {
+                                HazardId = 10,
+                                Name = "StormGutterFlush",
+                                Trigger = "timer",
+                                PeriodSeconds = "15",
+                                TelegraphFrames = 30,
+                                Damage = 0,
+                                CenterX = "0",
+                                CenterZ = "-3",
+                                Radius = "2",
+                            },
+                        },
+                    },
+                    new AuthoredPhase
+                    {
+                        Name = "Library",
+                        DurationSeconds = "0",
+                        GeometrySetId = 1,
+                        TransitionSeconds = "4",
+                        CarryItems = "held_only",
+                        CarryJewels = "all",
+                        CameraRadius = "16",
+                        ScriptedCamera = new AuthoredScriptedCamera
+                        {
+                            Enabled = true,
+                            EndCenterY = "9",
+                            EndRadius = "18",
+                        },
+                        Hazards = new List<AuthoredHazard>
+                        {
+                            new AuthoredHazard
+                            {
+                                HazardId = 11,
+                                Name = "BookcaseCrush",
+                                Trigger = "timer",
+                                PeriodSeconds = "10",
+                                TelegraphFrames = 45,
+                                Damage = 120,
+                                CenterX = "0",
+                                CenterZ = "0",
+                                Radius = "2.5",
+                            },
+                        },
+                        Kinematics = new List<AuthoredKinematic>
+                        {
+                            new AuthoredKinematic
+                            {
+                                TrackId = 10,
+                                Name = "SlidingBookcase",
+                                PeriodSeconds = "10",
+                                Amplitude = "3",
+                                OriginX = "-1",
+                                OriginZ = "0",
                             },
                         },
                     },

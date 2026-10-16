@@ -142,6 +142,69 @@ public sealed class StageGraphRuntimeTests
     }
 
     [Test]
+    public void Fulgur_Cloister_compiles_courtyard_library_with_held_only()
+    {
+        ContentCatalog catalog = ContentCompiler.Compile(SampleContentFactory.CreateS5StubPack());
+        Assert.That(catalog.TryGetStage(SampleContentFactory.FulgurCloisterStageId, out StageRecord stage), Is.True);
+        Assert.That(stage.Phases.Length, Is.EqualTo(2));
+        Assert.That(stage.Phases[0].Name, Is.EqualTo("Courtyard"));
+        Assert.That(stage.Phases[0].DurationFrames, Is.EqualTo(40 * 60));
+        Assert.That(stage.Phases[1].Name, Is.EqualTo("Library"));
+        Assert.That(stage.Phases[1].TransitionFrames, Is.EqualTo(4 * 60));
+        Assert.That(stage.Phases[1].CarryItems, Is.EqualTo(CarryItemsMode.HeldOnly));
+        Assert.That(stage.Phases[1].Kinematics.Length, Is.EqualTo(1));
+        Assert.That(stage.Phases[1].Hazards[0].Damage, Is.EqualTo(120));
+    }
+
+    [Test]
+    public void Fulgur_phase_timers_advance_Courtyard_to_Library_with_held_only()
+    {
+        ContentCatalog catalog = ContentCompiler.Compile(SampleContentFactory.CreateS5StubPack());
+        var config = MatchConfig.CreateDefault(Seed ^ 4UL, actorCount: 2);
+        unsafe
+        {
+            config.StageId = SampleContentFactory.FulgurCloisterStageId;
+            config.FighterIds[0] = SampleContentFactory.RookFighterId;
+            config.FighterIds[1] = SampleContentFactory.RookFighterId;
+        }
+
+        var sim = new Simulation();
+        sim.Reset(config, catalog);
+
+        Assert.That(sim.State.PhaseIndex, Is.EqualTo(0));
+        Assert.That(sim.State.ActiveHazardCount, Is.EqualTo(1));
+        Assert.That(sim.State.PhaseDurationFrames, Is.EqualTo(40 * 60));
+
+        // Spawn a loose field item; Landslide held_only should despawn it.
+        int loose = sim.SpawnLooseItem(MatchRules.AdhesiveSprayItemId, Fix.FromInt(3), Fix.Zero, Fix.Zero);
+        Assert.That(loose, Is.GreaterThanOrEqualTo(0));
+
+        for (int f = 0; f < 40 * 60; f++)
+        {
+            sim.Step(InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral);
+        }
+
+        MatchState landslide = sim.Snapshot();
+        Assert.That(landslide.PhaseIndex, Is.EqualTo(1));
+        Assert.That((landslide.StageFlags & StageFlags.InTransition) != 0, Is.True);
+        Assert.That(landslide.ActiveHazardCount, Is.EqualTo(0));
+        LooseItemSlot field = MatchStateAccess.GetLooseItem(ref landslide, loose);
+        Assert.That(field.IsActive, Is.False, "held_only transition despawns field items");
+
+        for (int f = 0; f < 4 * 60; f++)
+        {
+            sim.Step(InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral, InputFrame.Neutral);
+        }
+
+        MatchState library = sim.Snapshot();
+        Assert.That((library.StageFlags & StageFlags.InTransition) == 0, Is.True);
+        Assert.That((library.StageFlags & StageFlags.HazardsEnabled) != 0, Is.True);
+        Assert.That(library.ActiveHazardCount, Is.EqualTo(1));
+        Assert.That(library.ActiveKinematicCount, Is.EqualTo(1));
+        Assert.That(library.PhaseDurationFrames, Is.EqualTo(0));
+    }
+
+    [Test]
     public void Schema_v2_blob_round_trip_preserves_hazards()
     {
         ContentCatalog compiled = ContentCompiler.Compile(SampleContentFactory.CreateS5StubPack());
