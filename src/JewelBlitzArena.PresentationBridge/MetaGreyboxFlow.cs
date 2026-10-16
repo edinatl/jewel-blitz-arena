@@ -69,6 +69,36 @@ namespace JewelBlitzArena.PresentationBridge
             return true;
         }
 
+        /// <summary>Editor-free ASCII for Buy room (stock via BuildStock).</summary>
+        public string RenderBuyRoom()
+        {
+            IReadOnlyList<ShopRuntime.StockEntry> stock = OpenBuyStock();
+            return BenchRoomAscii.RenderBuy(stock, _catalog, Profile);
+        }
+
+        /// <summary>Editor-free ASCII for Facet Wheel band weights.</summary>
+        public string RenderFacetWheelRoom()
+        {
+            return BenchRoomAscii.RenderFacetWheel(Profile);
+        }
+
+        public IReadOnlyList<BenchRoomsRuntime.BenchRoomEntry> BuildBenchRooms(ulong visitSeed = 0UL) =>
+            _menu.BuildBenchRooms(Profile, visitSeed);
+
+        public string RenderBenchRooms(ulong visitSeed = 0UL) =>
+            BenchRoomAscii.RenderRooms(BuildBenchRooms(visitSeed));
+
+        public bool TrySpinFacetWheel(ulong seed, out FacetWheelBand band, out int caratsReward)
+        {
+            bool ok = FacetWheelRuntime.TrySpin(Profile, seed, out band, out caratsReward);
+            if (ok)
+            {
+                _boot.SaveProfile();
+            }
+
+            return ok;
+        }
+
         public MatchConfig StartCustom(ModeRequest? request = null)
         {
             _boot.Boot();

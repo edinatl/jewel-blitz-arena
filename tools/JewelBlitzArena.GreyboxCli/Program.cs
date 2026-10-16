@@ -21,6 +21,7 @@ internal static class Program
         bool useMeta = false;
         bool useLoopback = false;
         int deliveryDelay = 2;
+        string? benchRoom = null;
 
         for (int i = 0; i < args.Length; i++)
         {
@@ -57,6 +58,10 @@ internal static class Program
             {
                 useMeta = true;
             }
+            else if (a is "--bench" && i + 1 < args.Length)
+            {
+                benchRoom = args[++i].Trim().ToLowerInvariant();
+            }
             else if (a is "--loopback")
             {
                 useLoopback = true;
@@ -73,6 +78,11 @@ internal static class Program
         }
 
         ContentCatalog? catalog = LoadCatalog(blobPath);
+
+        if (benchRoom != null)
+        {
+            return RunBench(benchRoom, seed, outPath, catalog);
+        }
 
         if (useMeta)
         {
@@ -102,6 +112,61 @@ internal static class Program
         }
 
         return null;
+    }
+
+    private static int RunBench(
+        string room,
+        ulong seed,
+        string? outPath,
+        ContentCatalog? catalog)
+    {
+        string profilePath = MetaGreyboxFlow.DefaultTempProfilePath("jba-cli-bench-");
+        try
+        {
+            var flow = new MetaGreyboxFlow(profilePath);
+            flow.SetCatalog(catalog);
+            flow.BootProfile();
+            flow.Profile.Carats = 5_000;
+            flow.Profile.Chits = FacetWheelRuntime.SpinCostChits;
+            flow.Profile.ShopStockSeed = seed == 0UL ? 0x42454E4348UL : seed;
+
+            string render;
+            if (room is "buy")
+            {
+                render = flow.RenderBuyRoom();
+            }
+            else if (room is "wheel" or "facet" or "facetwheel")
+            {
+                render = flow.RenderFacetWheelRoom();
+            }
+            else if (room is "rooms" or "menu")
+            {
+                render = flow.RenderBenchRooms(visitSeed: seed);
+            }
+            else
+            {
+                Console.Error.WriteLine($"unknown --bench room '{room}' (buy|wheel|rooms)");
+                return 2;
+            }
+
+            Console.WriteLine(render.TrimEnd());
+            if (outPath != null)
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(outPath))!);
+                File.WriteAllText(outPath, render);
+                Console.WriteLine($"wrote {outPath}");
+            }
+
+            return 0;
+        }
+        finally
+        {
+            string? dir = Path.GetDirectoryName(profilePath);
+            if (dir != null && Directory.Exists(dir))
+            {
+                Directory.Delete(dir, recursive: true);
+            }
+        }
     }
 
     private static int RunMeta(
@@ -308,6 +373,8 @@ internal static class Program
               --blob PATH         Optional .jba content blob
               --neutral           All-neutral inputs
               --meta              Boot → Custom → profile stamp path
+              --bench buy|wheel|rooms
+                                  Editor-free Bench room ASCII (Buy stock / Facet Wheel)
               --loopback          DualSessionHarness rollback greybox
               --delivery-delay N  Loopback one-way delay in frames (default 2)
             """);
